@@ -58,7 +58,10 @@ div {
 	width: 1370px;
 	margin-right: auto;
 	margin-left: auto;
+}
 
+.pos-center {
+	text-align: center;
 }
 
 .row {
@@ -553,6 +556,7 @@ em.wipe {
  
 
 .form-btn {
+	margin-top: 10px;
 	display: inline-block;
 	margin-bottom: 0;
 	font-weight: 400;

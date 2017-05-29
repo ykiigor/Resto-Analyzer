@@ -3239,10 +3239,10 @@ function PrepParse(fightID,actorID){
 function BuildMainPage(){
 	var HTML = "";
 	
-	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\" style=\"font-size: 14px;padding-left:20px;padding-bottom:20px\">";
+	HTML += "<div class=\"panel half\" style=\"margin-right:auto;margin-left: auto;float:inherit;\"><div class=\"col-full\"><div class=\"box pos-center\" style=\"font-size: 14px;padding-left:20px;padding-bottom:20px\">";
 	HTML += "<header class=\"box-header\">ANALYZE REPORT</header>";
 
-	HTML += "<form id=\"mainpage-form\"><b>Enter your Warcraft Logs report code.</b><br>https://www.warcraftlogs.com/reports/<input type=\"text\" id=\"mainpage-input\" size=\"30\" class=\"form-control\">/<br>";
+	HTML += "<form id=\"mainpage-form\"><b>Enter your Warcraft Logs report code.</b><br>https://www.warcraftlogs.com/reports/ <input type=\"text\" id=\"mainpage-input\" size=\"20\" class=\"form-control\"> /<br>";
 	HTML += "<input type=\"submit\" value=\"Analyze\" class=\"form-btn\" id=\"mainpage-btn\"></form></div></div></div>";
 
 	$("#main").html(HTML);
