@@ -2354,8 +2354,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 			} else if(event.type == "combatantinfo" && event.sourceID == actor_id){
 
 				if(event["specID"] != 264){
-					error_msg("Error: Wrong specialization");
-					throw new Error("Error: Wrong specialization");
+					error_msg("Wrong specialization");
+					throw new Error("Wrong specialization");
 				}
 				
 				//console.log(event);
@@ -2426,7 +2426,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 			}			
 		}
 		
-		} catch(err) { error_msg("JS error: "+err); }
+		} catch(err) {	
+			error_msg("Error: "+err);
+			throw new Error(err);
+		}
 		
 		if(!data.nextPageTimestamp) {
 			$("#navbar-progress").width("100%").css('opacity', '0');
