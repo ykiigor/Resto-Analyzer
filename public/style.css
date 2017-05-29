@@ -79,6 +79,42 @@ div {
 	width: 50% !important;
 }
 
+.w13 {
+	width: 13.3% !important;
+}
+
+.w15 {
+	width: 15% !important;
+}
+
+.w25 {
+	width: 25% !important;
+}
+
+.w30 {
+	width: 30% !important;
+}
+
+.w33 {
+	width: 33.3% !important;
+}
+
+.w40 {
+	width: 40% !important;
+}
+
+.w75 {
+	width: 75% !important;
+}
+
+.w80 {
+	width: 80% !important;
+}
+
+.w70p {
+	width: 70px !important;
+}
+
 
 .t-right {
 	text-align: right;
@@ -91,6 +127,16 @@ div {
 .list .row {
 	margin-top: 5px;
 	margin-bottom: 5px;
+}
+
+.gear li > .row,
+.special_items li > .row,
+.traits li > .row,
+.talents li > .row,
+.resurgence li > .row,
+.potions li > .row {
+	margin-top: 3px;
+	margin-bottom: 0;
 }
 
 .clearfix:after, .clearfix:before {
@@ -161,6 +207,7 @@ li.item {
 	position: relative;
 	border-bottom: 1px solid rgba(0,0,0,.4);
 	box-shadow: 0 1px 0 0 hsla(0,0%,100%,.1);
+	padding: 1em;
 }
 
 .list-top-line {
@@ -262,9 +309,32 @@ li.item {
 .statlist .row {
 	margin-top: 0px;
 }
-	
+
 img {
 	vertical-align: middle;
+}
+
+.cooldowns a img {
+	height: 23px; 
+	vertical-align: middle;
+	margin-right: 4px;
+}
+
+.resurgence a img,
+.traits a img,
+.gear a img,
+.special_items a img,
+.potions a img,
+.cooldowns .w70p a img,
+.slt .w70p a img,
+.talents a img {
+	height: 56px;
+	border-radius: 50%;
+}
+
+.procs a img {
+	height: 23px;
+	margin-right: 4px;
 }
 
 .navbar {
