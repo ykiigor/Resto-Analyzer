@@ -2484,6 +2484,9 @@ function ParseHeader(fight_code,showPage,afterFunc)
 		
 		if(showPage) BuildFightsList();
 		if(afterFunc) afterFunc();
+	}).fail( function( data ) {
+		error_msg("Parsing Error. Log may be private or removed.");
+		throw new Error("Error: Parsing Error");
 	});
 }
 
