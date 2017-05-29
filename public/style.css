@@ -3,7 +3,7 @@ body, td {
 	margin: 0;
 	padding: 0;
 	
-	background: url('data/background-merged.png') 50% no-repeat;
+	background: url('background-merged.png') 50% no-repeat;
 	background-size: cover;
 	background-attachment: fixed;
 

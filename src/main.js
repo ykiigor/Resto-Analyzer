@@ -408,15 +408,14 @@ var enchToStat = {
 	5430: ["vers",150],
 };
 
-var actors = [];
-var actorsData = [];
-var fightsData = [];
-var healingData = [];
-var currFightData = [];
-var currReportData = [];
-var pV = {	//parse Vars
-};
-var rV = {	//result Vars
+
+var actors = [];		// Used for filter events only for char & his summons
+var actorsData = [];		// All units data
+var fightsData = [];		// All fights data
+var healingData = [];		// Spells healing data
+var currFightData = [];		// Selected fight info
+var pV = {};			// "Garbage" variables, used for parsing
+var rV = {			// Result Variables
 	talents: [],
 	traits: [],
 	resurgence: [],
@@ -433,24 +432,78 @@ var rV = {	//result Vars
 	manaUsage: 0,
 	manaGain: 0,
 };
-var cV = {	//char Vars
+var cV = {			// Char Variables
 	traitInfo: [],
 	gearInfo: [],
 	talentInfo: [],
 	spellInfo: [],
 };
-var currHP = [];
-var healPerStat = {
+var currHP = [];		// Current raid health data
+var healPerStat = {		// Healing per stat data
 	int: {amount:0,total:0,avg:0,avgCount:0},
 	crit: {amount:0,total:0,avg:0,avgCount:0},
 	haste: {amount:0,total:0,avg:0,avgCount:0},
 	mastery: {amount:0,total:0,avg:0,avgCount:0,all:0},
 	vers: {amount:0,total:0,avg:0,avgCount:0},
 };
-var cooldownsTracking = [];
-var sltTracking = [];
+var cooldownsTracking = [];	// Cooldowns data
+var sltTracking = [];		// Spirit Link data
 
 var reportFightCode;
+
+
+
+
+function GetTraitRank(traitID)
+{
+	if(cV.traitInfo[traitID])
+		return cV.traitInfo[traitID].rank;
+	else
+		return 0;
+}
+
+function ScaleStat(stat,fromIlvl,toIlvl,isLinear = 0)
+{
+	var scalingFrom = (fromIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,fromIlvl - 800) : Math.pow(0.994435486,fromIlvl - 800));
+	var scalingTo = (toIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,toIlvl - 800) : Math.pow(0.994435486,toIlvl - 800));
+	
+	stat = stat / scalingFrom;
+	var newValue = stat * Math.pow(1.00936,toIlvl - fromIlvl);
+	newValue *= scalingTo;
+	
+	return newValue;
+}
+
+function MsToFormattedTime(ms,calcFromPull)
+{
+	if(calcFromPull) ms -= currFightData.start_time;
+	var min = Math.floor(ms / 60000);
+	var sec = Math.floor( (ms - min * 60000) / 1000 );
+	
+	return (min < 10 ? "0" : "")+min+":"+(sec < 10 ? "0" : "")+sec;
+	
+}
+
+function NumberToFormattedNumber(num,decimals = 0,decimals_m = 0,decimals_k = 0)
+{
+	if(num > 1000000000){
+		return (num / 1000000000).toFixed(decimals)+"M";
+	} else if (num > 1000000){
+		if(decimals_m != 0) decimals = decimals_m;
+		return (num / 1000000).toFixed(decimals)+"m";
+	} else if (num > 1000){
+		if(decimals_k != 0) decimals = decimals_k;
+		return (num / 1000).toFixed(decimals)+"k";
+	} else {
+		return Math.floor(num);
+	}	
+}
+
+function error_msg(msg) {
+	$("#main").html("<div class=\"panel\"><div class=\"col-full\"><div class=\"box\">"+msg+"</div></div></div>");
+
+}
+
 
 var ITEMS = [
 	{	//Velens
@@ -713,26 +766,6 @@ var ITEMS = [
 		},
 	},
 ];
-
-function GetTraitRank(traitID)
-{
-	if(cV.traitInfo[traitID])
-		return cV.traitInfo[traitID].rank;
-	else
-		return 0;
-}
-
-function ScaleStat(stat,fromIlvl,toIlvl,isLinear = 0)
-{
-	var scalingFrom = (fromIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,fromIlvl - 800) : Math.pow(0.994435486,fromIlvl - 800));
-	var scalingTo = (toIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,toIlvl - 800) : Math.pow(0.994435486,toIlvl - 800));
-	
-	stat = stat / scalingFrom;
-	var newValue = stat * Math.pow(1.00936,toIlvl - fromIlvl);
-	newValue *= scalingTo;
-	
-	return newValue;
-}
 
 var TRAITS = [
 	{	//Grace [+6%]
@@ -1415,7 +1448,6 @@ var pluginsList = [ITEMS, TRAITS, TALENTS, RESURGENCE, POTIONS];
 for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 	var pluginData = pluginsList[k];
 	for (var i = 0, len = pluginData.length; i < len; i++) {
-		if(pluginData[i].init) pluginData[i].init();
 		if(pluginData[i].parse){
 			for (var j = 0, j_len = pluginData[i].parse.length; j < j_len; j=j+2) {
 				parsePlugins[ pluginData[i].parse[j] ].push(pluginData[i].parse[j+1]);
@@ -1429,8 +1461,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 {
 	$.getJSON( "https://www.warcraftlogs.com:443/v1/report/events/"+fight_code+"?start="+start_time+"&end="+end_time+"&actorid="+actor_id+"&api_key="+WCL_API_KEY ).done( function( data ) {
 		if(data.status == 400){
-			console.log("Error #1");
-			throw new Error("my error message");
+			error_msg(data.error);
+			throw new Error("Error: Parsing Error");
 		}
 		actors[actor_id] = true
 		for (var i = 0, len = data.events.length; i < len; i++) {
@@ -1850,7 +1882,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}			
 			} else if(event.type == "combatantinfo" && event.sourceID == actor_id){
 
-				if(event["specID"] != 264) error_msg("Error: Wrong specialization.");
+				if(event["specID"] != 264){
+					error_msg("Error: Wrong specialization");
+					throw new Error("Error: Wrong specialization");
+				}
 				
 				console.log(event);
 				
@@ -1936,8 +1971,8 @@ function ParseHeader(fight_code,showPage,afterFunc)
 {
 	$.getJSON( "https://www.warcraftlogs.com:443/v1/report/fights/"+fight_code+"?api_key="+WCL_API_KEY ).done( function( data ) {
 		if(data.status == 400){
-			console.log("Error #2");
-			throw new Error("my error message");
+			error_msg(data.error);
+			throw new Error("Error: Parsing Error");
 		}
 		
 		for (var i = 0, len = data.fights.length; i < len; i++) {
@@ -1963,36 +1998,11 @@ function ParseHeader(fight_code,showPage,afterFunc)
 			}
 		}
 		
-		currReportData.name = data.title;
+		currFightData.report_name = data.title;
 		
 		if(showPage) BuildFightsList();
 		if(afterFunc) afterFunc();
 	});
-}
-
-function MsToFormattedTime(ms,calcFromPull)
-{
-	if(calcFromPull) ms -= currFightData.start_time;
-	var min = Math.floor(ms / 60000);
-	var sec = Math.floor( (ms - min * 60000) / 1000 );
-	
-	return (min < 10 ? "0" : "")+min+":"+(sec < 10 ? "0" : "")+sec;
-	
-}
-
-function NumberToFormattedNumber(num,decimals = 0,decimals_m = 0,decimals_k = 0)
-{
-	if(num > 1000000000){
-		return (num / 1000000000).toFixed(decimals)+"M";
-	} else if (num > 1000000){
-		if(decimals_m != 0) decimals = decimals_m;
-		return (num / 1000000).toFixed(decimals)+"m";
-	} else if (num > 1000){
-		if(decimals_k != 0) decimals = decimals_k;
-		return (num / 1000).toFixed(decimals)+"k";
-	} else {
-		return Math.floor(num);
-	}	
 }
 
 function CalcHealingFromItem(itemID,diffStats)
@@ -2054,11 +2064,11 @@ function CalcHealingFromItem(itemID,diffStats)
 	};
 }
 
-var IsResponceRewritten = false;
+var IsWowheadResponceRewritten = false;
 
 function GetItemDataFromWowhead(itemID)
 {
-	if(!IsResponceRewritten){
+	if(!IsWowheadResponceRewritten){
 		if(!$WowheadPower || !$WowheadPower.registerItem) return false;
 		$WowheadPower.registerItem = function(id,locale,json){
 			if(json && json.tooltip_enus){
@@ -2108,7 +2118,7 @@ function GetItemDataFromWowhead(itemID)
 			}
 			$WowheadPower.register(3,id,locale,json);
 		}
-		IsResponceRewritten = true;
+		IsWowheadResponceRewritten = true;
 	}
 	
 	$.getScript( "http://www.wowhead.com/item="+itemID+"&power" );	
@@ -2118,6 +2128,7 @@ function GetItemDataFromWowhead(itemID)
 
 function BuildReport(){
 	if(!cV.combantantInfo){
+		error_msg("Error: Combantant info is missing.");
 		throw new Error("Error: Combantant info is missing.");
 	}
 	
@@ -2609,11 +2620,54 @@ function PrepParse(fightID,actorID){
 	currFightData.actorName = actorsData[actorID].name;
 	currFightData.len = obj.end_time - obj.start_time;
 	
+	//erase variables 
+	actors = [];
+	healingData = [];
+	pV = {},
+	rV = {
+		talents: [],
+		traits: [],
+		resurgence: [],
+		potions: [],
+		buffs: {
+			vers: [],
+			crit: [],
+			haste: [],
+			haste_mod: [],
+			mastery: [],
+			int: [],	
+		},
+		healFromMana: 0,
+		manaUsage: 0,
+		manaGain: 0,
+	};
+	cV = {
+		traitInfo: [],
+		gearInfo: [],
+		talentInfo: [],
+		spellInfo: [],
+	};
+	currHP = [];
+	healPerStat = {
+		int: {amount:0,total:0,avg:0,avgCount:0},
+		crit: {amount:0,total:0,avg:0,avgCount:0},
+		haste: {amount:0,total:0,avg:0,avgCount:0},
+		mastery: {amount:0,total:0,avg:0,avgCount:0,all:0},
+		vers: {amount:0,total:0,avg:0,avgCount:0},
+	};
+	cooldownsTracking = [];
+	sltTracking = [];
+	
+	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
+		var pluginData = pluginsList[k];
+		for (var i = 0, len = pluginData.length; i < len; i++) if(pluginData[i].init) pluginData[i].init();
+	}
+	
 	var HTML = "";
 	HTML += "<li class=\"breadcrumb-item\"><a href=\"javascript:void(0)\" id=\"nav-btn-main\">Resto Analyzer</a></li>";
-	HTML += "<li class=\"breadcrumb-item\"><a href=\"javascript:void(0)\" id=\"nav-btn-fights\">"+currReportData.name+"</a></li>";
-	HTML += "<li class=\"breadcrumb-item\"><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"#fight="+currFightData.id+"&type=summary\">"+currFightData.name+" ("+MsToFormattedTime(currFightData.end_time - currFightData.start_time)+")</a></li>";
-	HTML += "<li class=\"breadcrumb-item\"><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"#fight="+currFightData.id+"&type=healing&source="+currFightData.actor+"\">"+currFightData.actorName+"</a></li>";
+	HTML += "<li class=\"breadcrumb-item\"><a href=\"javascript:void(0)\" id=\"nav-btn-fights\">"+currFightData.report_name+"</a></li>";
+	HTML += "<li class=\"breadcrumb-item\"><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"#fight="+currFightData.id+"&type=summary\" target=\"_blank\">"+currFightData.name+" ("+MsToFormattedTime(currFightData.end_time - currFightData.start_time)+")</a></li>";
+	HTML += "<li class=\"breadcrumb-item\"><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"#fight="+currFightData.id+"&type=healing&source="+currFightData.actor+"\" target=\"_blank\">"+currFightData.actorName+"</a></li>";
 	$("#navbar-header").html(HTML);
 
 	$("#nav-btn-main").click(function(){ BuildMainPage(); });
@@ -2653,7 +2707,7 @@ function BuildMainPage(){
 	
 	$("#nav-btn-main").click(function(){ BuildMainPage(); });
 	
-	window.history.pushState('main', 'Main', '');
+	window.history.pushState('main', 'Main', '?');
 }
 
 function QueryString() {
