@@ -1876,6 +1876,29 @@ var OTHER = [
 	{	//Fix
 		init: function() {
 			pV.critTidalLoss = 0;
+			
+		},
+	},
+	{	//Crit resurgence
+		init: function() {
+			rV.resurgenceCrit = 0;
+			rV.resurgenceCritAmount = 0;
+			pV.resurgenceCritAvg = 0;
+			pV.resurgenceCritCount = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if((spellID == 8004 || (spellID == 61295 && !event.tick) || spellID == 73685 || spellID == 1064 || spellID == 77472) && event.hitType == 2){
+					pV.resurgenceCritAvg += pV.critNow;
+					pV.resurgenceCritCount ++;
+				}
+			},
+			"energize", function(event,spellID){
+				if(spellID == 101033) rV.resurgenceCrit += event.resourceChange;
+			},
+		],
+		afterParse: function() {
+			rV.resurgenceCritAmount = pV.resurgenceCritAvg / pV.resurgenceCritCount;
 		},
 	},
 ];
@@ -1917,6 +1940,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 			throw new Error("Error: Parsing Error");
 		}
 		actors[actor_id] = true
+		
+		try {
 
 		for (var i = 0, len = data.events.length; i < len; i++) {
 			var event = data.events[i];
@@ -2401,14 +2426,20 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 			}			
 		}
 		
+		} catch(err) { error_msg("JS error: "+err); }
+		
 		if(!data.nextPageTimestamp) {
 			$("#navbar-progress").width("100%").css('opacity', '0');
+			if(pV.ReUpdatePage) clearTimeout(pV.ReUpdatePage);
 			BuildReport();
 		} else {
+			currFightData.end_time_parsed = data.nextPageTimestamp;
+			if(!pV.ReUpdatePage) pV.ReUpdatePage = setTimeout(function() {  BuildReportMinor(); pV.ReUpdatePage = false; },300);
 			var prog = (data.nextPageTimestamp - currFightData.start_time) / (currFightData.end_time - currFightData.start_time) * 100;
 			$("#navbar-progress").width(prog+"%").css('opacity', '1');
 			ParseLog(fight_code,actor_id,data.nextPageTimestamp,end_time);
 		}
+		
 	}).fail( function( data ) {
 		error_msg("Parsing Error. Log may be private or removed.");
 		throw new Error("Error: Parsing Error");
@@ -2581,6 +2612,43 @@ function GetItemDataFromWowhead(itemID)
 	$.getScript( "https://www.wowhead.com/item="+itemID+"&power" );	
 }
 
+Number.prototype.format = function() {
+	return this.toLocaleString(undefined, {maximumFractionDigits:0,useGrouping:true}).replace(/\D/g,",");
+};
+
+function BuildReportMinor(){
+	var HTML = "";
+	
+	console.log('BuildReportMinor',new Date().getTime());
+
+	var fightLen = (currFightData.end_time_parsed || currFightData.end_time) - currFightData.start_time;
+
+	var currTotal = 0;
+	Object.keys(healingData).forEach(function (spellID) {
+		if(spellID != 98021) currTotal += healingData[spellID][0];
+	});
+
+	HTML += "<div class=\"panel\" style=\"margin-top:-10px;\"><div class=\"row full\" style=\"margin-bottom:5px;\">";
+	var hps = Math.round(currTotal / fightLen * 1000);
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingwavegreater.jpg\"></div><div class=\"col w75\">Healing Done: "+NumberToFormattedNumber(rV.total)+"<br>HPS: "+NumberToFormattedNumber(hps,0,3)+"</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingtouch.jpg\"></div><div class=\"col w75\">Mastery healing Done:<br>"+NumberToFormattedNumber(Math.round(healPerStat.mastery.total),1)+" ("+Math.round(healPerStat.mastery.total / healPerStat.mastery.all * 100)+"%)</div></div></div></div>";
+	HTML += "</div></div>";	
+	
+	HTML += "<div class=\"panel\">";
+	/// Spells List
+	var spellslistKeys = Object.keys(healingData);
+	spellslistKeys.sort(function(a,b){ return healingData[a][0] > healingData[b][0] ? - 1 : 1 });
+	HTML += "<div class=\"col-half\"><div class=\"box clearfix spellslist\">";
+	for (var j = 0, j_len = spellslistKeys.length; j < j_len; j++) {
+		var spellID = spellslistKeys[j];
+		var spellInfo = cV.spellInfo[spellID];
+		HTML += "<div class=\"row full\"><div class=\"line half\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+spellInfo['icon']+"\" alt=\""+spellInfo['name']+"\">"+spellInfo['name']+"</a></div><div class=\"line t-right w15\">"+NumberToFormattedNumber(healingData[spellID][0],1)+"</div><div class=\"line t-right t-grey w15\">"+NumberToFormattedNumber(healingData[spellID][1],1)+"</div></div>";
+	}
+	HTML += "</div></div>";	
+
+	
+	$("#main").html(HTML);
+}
 
 
 function BuildReport(){
@@ -2613,7 +2681,6 @@ function BuildReport(){
 	var fightLen = fightEnd - fightStart;//$end_time - $start_time_saved
 	
 	HTML += "<div class=\"panel\" style=\"margin-top:-10px;\"><div class=\"row full\" style=\"margin-bottom:5px;\">";
-	//var = Math.round(rV.total / ($end_time - $start_time_saved) * 1000);
 	var hps = Math.round(rV.total / fightLen * 1000);
 	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingwavegreater.jpg\"></div><div class=\"col w75\">Healing Done: "+NumberToFormattedNumber(rV.total)+"<br>HPS: "+NumberToFormattedNumber(hps,0,3)+"</div></div></div></div>";
 	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingtouch.jpg\"></div><div class=\"col w75\">Mastery healing Done:<br>"+NumberToFormattedNumber(Math.round(healPerStat.mastery.total),1)+" ("+Math.round(healPerStat.mastery.total / healPerStat.mastery.all * 100)+"%)</div></div></div></div>";
@@ -2641,7 +2708,7 @@ function BuildReport(){
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix statlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Stats</header>";
 	var allStatsList = [
 		["int","Int","From gear: "+cV.intellect_min],
-		["crit","<em class=\"tooltip\">Crit<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Mana from resurgence are ignored now</span></em>","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000"],
+		["crit","Crit","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000"],
 		["mastery","Mastery","From gear: "+(cV.mastery-3200)+"<br>Base value: 3200"],
 		["vers","Vers","From gear: "+cV.versatility],
 		["haste","<em class=\"tooltip\">Haste<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Cast time not counted here, only profit from ticks</span></em>","From gear: "+cV.haste],
@@ -2649,9 +2716,26 @@ function BuildReport(){
 	HTML += "<div class=\"row full\"><div class=\"col size\"> </div><div class=\"col size\">Heal per stat</div><div class=\"col size\">Stat weight</div><div class=\"col size\">Total from stat</div><div class=\"col size\">Avg on fight</div></div>";
 	for (var j = 0, j_len = allStatsList.length; j < j_len; j++) {
 		var statData = allStatsList[j];
-		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+healPerStat[ statData[0] ].amount+"</div><div class=\"col size\">"+(healPerStat[ statData[0] ].amount / fightLen * 1000)+"</div><div class=\"col size\">"+NumberToFormattedNumber(healPerStat[ statData[0] ].total)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount).toFixed(0)+"<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+statData[2]+"</span></em></div></div>";
+		var amount = healPerStat[ statData[0] ].amount;
+		var total = healPerStat[ statData[0] ].total;
+		var amountText = amount.toFixed(3);
+		var totalText = NumberToFormattedNumber(total);
+		if(statData[0] == "crit" && rV.resurgenceCritAmount > 0){
+			var regurgenceAmount = rV.resurgenceCrit / rV.manaUsage * rV.healFromMana;
+			var preTotal = total;
+			total += regurgenceAmount;
+			var preAmount = amount;
+			amount += regurgenceAmount / rV.resurgenceCritAmount;
+			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+preAmount.toFixed(3)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount).toFixed(3)+"</span></em>";
+			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+NumberToFormattedNumber(preTotal)+"<br>From resurgence: "+NumberToFormattedNumber(regurgenceAmount)+"</span></em>";			
+		}
+		var weightText = (amount / fightLen * 1000).toFixed(2);
+		if(statData[0] == "int") {
+			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000 * 1.05).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">5% armor bonus included</span></em>";
+		}
+		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+amountText+"</div><div class=\"col size\">"+weightText+"</div><div class=\"col size\">"+totalText+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount).format()+"<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+statData[2]+"</span></em></div></div>";
 	}
-	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).toFixed(0)+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana gained via passives & buffs: "+(rV.manaGain).toFixed(0)+"<br>Mana regened: "+(fightLen / 1000 * 8800).toFixed(0)+"<br>Base manapull: "+(1100000).toFixed(0)+"</span></em></div></div>";
+	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 8800).format()+"<br>Base manapull: "+(1100000).format()+"</span></em></div></div>";
 	HTML += "</div></div>";	
 
 	/// Items predictions
@@ -2943,7 +3027,7 @@ function BuildReport(){
 				
 				HTML += "<div class=\"row full\"><div class=\"cd_more_3_time\">"+(healObj.time / 1000).toFixed(3)+"</div><div class=\"cd_more_3_info cd_more_3_info_heal\">";
 				HTML += "<a href=\"//www.wowhead.com/spell="+healObj.id+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[healObj.id].icon+"\" alt=\""+cV.spellInfo[healObj.id].name+"\"> "+cV.spellInfo[healObj.id].name+"</a> x"+healObj.count;
-				HTML += "</div><div class=\"cd_more_3_info cd_more_3_info_amount\">"+healObj.amount+"</div><div class=\"cd_more_3_info cd_more_3_info_over\">"+healObj.over+"</div></div>";				
+				HTML += "</div><div class=\"cd_more_3_info cd_more_3_info_amount\">"+healObj.amount.format()+"</div><div class=\"cd_more_3_info cd_more_3_info_over\">"+healObj.over.format()+"</div></div>";				
 				
 				overHeal += healObj.over;
 				
@@ -2956,7 +3040,7 @@ function BuildReport(){
 		HTML += "<br><a href=\"javascript:void(0)\" class=\"more_3\">hide</a></div></div>";
 		
 		HTML += "<div class=\"col text-center w13\"><div style=\"font-size: 2em;\">"+NumberToFormattedNumber(obj.healing,2)+"</div>HPS: "+NumberToFormattedNumber(obj.healing / ((obj.ended ? obj.ended : fightEnd) - obj.start) * 1000,2)+"</div>";
-		HTML += "<div class=\"col text-center w13\"><div style=\"font-size: 2em;\">"+(overHeal / (obj.healing + overHeal) * 100).toFixed(1)+"%</div>overhealing</div>";
+		HTML += "<div class=\"col text-center w13\"><div style=\"font-size: 2em;\">"+(overHeal / (obj.healing + overHeal) * 100).toFixed(2)+"%</div>overhealing</div>";
 		HTML += "<div class=\"col text-center w13\"><div style=\"font-size: 2em;\">"+NumberToFormattedNumber(obj.mana)+"</div>Mana</div></div></li>";
 	}
 	HTML += "</ul></div></div></div>";
@@ -2986,8 +3070,8 @@ function BuildReport(){
 				var unitData = actorsData[unitID];
 				if(unitData){
 					HTML += "<div class=\"row full\"><div class=\"cd_more_3_time\">"+(prevTime < obj.damage[j].time ? (obj.damage[j].time / 1000).toFixed(3) : "")+"</div><div class=\"cd_more_3_info cd_more_3_info_heal"+(unitData.class ? (" "+unitData.class) : "")+"\">";
-					HTML += unitData.name+"</div><div class=\"cd_more_3_info cd_more_3_info_amount slt-damage\">"+obj.damage[j].data[unitID].amount+"</div>";
-					if(obj.damage[j].data[unitID].absorbed > 0) HTML += "<div class=\"cd_more_3_info cd_more_3_info_over\">"+obj.damage[j].data[unitID].absorbed+"</div>";
+					HTML += unitData.name+"</div><div class=\"cd_more_3_info cd_more_3_info_amount slt-damage\">"+obj.damage[j].data[unitID].amount.format()+"</div>";
+					if(obj.damage[j].data[unitID].absorbed > 0) HTML += "<div class=\"cd_more_3_info cd_more_3_info_over\">"+obj.damage[j].data[unitID].absorbed.format()+"</div>";
 					HTML += "</div>";
 					prevTime = obj.damage[j].time;
 				}
@@ -3000,8 +3084,8 @@ function BuildReport(){
 					var unitData = actorsData[unitID];
 					if(unitData){
 						HTML += "<div class=\"row full\"><div class=\"cd_more_3_time\">"+(prevTime < obj.heal[k].time ? (obj.heal[k].time / 1000).toFixed(3) : "")+"</div><div class=\"cd_more_3_info cd_more_3_info_heal"+(unitData.class ? (" "+unitData.class) : "")+"\">";
-						HTML += unitData.name+"</div><div class=\"cd_more_3_info cd_more_3_info_amount slt-heal\">"+obj.heal[k].data[unitID].amount+"</div>";
-						if(obj.heal[k].data[unitID].absorbed > 0) HTML += "<div class=\"cd_more_3_info cd_more_3_info_over\">"+obj.heal[k].data[unitID].absorbed+"</div>";
+						HTML += unitData.name+"</div><div class=\"cd_more_3_info cd_more_3_info_amount slt-heal\">"+obj.heal[k].data[unitID].amount.format()+"</div>";
+						if(obj.heal[k].data[unitID].absorbed > 0) HTML += "<div class=\"cd_more_3_info cd_more_3_info_over\">"+obj.heal[k].data[unitID].absorbed.format()+"</div>";
 						HTML += "</div>";
 						prevTime = obj.heal[j].time;
 						TotalHealing += obj.heal[k].data[unitID].amount;
