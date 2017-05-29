@@ -434,7 +434,6 @@ var cV = {			// Char Variables
 	talentInfo: [],
 	spellInfo: [],
 };
-var currHP = [];		// Current raid health data
 var healPerStat = {		// Healing per stat data
 	int: {amount:0,total:0,avg:0,avgCount:0},
 	crit: {amount:0,total:0,avg:0,avgCount:0},
@@ -630,9 +629,9 @@ var ITEMS = [
 		},
 		parse: [
 			"damage", function(event,spellID){
-				if(event.targetID == currFightData.actor && currHP[ event.targetID ]){
+				if(event.targetID == currFightData.actor && event.resourceActor == 2 && event.maxHitPoints){
 					if(event.timestamp > pV.prydazNextReset) {
-						pV.prydazCurrent = currHP[ event.targetID ].max * 0.25;
+						pV.prydazCurrent = event.maxHitPoints * 0.25;
 						while(pV.prydazNextReset < event.timestamp){
 							pV.prydazNextReset += 30000;
 						}
@@ -1086,8 +1085,8 @@ var ITEMS = [
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
- 				if(spellID == 61295 && !event.tick && currHP[event.targetID]){
- 					var targetHPbeforeHeal = Math.max(currHP[event.targetID].num - amount,0) / currHP[event.targetID].max;
+ 				if(spellID == 61295 && !event.tick && event.resourceActor == 2 && event.hitPoints && event.maxHitPoints){
+ 					var targetHPbeforeHeal = Math.max(event.hitPoints - amount,0) / event.maxHitPoints;
 					if(targetHPbeforeHeal <= .4) rV.beltCount++;
 				}
 			},
@@ -1425,6 +1424,54 @@ var TRAITS = [
 			id: 1104,
 			spellID: 207092,
 			icon: "ability_skyreach_four_wind.jpg",
+		},
+	},
+	{	//tidal buff
+		init: function() {
+			rV.traits[1103] = 0;
+			rV.traits1103_CastTime = 0;
+			rV.traits1103_Crit = 0;
+			pV.traits1103_TidalLoss = 0;
+			pV.traits1103_HRStartCast = 0;
+			pV.traits1103_HRCastTime = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if((spellID == 77472 || spellID == 8004) && (event.timestamp <= pV.hwWithoutTidalLoss)){
+					if(spellID == 8004 && event.hitType == 2){
+						rV.traits1103_Crit += ( GetTraitRank(1103) * 4 * 400 ) / pV.critNow * pV.critAmount;;
+					} else if(spellID == 77472) {
+						var tidal = (GetTraitRank(1103) * 0.03);
+						rV.traits1103_CastTime += pV.traits1103_HRCastTime / (1 - tidal) * tidal;
+					}
+				}
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 53390) pV.traits1103_TidalLoss = event.timestamp + 500;
+			},
+			"removebuffstack", function(event,spellID){
+				if(spellID == 53390) pV.traits1103_TidalLoss = event.timestamp + 500;
+			},
+			"begincast", function(event,spellID){
+				if(spellID == 77472) pV.traits1103_HRStartCast = event.timestamp;
+			},
+			"cast", function(event,spellID){
+				if(spellID == 77472) {
+					pV.traits1103_HRCastTime = event.timestamp - pV.traits1103_HRStartCast;
+				}
+			},			
+		],
+		afterParse: function() {
+			var hps = rV.total / (currFightData.end_time - currFightData.start_time);
+			
+			rV.traits[1103] = rV.traits1103_Crit + hps * rV.traits1103_CastTime;
+		},		
+		obj: {
+			name: "Tidal Chains",
+			id: 1103,
+			spellID: 207088,
+			icon: "spell_frost_chainsofice.jpg",
+			tip: function() { return "From surge crit: "+NumberToFormattedNumber(rV.traits1103_Crit,0,2)+"<br>Reduced HW cast time: "+(rV.traits1103_CastTime/1000).toFixed(1)+"s" },
 		},
 	},
 	
@@ -1826,7 +1873,14 @@ var OTHER = [
 			},
 		],
 	},
+	{	//Fix
+		init: function() {
+			pV.critTidalLoss = 0;
+		},
+	},
 ];
+
+
 
 var parsePlugins = {
 	heal: [],
@@ -1835,6 +1889,7 @@ var parsePlugins = {
 	removebuff: [],
 	removebuffstack: [],
 	cast: [],
+	begincast: [],
 	damage: [],
 	energize: [],
 	gear: [],
@@ -1862,26 +1917,17 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 			throw new Error("Error: Parsing Error");
 		}
 		actors[actor_id] = true
+
 		for (var i = 0, len = data.events.length; i < len; i++) {
 			var event = data.events[i];
-			
+
 			var resourceActorNow = event.resourceActor == 1 ? event.sourceID : event.targetID;
 			
-			if(resourceActorNow){
-				if(!currHP[resourceActorNow]){
-					currHP[resourceActorNow] = []
-				}
-				if(event.hitPoints) currHP[resourceActorNow].num = event.hitPoints
-				if(event.maxHitPoints) currHP[resourceActorNow].max = event.maxHitPoints
-				if(event.hitPoints && event.maxHitPoints) currHP[resourceActorNow].per = event.hitPoints / event.maxHitPoints
-				
-				if(resourceActorNow == actor_id && event.spellPower){
-					cV.intellect = event.spellPower;
-					cV.intellect_min = Math.min(cV.intellect_min, cV.intellect);
-				}
+			if(resourceActorNow == actor_id && event.spellPower){
+				cV.intellect = event.spellPower;
+				cV.intellect_min = Math.min(cV.intellect_min, cV.intellect);
 			}
 			
-
 			if((event.type == "heal" || event.type == "absorbed") && actors[event.sourceID]){
 				var spellID = event.ability.guid;
 				if(!healingData[spellID]){
@@ -1923,6 +1969,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 								pV.critNow += GetTraitRank(1109) * 4 * 400;
 							} else if(spellID == 73921){	//healing rain
 								pV.critNow += GetTraitRank(1107) * 2 * 400;
+							} else if(spellID == 8004 && event.timestamp <= pV.critTidalLoss){	//surge
+								pV.critNow += (GetTraitRank(1103) * 4 + 40) * 400;
 							}
 							
 							healPerStat.crit.amount += pV.critAmount / pV.critNow;
@@ -1937,8 +1985,9 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 								}
 							});
 						}
-						if(currHP[event.targetID] && spellID != 73685){	//UL hardfix
-							var targetHPbeforeHeal = Math.max(currHP[event.targetID].num - amount,0) / currHP[event.targetID].max;
+						if(event.resourceActor == 2 && event.hitPoints && event.maxHitPoints && spellID != 73685){
+							var targetHPbeforeHeal = Math.max(event.hitPoints - amount,0) / event.maxHitPoints;
+						
 							pV.masteryNow = cV.mastery;
 
 							Object.keys(statsBuffs.mastery).forEach(function (buffSpellID) {
@@ -2137,6 +2186,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 				if(spellID == 29166){
 					pV.innervate = false;
+				} else if(spellID == 53390) {
+					pV.critTidalLoss = event.timestamp + 500;
 				}
 
 				if(cooldownsTrackingIDs[spellID]) {
@@ -2153,10 +2204,20 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 			} else if(event.type == "removebuffstack" && actors[event.targetID]){
 				var spellID = event.ability.guid;
+				
+				if(spellID == 53390) {
+					pV.critTidalLoss = event.timestamp + 500;
+				}
 
 				for (var j = 0, j_len = parsePlugins.removebuffstack.length; j < j_len; j++) {
 					parsePlugins.removebuffstack[j](event,spellID);
-				}		
+				}
+			} else if(event.type == "begincast" && actors[event.sourceID]){
+				var spellID = event.ability.guid;
+				
+				for (var j = 0, j_len = parsePlugins.begincast.length; j < j_len; j++) {
+					parsePlugins.begincast[j](event,spellID);
+				}									
 			} else if(event.type == "cast" && actors[event.sourceID]){
 				var spellID = event.ability.guid;
 
@@ -2399,35 +2460,38 @@ function CalcHealingFromItem(itemID,diffStats)
 {
 	var passiveStats = 0;
 	var statsText = "Calculated stats:";
-	if(cV.gearInfo[itemID]){
+	var obj = cV.gearInfo[itemID];
+	var defStats = false;
+	if(obj){
 		var statsDB = diffStats || itemsStats[itemID];
 		if(statsDB){
-			var realIlvl = cV.gearInfo[itemID]['itemLevel'];
+			var realIlvl = obj.itemLevel;
 			var baseIlvl = statsDB['ilvl'];
 			
 			Object.keys(statsDB).forEach(function (statName) {
 				var value = statsDB[statName]
-				if(statName == 'passive' && cV.gearInfo[itemID].bonusIDs){
-					for (var i = 0, i_len = cV.gearInfo[itemID].bonusIDs.length; i < i_len; i++) {
-						if(itemsBonusToStats[ cV.gearInfo[itemID].bonusIDs[i] ]){
-							statName = itemsBonusToStats[ cV.gearInfo[itemID].bonusIDs[i] ];
+				if(statName == 'passive' && obj.bonusIDs){
+					for (var i = 0, i_len = obj.bonusIDs.length; i < i_len; i++) {
+						if(itemsBonusToStats[ obj.bonusIDs[i] ]){
+							statName = itemsBonusToStats[ obj.bonusIDs[i] ];
 							break;
 						}
 					}
 				}
 			
 				if(healPerStat[statName]){
-					var newValue = ScaleStat(value,baseIlvl,realIlvl,statName == "int" ? 1 : (jewelSlots[ cV.gearInfo[itemID].slot ] ? 2 : 0));
+					var newValue = ScaleStat(value,baseIlvl,realIlvl,statName == "int" ? 1 : (jewelSlots[ obj.slot ] ? 2 : 0));
 					statsText += "<br>"+statName+": "+Math.round(newValue);
 					if(statName == "int") newValue *= 1.05;	//5% bonus
 					passiveStats += healPerStat[statName].amount * newValue;
 				}
 			});
+			defStats = true;
 		}
 		
-		if(cV.gearInfo[itemID].gems) {
-			for (var i = 0, i_len = cV.gearInfo[itemID].gems.length; i < i_len; i++) {
-				var gemItemID = cV.gearInfo[itemID].gems[i].id
+		if(obj.gems) {
+			for (var i = 0, i_len = obj.gems.length; i < i_len; i++) {
+				var gemItemID = obj.gems[i].id
 				if(gemToStat[gemItemID]){
 					var gemStatData = gemToStat[gemItemID];
 					if(healPerStat[ gemStatData[0] ]){
@@ -2438,8 +2502,8 @@ function CalcHealingFromItem(itemID,diffStats)
 				}
 			}
 		}
-		if(cV.gearInfo[itemID].permanentEnchant && enchToStat[ cV.gearInfo[itemID].permanentEnchant ])  {
-			var gemStatData = enchToStat[ cV.gearInfo[itemID].permanentEnchant ];
+		if(obj.permanentEnchant && enchToStat[ obj.permanentEnchant ])  {
+			var gemStatData = enchToStat[ obj.permanentEnchant ];
 			if(healPerStat[ gemStatData[0] ]){
 				statsText += "<br>Enchant "+gemStatData[0]+": "+Math.round(gemStatData[1]);
 			
@@ -2451,6 +2515,7 @@ function CalcHealingFromItem(itemID,diffStats)
 	return {
 		heal: passiveStats,
 		tip: statsText,
+		base: defStats,
 	};
 }
 
@@ -2489,10 +2554,11 @@ function GetItemDataFromWowhead(itemID)
 				var matches = json.tooltip_enus.match(/([\d,]+) Haste/);
 				if(matches) itemStats.haste = matches[1].replace(",", "");
 				
-				
 				var passiveStats = CalcHealingFromItem(itemID,itemStats);
+				//console.log(itemStats.name,itemStats,passiveStats);
 				
-				$("#gear-"+itemID+"-name").html(itemStats.name);
+				var ilvlName = $("#gear-"+itemID+"-name").attr("data-ilvl");
+				$("#gear-"+itemID+"-name").html(itemStats.name+" "+ilvlName);
 				if(itemStatus!="locked"){
 					$("#gear-"+itemID+"-text").attr("data-status","locked");
 					
@@ -2523,6 +2589,11 @@ function BuildReport(){
 		throw new Error("Error: Combantant info is missing.");
 	}
 	
+	rV.total = 0;
+	Object.keys(healingData).forEach(function (spellID) {
+		if(spellID != 98021) rV.total += healingData[spellID][0];
+	});
+
 	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 		var pluginData = pluginsList[k];
 		for (var i = 0, len = pluginData.length; i < len; i++) {
@@ -2530,10 +2601,6 @@ function BuildReport(){
 		}
 	}
 	
-	rV.total = 0;
-	Object.keys(healingData).forEach(function (spellID) {
-		if(spellID != 98021) rV.total += healingData[spellID][0];
-	});
 	
 	//console.log(healingData);
 	console.log(rV);
@@ -2548,11 +2615,11 @@ function BuildReport(){
 	HTML += "<div class=\"panel\" style=\"margin-top:-10px;\"><div class=\"row full\" style=\"margin-bottom:5px;\">";
 	//var = Math.round(rV.total / ($end_time - $start_time_saved) * 1000);
 	var hps = Math.round(rV.total / fightLen * 1000);
-	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"//media.blizzard.com/wow/icons/56/spell_nature_healingwavegreater.jpg\"></div><div class=\"col w75\">Healing Done: "+NumberToFormattedNumber(rV.total)+"<br>HPS: "+NumberToFormattedNumber(hps,0,3)+"</div></div></div></div>";
-	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"//media.blizzard.com/wow/icons/56/spell_nature_healingtouch.jpg\"></div><div class=\"col w75\">Mastery healing Done:<br>"+NumberToFormattedNumber(Math.round(healPerStat.mastery.total),1)+" ("+Math.round(healPerStat.mastery.total / healPerStat.mastery.all * 100)+"%)</div></div></div></div>";
-	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img style=\"filter: grayscale(100%);-webkit-filter: grayscale(100%);\" src=\"//media.blizzard.com/wow/icons/56/spell_shaman_tidalwaves.jpg\"></div><div class=\"col w75\">HW or Surge without tidal:<br>"+rV.hwWithoutTidal+" ("+Math.round(rV.hwWithoutTidal / rV.hwWithoutTidalTotal * 100)+"%)</div></div></div></div>";
-	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"//media.blizzard.com/wow/icons/56/spell_shaman_spiritwalkersgrace.jpg\"></div><div class=\"col w75\">Spiritwalker's uptime:<br>"+Math.round(rV.spiritwalkerUptime/1000)+"s ("+Math.round(rV.spiritwalkerUptime / fightLen * 100)+"%)</div></div></div></div>";
-	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"//media.blizzard.com/wow/icons/56/spell_nature_spiritwolf.jpg\"></div><div class=\"col w75\">Wolf uptime:<br>"+Math.round(rV.wolfUptime/1000)+"s ("+Math.round(rV.wolfUptime / fightLen * 100)+"%)</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingwavegreater.jpg\"></div><div class=\"col w75\">Healing Done: "+NumberToFormattedNumber(rV.total)+"<br>HPS: "+NumberToFormattedNumber(hps,0,3)+"</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingtouch.jpg\"></div><div class=\"col w75\">Mastery healing Done:<br>"+NumberToFormattedNumber(Math.round(healPerStat.mastery.total),1)+" ("+Math.round(healPerStat.mastery.total / healPerStat.mastery.all * 100)+"%)</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img style=\"filter: grayscale(100%);-webkit-filter: grayscale(100%);\" src=\"http://media.blizzard.com/wow/icons/56/spell_shaman_tidalwaves.jpg\"></div><div class=\"col w75\">HW or Surge without tidal:<br>"+rV.hwWithoutTidal+" ("+Math.round(rV.hwWithoutTidal / rV.hwWithoutTidalTotal * 100)+"%)</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_shaman_spiritwalkersgrace.jpg\"></div><div class=\"col w75\">Spiritwalker's uptime:<br>"+Math.round(rV.spiritwalkerUptime/1000)+"s ("+Math.round(rV.spiritwalkerUptime / fightLen * 100)+"%)</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_spiritwolf.jpg\"></div><div class=\"col w75\">Wolf uptime:<br>"+Math.round(rV.wolfUptime/1000)+"s ("+Math.round(rV.wolfUptime / fightLen * 100)+"%)</div></div></div></div>";
 	HTML += "</div></div>";	
 	
 	
@@ -2566,7 +2633,7 @@ function BuildReport(){
 	for (var j = 0, j_len = spellslistKeys.length; j < j_len; j++) {
 		var spellID = spellslistKeys[j];
 		var spellInfo = cV.spellInfo[spellID];
-		HTML += "<div class=\"row full\"><div class=\"line half\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+spellInfo['icon']+"\" alt=\""+spellInfo['name']+"\">"+spellInfo['name']+"</a></div><div class=\"line t-right w15\">"+NumberToFormattedNumber(healingData[spellID][0],1)+"</div><div class=\"line t-right t-grey w15\">"+NumberToFormattedNumber(healingData[spellID][1],1)+"</div></div>";
+		HTML += "<div class=\"row full\"><div class=\"line half\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+spellInfo['icon']+"\" alt=\""+spellInfo['name']+"\">"+spellInfo['name']+"</a></div><div class=\"line t-right w15\">"+NumberToFormattedNumber(healingData[spellID][0],1)+"</div><div class=\"line t-right t-grey w15\">"+NumberToFormattedNumber(healingData[spellID][1],1)+"</div></div>";
 	}
 	HTML += "</div></div>";	
 	
@@ -2626,7 +2693,7 @@ function BuildReport(){
 		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 		
 		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-		HTML += "<a href=\"//www.wowhead.com/"+obj.type+"="+itemID+((cV.gearInfo[itemID] && cV.gearInfo[itemID].bonusIDs) ? "&bonus="+cV.gearInfo[itemID].bonusIDs.join(":") : "")+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+(obj.icon || cV.gearInfo[itemID].icon)+"\" alt=\""+obj.name+"\"></a></div>";
+		HTML += "<a href=\"//www.wowhead.com/"+obj.type+"="+itemID+((cV.gearInfo[itemID] && cV.gearInfo[itemID].bonusIDs) ? "&bonus="+cV.gearInfo[itemID].bonusIDs.join(":") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+(obj.icon || cV.gearInfo[itemID].icon)+"\" alt=\""+obj.name+"\"></a></div>";
 
 		HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[obj.quality]+";\">"+obj.name+"</header>";
 	
@@ -2634,7 +2701,7 @@ function BuildReport(){
 		if(amount > 0) HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
 		
 		var passiveStats = CalcHealingFromItem(itemID)
-		
+		passiveStats.heal = 0;	//block passives
 		if(passiveStats.heal > 0){
 			HTML += "From passive stats: "+NumberToFormattedNumber(passiveStats.heal,2)+" ("+(passiveStats.heal/rV.total*100).toFixed(2)+"%)<br>";
 		}
@@ -2664,13 +2731,13 @@ function BuildReport(){
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 			
 			HTML += "<div class=\"row w33\" id=\"gear-"+itemID+"\"><div class=\"col w70p\">";
-			HTML += "<a href=\"//www.wowhead.com/item="+itemID+(gearData ? (gearData.bonusIDs ? "&bonus="+gearData.bonusIDs.join(":") : "") : "")+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+gearData.icon+"\" alt=\""+gearData.icon+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/item="+itemID+(gearData ? (gearData.bonusIDs ? "&bonus="+gearData.bonusIDs.join(":") : "") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+gearData.icon+"\" alt=\""+gearData.icon+"\"></a></div>";
 
-			HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[gearData.quality]+";\" id=\"gear-"+itemID+"-name\">"+gearData.itemLevel+"</header>";
+			HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[gearData.quality]+";\" id=\"gear-"+itemID+"-name\" data-ilvl=\""+gearData.itemLevel+"\">"+gearData.itemLevel+"</header>";
 		
 			var passiveStats = CalcHealingFromItem(itemID)
 			
-			HTML += "<div class=\"row-gear full\" id=\"gear-"+itemID+"-text\" data-status=\""+(passiveStats.heal > 0 ? "locked" : "unlocked")+"\">";
+			HTML += "<div class=\"row-gear full\" id=\"gear-"+itemID+"-text\" data-status=\""+(passiveStats.base ? "locked" : "unlocked")+"\">";
 			if(passiveStats.heal > 0){
 				HTML += "From <em class=\"tooltip\">passive stats<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+passiveStats.tip+"</span></em>: "+NumberToFormattedNumber(passiveStats.heal,2)+" ("+(passiveStats.heal/rV.total*100).toFixed(2)+"%)<br>";
 			}
@@ -2699,12 +2766,12 @@ function BuildReport(){
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 			
 			HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-			HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+traitData.icon+"\" alt=\""+traitData.name+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+traitData.icon+"\" alt=\""+traitData.name+"\"></a></div>";
 
 			HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\">"+traitData.name+"</a>"+(traitRank > 1 ? " [Rank "+traitRank+"]" : "")+"</header>";
 		
 			var amount = rV.traits[traitData.id];
-			HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+			HTML += "<em class=\"result "+(traitData.tip ? "tooltip" : "")+"\">"+NumberToFormattedNumber(amount,2)+(traitData.tip ? "<span class=\"tip-text\" style=\"width: 180px;margin-left:-90px;\">"+traitData.tip()+"</span>" : "")+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
 			HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
 
 			if(traitData.additionalText) HTML += "<br>"+traitData.additionalText();
@@ -2729,7 +2796,7 @@ function BuildReport(){
 		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 		
 		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-		HTML += "<a href=\"//www.wowhead.com/spell="+talentData.id+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+cV.talentInfo[ talentData.id ].icon+"\" alt=\""+talentData.name+"\"></a></div>";
+		HTML += "<a href=\"//www.wowhead.com/spell="+talentData.id+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.talentInfo[ talentData.id ].icon+"\" alt=\""+talentData.name+"\"></a></div>";
 
 		HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+talentData.id+"\" target=\"_blank\">"+talentData.name+"</a></header>";
 	
@@ -2757,7 +2824,7 @@ function BuildReport(){
 		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 		
 		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-		HTML += "<a href=\"//www.wowhead.com/spell="+obj.id+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+obj.icon+"\" alt=\""+obj.name+"\"></a></div>";
+		HTML += "<a href=\"//www.wowhead.com/spell="+obj.id+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+obj.icon+"\" alt=\""+obj.name+"\"></a></div>";
 
 		HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+obj.id+"\" target=\"_blank\">"+obj.name+"</a></header>";
 	
@@ -2780,7 +2847,7 @@ function BuildReport(){
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 			
 			HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-			HTML += "<a href=\"//www.wowhead.com/spell="+potionData.id+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+potionData.icon+"\" alt=\""+potionData.name+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/spell="+potionData.id+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+potionData.icon+"\" alt=\""+potionData.name+"\"></a></div>";
 	
 			HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+potionData.id+"\" target=\"_blank\">"+potionData.name+"</a></header>";
 		
@@ -2825,7 +2892,7 @@ function BuildReport(){
 		var spellID = procsData[i][0];
 		var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
 		var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
-		HTML += "<div class=\"row half\"><div class=\"col w40\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+"</a></div><div class=\"col w30\"><em class=\"tooltip\">"+NumberToFormattedNumber(procsData[i][1],0,2)+"<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+procsData[i][2].join("<br>")+"</span></em></div><div class=\"col w30\">"+(procsData[i][1]/rV.total*100).toFixed(2)+"%</div></div>";
+		HTML += "<div class=\"row half\"><div class=\"col w40\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+"</a></div><div class=\"col w30\"><em class=\"tooltip\">"+NumberToFormattedNumber(procsData[i][1],0,2)+"<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+procsData[i][2].join("<br>")+"</span></em></div><div class=\"col w30\">"+(procsData[i][1]/rV.total*100).toFixed(2)+"%</div></div>";
 	}
 	HTML += "</div></div></div>";
 	
@@ -2837,7 +2904,7 @@ function BuildReport(){
 		var spellID = obj.spellID;
 				
 		HTML += "<li class=\"item clearfix\"><div class=\"row full\"><div class=\"col w70p\">";
-		HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"//media.blizzard.com/wow/icons/56/"+cV.spellInfo[spellID].icon+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
+		HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[spellID].icon+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
 	
 		HTML += "<div class=\"col half\">";
 		HTML += "<header class=\"cd_header\"><a href=\"//www.wowhead.com/spell="+spellID+"\">"+cV.spellInfo[spellID].name+"</a> ("+MsToFormattedTime(obj.start - fightStart)+" -> "+MsToFormattedTime((obj.ended || fightEnd) - fightStart)+"):</header>";
@@ -2845,7 +2912,7 @@ function BuildReport(){
 		HTML += "<div class=\"col full div_more_1\">";
 		for (var j = 0, j_len = obj.spells.length; j < j_len; j++) {
 			var j_spellID = obj.spells[j].spell;
-			HTML += "<a href=\"//www.wowhead.com/spell="+j_spellID+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+cV.spellInfo[j_spellID].icon+"\" alt=\""+cV.spellInfo[j_spellID].name+"\"></a>";
+			HTML += "<a href=\"//www.wowhead.com/spell="+j_spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[j_spellID].icon+"\" alt=\""+cV.spellInfo[j_spellID].name+"\"></a>";
 			
 		}
 		HTML += "<br><a href=\"javascript:void(0)\" class=\"more_1\">more</a></div>";
@@ -2854,7 +2921,7 @@ function BuildReport(){
 		for (var j = 0, j_len = obj.spells.length; j < j_len; j++) {
 			var j_spellID = obj.spells[j].spell;
 			HTML += "<div class=\"row full\"><div class=\"cd_more_2_time\">"+(obj.spells[j].time / 1000).toFixed(3)+"</div><div class=\"cd_more_2_info\">";
-			HTML += "<a href=\"//www.wowhead.com/spell="+j_spellID+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+cV.spellInfo[j_spellID].icon+"\" alt=\""+cV.spellInfo[j_spellID].name+"\"> "+cV.spellInfo[j_spellID].name+"</a></div></div>";
+			HTML += "<a href=\"//www.wowhead.com/spell="+j_spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[j_spellID].icon+"\" alt=\""+cV.spellInfo[j_spellID].name+"\"> "+cV.spellInfo[j_spellID].name+"</a></div></div>";
 		}
 		HTML += "<br><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"#fight="+currFightData.id+"&type=healing&source="+currFightData.actor+"&start="+obj.start+"&end="+(obj.ended || fightEnd)+"\" target=\"_blank\">WCL link</a>";
 		HTML += "<br><a href=\"javascript:void(0)\" class=\"more_2\">even more</a></div>";
@@ -2867,7 +2934,7 @@ function BuildReport(){
 		for (var j = 0, j_len = obj.spells.length; j < j_len; j++) {
 			var j_spellID = obj.spells[j].spell;
 			HTML += "<div class=\"row full\"><div class=\"cd_more_3_time\">"+(obj.spells[j].time / 1000).toFixed(3)+"</div><div class=\"cd_more_3_info\">";
-			HTML += "<a href=\"//www.wowhead.com/spell="+j_spellID+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+cV.spellInfo[j_spellID].icon+"\" alt=\""+cV.spellInfo[j_spellID].name+"\"> "+cV.spellInfo[j_spellID].name+"</a></div></div>";
+			HTML += "<a href=\"//www.wowhead.com/spell="+j_spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[j_spellID].icon+"\" alt=\""+cV.spellInfo[j_spellID].name+"\"> "+cV.spellInfo[j_spellID].name+"</a></div></div>";
 		
 			var timeLimit = obj.spells[j+1] ? obj.spells[j+1].time : fightEnd;
 			for (var k = cooldownData_healingMore_pos, k_len = obj.heal.length; k < k_len; k++) {
@@ -2875,7 +2942,7 @@ function BuildReport(){
 				var healObj = obj.heal[k]
 				
 				HTML += "<div class=\"row full\"><div class=\"cd_more_3_time\">"+(healObj.time / 1000).toFixed(3)+"</div><div class=\"cd_more_3_info cd_more_3_info_heal\">";
-				HTML += "<a href=\"//www.wowhead.com/spell="+healObj.id+"\" target=\"_blank\"><img src=\"//media.blizzard.com/wow/icons/56/"+cV.spellInfo[healObj.id].icon+"\" alt=\""+cV.spellInfo[healObj.id].name+"\"> "+cV.spellInfo[healObj.id].name+"</a> x"+healObj.count;
+				HTML += "<a href=\"//www.wowhead.com/spell="+healObj.id+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[healObj.id].icon+"\" alt=\""+cV.spellInfo[healObj.id].name+"\"> "+cV.spellInfo[healObj.id].name+"</a> x"+healObj.count;
 				HTML += "</div><div class=\"cd_more_3_info cd_more_3_info_amount\">"+healObj.amount+"</div><div class=\"cd_more_3_info cd_more_3_info_over\">"+healObj.over+"</div></div>";				
 				
 				overHeal += healObj.over;
@@ -2902,7 +2969,7 @@ function BuildReport(){
 		var spellID = 98021;
 				
 		HTML += "<li class=\"item clearfix\"><div class=\"row full\"><div class=\"col w70p\">";
-		HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"//media.blizzard.com/wow/icons/56/"+cV.spellInfo[spellID].icon+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
+		HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[spellID].icon+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
 	
 		HTML += "<div class=\"col half\">";
 		HTML += "<header class=\"cd_header\"><a href=\"//www.wowhead.com/spell="+spellID+"\">"+cV.spellInfo[spellID].name+"</a> ("+MsToFormattedTime(obj.start - fightStart)+" -> "+MsToFormattedTime((obj.ended ? obj.ended : fightEnd) - fightStart)+"):</header>";
@@ -3049,7 +3116,6 @@ function PrepParse(fightID,actorID){
 		talentInfo: [],
 		spellInfo: [],
 	};
-	currHP = [];
 	healPerStat = {
 		int: {amount:0,total:0,avg:0,avgCount:0},
 		crit: {amount:0,total:0,avg:0,avgCount:0},
