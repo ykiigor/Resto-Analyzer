@@ -2641,7 +2641,7 @@ function BuildReport(){
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix statlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Stats</header>";
 	var allStatsList = [
 		["int","Int","From gear: "+cV.intellect_min],
-		["crit","Crit","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000"],
+		["crit","<em class=\"tooltip\">Crit<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Mana from resurgence are ignored now</span></em>","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000"],
 		["mastery","Mastery","From gear: "+(cV.mastery-3200)+"<br>Base value: 3200"],
 		["vers","Vers","From gear: "+cV.versatility],
 		["haste","<em class=\"tooltip\">Haste<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Cast time not counted here, only profit from ticks</span></em>","From gear: "+cV.haste],
