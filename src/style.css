@@ -82,12 +82,24 @@ div {
 	width: 50% !important;
 }
 
+.w5 {
+	width: 5% !important;
+}
+
+.w10 {
+	width: 10% !important;
+}
+
 .w13 {
 	width: 13.3% !important;
 }
 
 .w15 {
 	width: 15% !important;
+}
+
+.w20 {
+	width: 20% !important;
 }
 
 .w25 {
@@ -652,4 +664,36 @@ em.wipe {
 	background: hsla(0,0%,100%,.1);
 	border-top-color: rgba(0,0,0,.4);
 	border-bottom-color: rgba(0,0,0,.4);
+}
+
+.mastery_eff .row {
+	font-size: 14px;
+	margin-left: -10px;
+	margin-right: -10px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.mastery_eff .col {
+	padding: 7px;
+}
+
+.mastery_eff .row:hover {
+	background: rgba(100, 100, 100, 0.4);
+}
+
+.mastery_eff span img {
+	height: 16px;
+}
+
+.mastery_eff span {
+	font-size: 12px;
+}
+
+.performance-bar {
+	opacity: .9;
+	height: 1.2em;
+	min-width: 1px;
+	background-color: #fff;
+	margin-top: .1em;
 }

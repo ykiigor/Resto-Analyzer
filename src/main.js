@@ -1,3 +1,8 @@
+///
+///	item 134488 & recurgence
+///
+///
+
 var itemsStats = {
 	140803:{ilvl:875,int:1634},
 	140793:{ilvl:870,mastery:1055},
@@ -394,6 +399,7 @@ var statsBuffs = {
 		238501: 3892, //coen: Swarming Shadows
 		224347: 400,	//Flask of the Solemn Night
 		214128: 6008,	//Chrono Shard
+		190909: 1000, //Mark of the Claw
 	},
 	haste_mod: {
 		80353: 1.3,	//BL
@@ -1727,7 +1733,7 @@ var TRAITS = [
 			id: 1108,
 			spellID: 207288,
 			icon: "ability_shaman_watershield.jpg",
-			tip: function() { return "Reduced cast time: "+(rV.traits1108_CastTime/1000).toFixed(1)+"s<br>To vaule heal number used HPS*Reduced time" },
+			tip: function() { return "Reduced cast time: "+(rV.traits1108_CastTime/1000).toFixed(1)+"s<br>To value heal number used HPS*Reduced time" },
 		},
 	},	
 ];
@@ -2053,7 +2059,7 @@ var POTIONS = [
 			text: function(){
 				var amount = rV.potions[188017] / rV.manaUsage * rV.healFromMana;
 			
-				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188017],0,2)+"</em> ("+(rV.potions[188017]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+" ("+(amount/rV.total*100).toFixed(2)+"%)</em>";
+				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188017],0,2)+"</em> ("+(rV.potions[188017]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
 			},
 		},
 	},
@@ -2073,7 +2079,7 @@ var POTIONS = [
 			text: function(){
 				var amount = rV.potions[188030] / rV.manaUsage * rV.healFromMana;
 			
-				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188030],0,2)+"</em> ("+(rV.potions[188030]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+" ("+(amount/rV.total*100).toFixed(2)+"%)</em>";
+				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188030],0,2)+"</em> ("+(rV.potions[188030]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
 			},
 		},
 	},
@@ -2440,6 +2446,25 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					var currHealFromMasteryOh = (amount + (event.overheal || 0)) * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
 				
 					AddStatAmount('mastery',pV.currHealFromMastery,currHealFromMasteryOh,pV.masteryNow,amount,spellID,event.timestamp);
+					
+					if(targetHPbeforeHeal < 0.30) healPerStat.mastery.b30 += pV.currHealFromMastery; else
+					if(targetHPbeforeHeal < 0.40) healPerStat.mastery.b40 += pV.currHealFromMastery; else
+					if(targetHPbeforeHeal < 0.50) healPerStat.mastery.b50 += pV.currHealFromMastery; else
+					if(targetHPbeforeHeal < 0.60) healPerStat.mastery.b60 += pV.currHealFromMastery; else
+					if(targetHPbeforeHeal < 0.70) healPerStat.mastery.b70 += pV.currHealFromMastery; else
+					if(targetHPbeforeHeal < 0.80) healPerStat.mastery.b80 += pV.currHealFromMastery; else
+								      healPerStat.mastery.b100+= pV.currHealFromMastery;
+
+					if(!healPerStat.mastery.t[event.targetID]) healPerStat.mastery.t[event.targetID] = {
+						hp: 0,
+						amount: 0,
+						mamount: 0,
+						spells: {},
+					}
+					healPerStat.mastery.t[event.targetID].hp += (amount - pV.currHealFromMastery) * (1 - targetHPbeforeHeal);
+					healPerStat.mastery.t[event.targetID].amount += (amount - pV.currHealFromMastery);
+					healPerStat.mastery.t[event.targetID].mamount += pV.currHealFromMastery;
+					healPerStat.mastery.t[event.targetID].spells[spellID] = (healPerStat.mastery.t[event.targetID].spells[spellID] || 0) + pV.currHealFromMastery;
 				}			
 
 				if(spellScaleVers[spellID]){
@@ -3117,7 +3142,7 @@ function BuildReport(){
 	for (var j = 0, j_len = spellslistKeys.length; j < j_len; j++) {
 		var spellID = spellslistKeys[j];
 		var spellInfo = cV.spellInfo[spellID];
-		HTML += "<div class=\"row full\"><div class=\"line half\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+spellInfo['icon']+"\" alt=\""+spellInfo['name']+"\">"+spellInfo['name']+"</a></div><div class=\"line t-right w15\">"+NumberToFormattedNumber(healingData[spellID][0],1)+"</div><div class=\"line t-right t-grey w15\">"+NumberToFormattedNumber(healingData[spellID][1],1)+"</div></div>";
+		HTML += "<div class=\"row full\"><div class=\"line half\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+spellInfo['icon'].replace(/\-/,"")+"\" alt=\""+spellInfo['name']+"\">"+spellInfo['name']+"</a></div><div class=\"line t-right w15\">"+NumberToFormattedNumber(healingData[spellID][0],1)+"</div><div class=\"line t-right t-grey w15\">"+NumberToFormattedNumber(healingData[spellID][1],1)+"</div></div>";
 	}
 	HTML += "</div></div>";	
 	
@@ -3125,7 +3150,7 @@ function BuildReport(){
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix statlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Stats</header>";
 	var allStatsList = [
 		["int","Int","From gear: "+cV.intellect_min],
-		["crit","Crit","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000"],
+		["crit","Crit","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000<br>Avg number can be much higher due Floodwaters & Empowered Droplets traits and Tidal Waves buff"],
 		["mastery","Mastery","From gear: "+(cV.mastery-3200)+"<br>Base value: 3200"],
 		["vers","Vers","From gear: "+cV.versatility],
 		["haste","<em class=\"tooltip\">Haste<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Cast time not counted here, only profit from ticks</span></em>","From gear: "+cV.haste],
@@ -3147,10 +3172,19 @@ function BuildReport(){
 			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+preAmount.toFixed(3)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount).toFixed(3)+"</span></em>";
 			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+NumberToFormattedNumber(preTotal)+"<br>From resurgence: "+NumberToFormattedNumber(regurgenceAmount)+"</span></em>";			
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+(preAmount / fightLen * 1000).toFixed(2)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount / fightLen * 1000).toFixed(2)+"</span></em>";
-		}
-		if(statData[0] == "int") {
+ 		} else if(statData[0] == "int") {
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000 * 1.05).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">5% armor bonus included</span></em>";
+		} else if(statData[0] == "mastery") {
+			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Based on health %:<br>";
+			totalText += "100-80: "+NumberToFormattedNumber(healPerStat.mastery.b100,0,1)+"<br>";
+			totalText += "80-70: "+NumberToFormattedNumber(healPerStat.mastery.b80,0,1)+"<br>";
+			totalText += "70-60: "+NumberToFormattedNumber(healPerStat.mastery.b70,0,1)+"<br>";
+			totalText += "60-50: "+NumberToFormattedNumber(healPerStat.mastery.b60,0,1)+"<br>";
+			totalText += "50-40: "+NumberToFormattedNumber(healPerStat.mastery.b50,0,1)+"<br>";
+			totalText += "40-30: "+NumberToFormattedNumber(healPerStat.mastery.b40,0,1)+"<br>";
+			totalText += "30-0: "+NumberToFormattedNumber(healPerStat.mastery.b30,0,1)+"</span></em>";
 		}
+		
 		var subSpellsList = "";
 		if(healPerStat[ statData[0] ].spells){
 			subSpellsList = " <em class=\"tooltip\">[?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">";
@@ -3166,13 +3200,14 @@ function BuildReport(){
 			subSpellsList += "</span></em>"
 		};
 		
-		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+amountText+subSpellsList+"</div><div class=\"col size\">"+weightText+"</div><div class=\"col size\">"+totalText+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount).format()+"<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+statData[2]+"</span></em></div></div>";
+		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+amountText+subSpellsList+"</div><div class=\"col size\">"+weightText+"</div><div class=\"col size\">"+totalText+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount).format()+"<span class=\"tip-text\" style=\"width: "+(statData[0] == "crit" ? 300 : 120)+"px;margin-left:-"+(statData[0] == "crit" ? 150 : 60)+"px;\">"+statData[2]+"</span></em></div></div>";
 	}
-	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 8800).format()+"<br>Base manapull: "+(1100000).format()+"</span></em></div></div>";
+	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 8800).format()+"<br>Base manapull: "+(1100000).format()+"</span></em></div></div>";
 	HTML += "</div></div>";	
 
 	/// Items predictions
-	HTML += "<div class=\"col-half\"><div class=\"box clearfix predictionlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Items predictions</header>";
+	HTML += "<div class=\"col-half\"><div class=\"box clearfix predictionlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Items predictions ";
+	HTML += "<sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only benefit from \"spell\" part of item is counted here</span></sup></header>";
 	for (var i = 0, len = ITEMS.length; i < len; i++) {
 		if(ITEMS[i].obj.prediction && (!ITEMS[i].obj.predictionСondition || ITEMS[i].obj.predictionСondition()) && (ITEMS[i].obj.type!="item" || (!ITEMS[i].obj.predictionСondition && !cV.gearInfo[ITEMS[i].obj.id]))){
 			var itemData = ITEMS[i].obj;
@@ -3248,7 +3283,7 @@ function BuildReport(){
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 			
 			HTML += "<div class=\"row w33\" id=\"gear-"+itemID+"\"><div class=\"col w70p\">";
-			HTML += "<a href=\"//www.wowhead.com/item="+itemID+(gearData ? (gearData.bonusIDs ? "&bonus="+gearData.bonusIDs.join(":") : "") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+gearData.icon+"\" alt=\""+gearData.icon+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/item="+itemID+(gearData ? (gearData.bonusIDs ? "&bonus="+gearData.bonusIDs.join(":") : "") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+gearData.icon.replace(/\-/,"")+"\" alt=\""+gearData.icon+"\"></a></div>";
 
 			HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[gearData.quality]+";\" id=\"gear-"+itemID+"-name\" data-ilvl=\""+gearData.itemLevel+"\">"+gearData.itemLevel+"</header>";
 		
@@ -3370,7 +3405,7 @@ function BuildReport(){
 		
 			if(!potionData.text){
 				var amount = rV.potions[potionData.id]
-				HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+				HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
 				HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
 			} else {
 				HTML += potionData.text();
@@ -3412,6 +3447,67 @@ function BuildReport(){
 		HTML += "<div class=\"row half\"><div class=\"col w40\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+"</a></div><div class=\"col w30\"><em class=\"tooltip\">"+NumberToFormattedNumber(procsData[i][1],0,2)+"<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+procsData[i][2].join("<br>")+"</span></em></div><div class=\"col w30\">"+(procsData[i][1]/rV.total*100).toFixed(2)+"%</div></div>";
 	}
 	HTML += "</div></div></div>";
+	
+	
+	/// Mastery
+	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix mastery_eff\"><header class=\"box-header\">MASTERY</header>";
+	counter = 0;
+	var masteryUnitsData = [];
+	var masteryAVGMax;
+	var masteryAmountTotal = 0;
+	var masteryAmountTotal2 = 0;
+	var masteryAmountMax;
+	var masteryTmp1 = 0;
+	Object.keys(healPerStat.mastery.t).forEach(function (unitID) {
+		if(healPerStat.mastery.t[unitID].amount > 0 && actorsData[unitID] && actorsData[unitID].class && classes[ actorsData[unitID].class ]){
+			healPerStat.mastery.t[unitID].avg = healPerStat.mastery.t[unitID].hp / healPerStat.mastery.t[unitID].amount;
+			if(!masteryAVGMax || masteryAVGMax < healPerStat.mastery.t[unitID].avg)	masteryAVGMax = healPerStat.mastery.t[unitID].avg;
+			masteryUnitsData.push(unitID);
+			masteryAmountTotal2 += healPerStat.mastery.t[unitID].amount;
+			masteryAmountTotal += healPerStat.mastery.t[unitID].mamount;
+			if(!masteryAmountMax || masteryAmountMax < healPerStat.mastery.t[unitID].mamount) masteryAmountMax = healPerStat.mastery.t[unitID].mamount;
+		}
+	});
+	HTML += "<div class=\"row full\"><div class=\"col w20\"></div><div class=\"col w5\"></div><div class=\"col w30\">Mastery effectiveness</div><div class=\"col w5\"></div><div class=\"col w30\"><em class=\"tooltip\">Healing done to target<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only healing coming from mastery used here</span></em></div></div>";
+	masteryUnitsData.sort(function(a,b){ return healPerStat.mastery.t[a].avg > healPerStat.mastery.t[b].avg ? - 1 : 1 });
+	for (var i = 0, len = masteryUnitsData.length; i < len; i++) {
+		var unitID = masteryUnitsData[i];
+		var unitData = actorsData[unitID];
+		var avg = 1 - healPerStat.mastery.t[unitID].avg;
+		HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w15\">"+unitData.name+"</div>";
+		
+		//HTML += "<div class=\"col w10 t-right\"><em class=\"tooltip\">"+((1 - avg)*100).toFixed(2)+"%<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Mastery effectiveness:"+((1 - avg)*100).toFixed(2)+"%<br>Target avg health:"+(avg*100).toFixed(2)+"%<br>Maximum mastery effectiveness:"+(healPerStat.mastery.t[unitID].max * 100).toFixed(2)+"%</span></em></div>";
+		HTML += "<div class=\"col w10 t-right\"><em class=\"tooltip\">"+((1 - avg)*100).toFixed(2)+"%<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Mastery effectiveness:"+((1 - avg)*100).toFixed(2)+"%<br>Target avg health:"+(avg*100).toFixed(2)+"%</span></em></div>";
+		
+		var width = healPerStat.mastery.t[unitID].avg / masteryAVGMax;
+		HTML += "<div class=\"col w25 clearfix\"><div class=\"performance-bar "+actorsData[unitID].class+"-bg\" style=\"width: "+(width * 100).toFixed(2)+"%;\"></div></div>";
+		var amount = healPerStat.mastery.t[unitID].mamount / masteryAmountTotal;
+		HTML += "<div class=\"col w10 t-right\">"+(amount*100).toFixed(2)+"%</div>";
+		var amountWidth = healPerStat.mastery.t[unitID].mamount / masteryAmountMax;
+		HTML += "<div class=\"col w25 clearfix\"><div class=\"performance-bar "+actorsData[unitID].class+"-bg\" style=\"width: "+(amountWidth * 100).toFixed(2)+"%;\"></div></div>";
+		
+		var spells = Object.keys(healPerStat.mastery.t[unitID].spells)
+		spells.sort(function(a,b){ return healPerStat.mastery.t[unitID].spells[a] > healPerStat.mastery.t[unitID].spells[b] ? - 1 : 1 });
+		var subSpellsList = "";
+		for (var k = 0, k_len = spells.length; k < k_len; k++) {
+			var spellID = spells[k]
+			var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
+			var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
+			subSpellsList += "<img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+" - "+NumberToFormattedNumber(healPerStat.mastery.t[unitID].spells[spellID],0,2)+"<br>";
+
+		}
+		
+		//masteryTmp1 += (1 - avg) * amount;
+		masteryTmp1 += (1 - avg) * (healPerStat.mastery.t[unitID].amount / masteryAmountTotal2);
+		
+		
+		HTML += "<div class=\"col w10\"><em class=\"tooltip\">"+NumberToFormattedNumber(healPerStat.mastery.t[unitID].mamount,0,2)+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">"+subSpellsList+"</span></em></div>";
+		HTML += "<div class=\"list-top-line\"></div>";
+		HTML += "</div>";
+	}
+	HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">Averege mastery effectiveness</div><div class=\"col w5 t-right\">"+(masteryTmp1*100).toFixed(2)+"%</div><div class=\"col w25 clearfix\"><div class=\"performance-bar\" style=\"width: "+(Math.min(masteryTmp1/masteryAVGMax,1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	HTML += "</div></div></div>";
+
 	
 	
 	/// COOLDOWNS
@@ -3554,14 +3650,17 @@ function BuildFightsList(){
 	var HTML = "";
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><ul class=\"list fightslist\">";
 	
+	var WCLFightCounter = {};
 	Object.keys(fightsData).forEach(function (fightID) {
 		var obj = fightsData[fightID];
 		if(obj.actors && obj.boss && diffIdToName[obj.difficulty]){
+			WCLFightCounter[obj.boss] = WCLFightCounter[obj.boss] || {}
+			WCLFightCounter[obj.boss][obj.difficulty] = (WCLFightCounter[obj.boss][obj.difficulty] || 0) + 1
 			for (var j = 0, j_len = obj.actors.length; j < j_len; j++) {
 				if(actorsData[ obj.actors[j] ].class == "Shaman"){
-					HTML += "<a href=\"javascript:void(0)\" data-fight=\""+fightID+"\" data-actor=\""+obj.actors[j]+"\" class=\"fightlist-btn\">";
+					HTML += "<a href=\"?report="+reportFightCode+"&fight="+fightID+"&actor="+obj.actors[j]+"\" data-fight=\""+fightID+"\" data-actor=\""+obj.actors[j]+"\" class=\"fightlist-btn\">";
 					HTML += "<li class=\"item clearfix\" style=\"padding: 5px 15px;\"><div class=\"row full\"><div class=\"col\" style=\"width:30%\">";
-					HTML += diffIdToName[obj.difficulty]+" "+obj.name+" <em class=\""+(obj.kill ? "kill" : "wipe")+"\">"+(obj.kill ? "kill" : "wipe")+"</em></div>";
+					HTML += diffIdToName[obj.difficulty]+" "+obj.name+" "+(!obj.kill ? "#"+WCLFightCounter[obj.boss][obj.difficulty] : "")+" <em class=\""+(obj.kill ? "kill" : "wipe")+"\">"+(obj.kill ? "kill" : "wipe")+"</em></div>";
 					HTML += "<div class=\"col\" style=\"width:5%\">"+MsToFormattedTime(obj.end_time - obj.start_time)+"</div><div class=\"col\" style=\"width:20%\">"+actorsData[ obj.actors[j] ].name+"</div></div>";
 					HTML += "</li></a>";
 				}
@@ -3574,6 +3673,7 @@ function BuildFightsList(){
 	$("#main").html(HTML);
 	
 	$(".fightlist-btn").click(function(e){
+		e.preventDefault();
 		var fightID = $(this).attr("data-fight");
 		var obj = fightsData[fightID];
 		if(obj){
@@ -3584,11 +3684,11 @@ function BuildFightsList(){
 	});
 	
 	var HTML = "";
-	HTML += "<li class=\"breadcrumb-item\"><a href=\"javascript:void(0)\" id=\"nav-btn-main\">Resto Analyzer</a></li>";
+	HTML += "<li class=\"breadcrumb-item\"><a href=\"?\" id=\"nav-btn-main\">Resto Analyzer</a></li>";
 	HTML += "<li class=\"breadcrumb-item\"><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"\" target=\"_blank\">Report</a></li>";
 	$("#navbar-header").html(HTML);
 	
-	$("#nav-btn-main").click(function(){ BuildMainPage(); });
+	$("#nav-btn-main").click(function(e){ e.preventDefault(); BuildMainPage(); });
 	
 	$("#navbar-progress").width("0%").css('opacity', '0');
 	
@@ -3639,7 +3739,7 @@ function PrepParse(fightID,actorID){
 		int: {amount:0,total:0,avg:0,avgCount:0,all:0},
 		crit: {amount:0,total:0,avg:0,avgCount:0,all:0},
 		haste: {amount:0,total:0,avg:0,avgCount:0,all:0},
-		mastery: {amount:0,total:0,avg:0,avgCount:0,all:0},
+		mastery: {amount:0,total:0,avg:0,avgCount:0,all:0,b100:0,b80:0,b70:0,b60:0,b50:0,b40:0,b30:0,t:{}},
 		vers: {amount:0,total:0,avg:0,avgCount:0,all:0},
 	};
 	cooldownsTracking = [];
@@ -3652,14 +3752,14 @@ function PrepParse(fightID,actorID){
 	}
 	
 	var HTML = "";
-	HTML += "<li class=\"breadcrumb-item\"><a href=\"javascript:void(0)\" id=\"nav-btn-main\">Resto Analyzer</a></li>";
-	HTML += "<li class=\"breadcrumb-item\"><a href=\"javascript:void(0)\" id=\"nav-btn-fights\">"+currFightData.report_name+"</a></li>";
+	HTML += "<li class=\"breadcrumb-item\"><a href=\"?\" id=\"nav-btn-main\">Resto Analyzer</a></li>";
+	HTML += "<li class=\"breadcrumb-item\"><a href=\"?report="+reportFightCode+"\" id=\"nav-btn-fights\">"+currFightData.report_name+"</a></li>";
 	HTML += "<li class=\"breadcrumb-item\"><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"#fight="+currFightData.id+"&type=summary\" target=\"_blank\">"+currFightData.name+" ("+MsToFormattedTime(currFightData.end_time - currFightData.start_time)+")</a></li>";
 	HTML += "<li class=\"breadcrumb-item\"><a href=\"https://www.warcraftlogs.com/reports/"+reportFightCode+"#fight="+currFightData.id+"&type=healing&source="+currFightData.actor+"\" target=\"_blank\">"+currFightData.actorName+"</a></li>";
 	$("#navbar-header").html(HTML);
 
-	$("#nav-btn-main").click(function(){ BuildMainPage(); });
-	$("#nav-btn-fights").click(function(){ BuildFightsList(); });
+	$("#nav-btn-main").click(function(e){ e.preventDefault(); BuildMainPage(); });
+	$("#nav-btn-fights").click(function(e){ e.preventDefault(); BuildFightsList(); });
 	
 	$("#main").html("");
 
@@ -3690,10 +3790,10 @@ function BuildMainPage(){
 	});
 	
 	var HTML = "";
-	HTML += "<li class=\"breadcrumb-item\"><a href=\"javascript:void(0)\" id=\"nav-btn-main\">Resto Analyzer</a></li>";
+	HTML += "<li class=\"breadcrumb-item\"><a href=\"?\" id=\"nav-btn-main\">Resto Analyzer</a></li>";
 	$("#navbar-header").html(HTML);
 	
-	$("#nav-btn-main").click(function(){ BuildMainPage(); });
+	$("#nav-btn-main").click(function(e){ e.preventDefault(); BuildMainPage(); });
 	
 	window.history.pushState('main', 'Main', '?');
 }
