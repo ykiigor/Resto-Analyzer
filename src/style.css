@@ -335,6 +335,10 @@ img {
 	border-radius: 50%;
 }
 
+.statlist span img {
+	height: 16px;
+}
+
 .procs a img {
 	height: 23px;
 	margin-right: 4px;
