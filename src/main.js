@@ -3505,7 +3505,7 @@ function BuildReport(){
 		HTML += "<div class=\"list-top-line\"></div>";
 		HTML += "</div>";
 	}
-	HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">Averege mastery effectiveness</div><div class=\"col w5 t-right\">"+(masteryTmp1*100).toFixed(2)+"%</div><div class=\"col w25 clearfix\"><div class=\"performance-bar\" style=\"width: "+(Math.min(masteryTmp1/masteryAVGMax,1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">Average mastery effectiveness</div><div class=\"col w5 t-right\">"+(masteryTmp1*100).toFixed(2)+"%</div><div class=\"col w25 clearfix\"><div class=\"performance-bar\" style=\"width: "+(Math.min(masteryTmp1/masteryAVGMax,1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
 	HTML += "</div></div></div>";
 
 	
