@@ -300,7 +300,7 @@ var spellScaleVers = {
 
 
 var delayedSpells = [
-	["CBT", 157503, 0.25, 20000, {
+	["buffCBT", 157503, {
 	157503: true,	//cbt
 	52042: true,	//hst
 	209069: true,	//tidal
@@ -311,7 +311,7 @@ var delayedSpells = [
 	235967: true,	//velens
 	201633: true,	//est
 }],	//cbt
-	["AG", 114911, 0.6, 2000, {
+	["buffAG", 114911, {
 	114911: true,	//ag
 	52042: true,	//hst
 	209069: true,	//tidal
@@ -322,7 +322,7 @@ var delayedSpells = [
 	235967: true,	//velens
 	201633: true,	//est
 }],	//ag
-	["ASC", 114083, 1, 2000, {
+	["buffASC", 114083, {
 	114083: true,	//asc
 	114911: true,	//ag
 	157503: true,	//cbt
@@ -344,7 +344,7 @@ var cooldownsTrackingIDs = {
 	29166: true,
 };
 var cooldownsTrackingIDsbyCast = {
-	157153: 16000,
+	157153: 15500,
 };
 
 var ignoredSpellsForCDTracking = {
@@ -360,9 +360,9 @@ var healingFromMana = {
 	77472: 1,	//hw
 	61295: 1,	//riptide
 	114911: 0.75,	//ag
-	52042: 1,	//hst
+	//52042: 1,	//hst
+	//208899: 1,	//qd
 	73685: 1,	//ul
-	208899: 1,	//qd
 	235967: 0.75,	//velens
 	114083: 0.75,	//asc
 	8004: 1,	//surge
@@ -767,18 +767,23 @@ var ITEMS = [
 	{	//2t20
 		init: function() {
 			rV.t20_2p_PredictionAmount = 0;
+			rV.t20_2p_Amount = 0;
+			rV.t20_2p_Count = 0;
 			pV.t20_2p_gearCount = 0;
 			pV.t20_2p_last = 0;
 			pV.t20_2p_curr = 0;
 			pV.t20_2p_curr_targets = [];
+			pV.t20_2p_pred_targets = [];
+			pV.t20_2p_buffLast = 0;
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
 				if(spellID == 61295){
+					//prediction
 					if(!event.tick){
 						if(event.timestamp > pV.t20_2p_last){
 							pV.t20_2p_last = event.timestamp + 60000;
-							pV.t20_2p_curr = 2;
+							pV.t20_2p_curr = 3;	//~3 ppm on testing
 						}
 						if(pV.t20_2p_curr > 0){
 							if(event.hitType == 1){
@@ -786,14 +791,31 @@ var ITEMS = [
 								
 								pV.t20_4p_PredictionNext = event.timestamp + 15000;
 							}
-							pV.t20_2p_curr_targets[event.targetID] = event.timestamp + 18000;
+							pV.t20_2p_pred_targets[event.targetID] = event.timestamp + 18000;
 							pV.t20_2p_curr--;
 						}
-					} else if(pV.t20_2p_curr_targets[event.targetID] && pV.t20_2p_curr_targets[event.targetID] <= event.timestamp && event.hitType == 1){
+					} else if(pV.t20_2p_pred_targets[event.targetID] && pV.t20_2p_pred_targets[event.targetID] <= event.timestamp && event.hitType == 1){
 						rV.t20_2p_PredictionAmount += amount;
-					}	
+					}
+					
+
+					//real
+					if(!event.tick){
+						if(event.timestamp <= pV.t20_2p_buffLast){
+							pV.t20_2p_curr_targets[event.targetID] = event.timestamp + 18000;
+							rV.t20_2p_Count ++;
+						} else {
+							pV.t20_2p_curr_targets[event.targetID] = 0;
+						}
+					}
+					if(pV.t20_2p_curr_targets[event.targetID] && pV.t20_2p_curr_targets[event.targetID] <= event.timestamp && event.hitType == 2){
+						rV.t20_2p_Amount += pV.critAmount * Math.max(1 - (pV.critNow / 40000),0);
+					}
 				}
 			},
+			"removebuff", function(event,spellID){
+				if(spellID == 246729) pV.t20_2p_buffLast = event.timestamp + 500;
+			},			
 			"gear", function(itemData,itemID){
 				if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t20_2p_gearCount++;
 			}
@@ -805,13 +827,20 @@ var ITEMS = [
 			id: 242287,
 			prediction: "t20_2p_PredictionAmount",
 			predictionСondition: function() { return pV.t20_2p_gearCount < 2 },
+			gear: "t20_2p_Amount",
+			gearFunc: function() { return pV.t20_4p_gearCount >= 2 },
+			gearAdditionalText: function() { return rV.t20_2p_Count+" times" },
+			icon: "spell_nature_riptide.jpg",
 		},
 	},
 	{	//4t20
 		init: function() {
+			rV.t20_4p_Amount = 0;
+			rV.t20_4p_Count = 0;
 			rV.t20_4p_PredictionAmount = 0;
 			pV.t20_4p_gearCount = 0;
 			pV.t20_4p_PredictionNext = 0;
+			pV.t20_4p_buffLast = 0;
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
@@ -819,6 +848,10 @@ var ITEMS = [
 					pV.t20_4p_PredictionNext = event.timestamp + 15000;
 				} else if (spellID == 73921 && pV.t20_4p_PredictionEnabled){
 					rV.t20_4p_PredictionAmount += amount * 0.5;
+				}
+				
+				if(spellID == 73921 && pV.t20_4p_Active){
+					rV.t20_4p_Amount += amount * (1 - (1 / 1.5))
 				}
 			},
 			"cast", function(event,spellID){
@@ -828,7 +861,16 @@ var ITEMS = [
 						pV.t20_4p_PredictionEnabled = true;
 					}
 					pV.t20_4p_PredictionNext = 0;
+					
+					pV.t20_4p_Active = false;
+					if(event.timestamp <= pV.t20_4p_buffLast){
+						pV.t20_4p_Active = true;
+						rV.t20_4p_Count ++;
+					}
 				}
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 246771) pV.t20_4p_buffLast = event.timestamp + 500;
 			},
 			"gear", function(itemData,itemID){
 				if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t20_4p_gearCount++;
@@ -841,6 +883,10 @@ var ITEMS = [
 			id: 242288,
 			prediction: "t20_4p_PredictionAmount",
 			predictionСondition: function() { return pV.t20_2p_gearCount < 4 },
+			gear: "t20_4p_Amount",
+			gearFunc: function() { return pV.t20_4p_gearCount >= 4 },
+			gearAdditionalText: function() { return rV.t20_4p_Count+" times" },
+			icon: "spell_nature_giftofthewaterspirit.jpg",
 		},
 	},
 	{	//paradox
@@ -854,6 +900,7 @@ var ITEMS = [
 					rV.manaGain += 19800;
 					rV.paradoxAmount += event.resourceChange + 19800;
 					rV.manaUsage -= 19800;
+					if(rV.manaUsageBySpell[77472]) rV.manaUsageBySpell[77472] -= 19800;
 					
 					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
 						if(cooldownsTracking[j].opened){
@@ -1014,6 +1061,7 @@ var ITEMS = [
 					rV.nobundosCount++;
 					rV.manaGain += 22000;
 					rV.manaUsage -= 22000;
+					if(rV.manaUsageBySpell[8004]) rV.manaUsageBySpell[8004] -= 22000;
 				}			
 			},
 		],
@@ -1167,6 +1215,7 @@ var ITEMS = [
 					rV.darkmoonAmountMana += pV.darkmoonManaNow;
 					rV.manaGain += pV.darkmoonManaNow;
 					rV.manaUsage -= pV.darkmoonManaNow;
+					rV.manaUsageBySpell[pV.manaUsageLastSpell] -= pV.darkmoonManaNow;
 				}
 			},
 			"applybuff", function(event,spellID){
@@ -2196,12 +2245,12 @@ var OTHER = [
 			for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
 				var spellData = delayedSpells[j];
 				if(healingData[ spellData[1] ]) {
-					pV[ "buff"+spellData[0] ].itself = healingData[ spellData[1] ][0];
+					pV[ spellData[0] ].itself = healingData[ spellData[1] ][0];
 				}
 			}
 			for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
 				var spellData = delayedSpells[j];
-				var CDdata = pV[ "buff"+spellData[0] ];
+				var CDdata = pV[ spellData[0] ];
 				var itself = 0;
 				if(healingData[ spellData[1] ]) {
 					itself = healingData[ spellData[1] ][0];
@@ -2213,8 +2262,8 @@ var OTHER = [
 						var stat = statsList[k];				
 						healPerStat[stat].amount += CDdata[stat].amount * p;
 						healPerStat[stat].total += CDdata[stat].total * p;
-						//healPerStat[stat].avg += CDdata[stat].avg;
-						//healPerStat[stat].avgCount += CDdata[stat].avgCount;
+						healPerStat[stat].avg += CDdata[stat].avg * p;
+						healPerStat[stat].avgCount += CDdata[stat].avgCount * p;
 						healPerStat[stat].all += CDdata[stat].all * p;
 						
 						if(!healPerStat[stat].spells) healPerStat[stat].spells = {};
@@ -2233,8 +2282,8 @@ var OTHER = [
 								var stat = statsList[l];			
 								healPerStat[stat].amount += nCDdata[stat].amount * p * p2;
 								healPerStat[stat].total += nCDdata[stat].total * p * p2;
-								//healPerStat[stat].avg += nCDdata[stat].avg;
-								//healPerStat[stat].avgCount += nCDdata[stat].avgCount;
+								healPerStat[stat].avg += nCDdata[stat].avg * p * p2;
+								healPerStat[stat].avgCount += nCDdata[stat].avgCount * p * p2;
 								healPerStat[stat].all += nCDdata[stat].all * p * p2;
 								
 								if(!healPerStat[stat].spells) healPerStat[stat].spells = {};
@@ -2313,8 +2362,9 @@ var multiplicateCDs = [
 function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timestamp){
 	healPerStat[stat].amount += amount / statNow;
 	healPerStat[stat].total += amount;
-	healPerStat[stat].avg += statNow;
-	healPerStat[stat].avgCount ++;
+	var healWOstat = stat == "int" ? amount : (totalHeal - amount);
+	healPerStat[stat].avg += statNow * healWOstat;
+	healPerStat[stat].avgCount += healWOstat;
 	healPerStat[stat].all += totalHeal;
 	if(!healPerStat[stat].spells) healPerStat[stat].spells = {};
 	healPerStat[stat].spells[spellID] = (healPerStat[stat].spells[spellID] || 0) + amount / statNow;	
@@ -2327,12 +2377,12 @@ function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timest
 	});
 	
 	for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
-		var CDdata = pV[ "buff"+delayedSpells[j][0] ];
-		if(!delayedSpells[j][4][spellID] && timestamp <= CDdata.time){
+		var CDdata = pV[ delayedSpells[j][0] ];
+		if(!delayedSpells[j][2][spellID] && timestamp <= CDdata.time){
 			CDdata[stat].amount += amountWithOh / statNow;
 			CDdata[stat].total += amountWithOh;
-			//CDdata[stat].avg += statNow;
-			//CDdata[stat].avgCount ++;
+			CDdata[stat].avg += statNow * amountWithOh;
+			CDdata[stat].avgCount += amountWithOh;
 			CDdata[stat].all += totalHeal;			
 
 			if(!CDdata[stat].spells) CDdata[stat].spells = {};
@@ -2352,8 +2402,8 @@ function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timest
 				
 					CDdata[stat].amount += amountWithOh / statNow;
 					CDdata[stat].total += amountWithOh;
-					//CDdata[stat].avg += statNow;
-					//CDdata[stat].avgCount ++;
+					CDdata[stat].avg += statNow * amountWithOh;
+					CDdata[stat].avgCount += amountWithOh;
 					CDdata[stat].all += totalHeal;			
 					
 					Object.keys(statsBuffs[stat]).forEach(function (buffSpellID) {
@@ -2395,6 +2445,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					healingData[spellID] = [0,0];
 				}
 				var amount = event.amount;
+				var overheal = event.overheal || 0;
  				if(event.absorbed) amount += event.absorbed;
  				if(event.absorb) amount += event.absorb;
 				healingData[spellID][0] += amount;
@@ -2405,13 +2456,13 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 				
 				if(spellScaleInt[spellID]){
-					AddStatAmount('int',amount,amount+(event.overheal || 0),cV.intellect,amount,spellID,event.timestamp);
+					AddStatAmount('int',amount,amount+overheal,cV.intellect,amount,spellID,event.timestamp);
 				}
 				
 				if(event.hitType == 2){
 					pV.critNow = cV.critSpell;
 					pV.critAmount = amount / (cV.gearInfo[142170] ? (2.05 / 1.05) : 2);
-					var critAmountOh = (amount + (event.overheal || 0)) / (cV.gearInfo[142170] ? (2.05 / 1.05) : 2);
+					var critAmountOh = (amount + overheal) / (cV.gearInfo[142170] ? (2.05 / 1.05) : 2);
 					
 					Object.keys(statsBuffs.crit).forEach(function (buffSpellID) {
 						if(buffStatus[buffSpellID]) pV.critNow += statsBuffs.crit[buffSpellID];
@@ -2443,7 +2494,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					});
 
 					pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
-					var currHealFromMasteryOh = (amount + (event.overheal || 0)) * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
+					var currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
 				
 					AddStatAmount('mastery',pV.currHealFromMastery,currHealFromMasteryOh,pV.masteryNow,amount,spellID,event.timestamp);
 					
@@ -2474,7 +2525,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					});
 					
 					pV.currHealFromVers = amount * ( 1 - (1 / ((pV.versNow / 475) / 100 + 1)) );
-					var currHealFromVersOh = (amount + (event.overheal || 0)) * ( 1 - (1 / ((pV.versNow / 475) / 100 + 1)) );
+					var currHealFromVersOh = (amount + overheal) * ( 1 - (1 / ((pV.versNow / 475) / 100 + 1)) );
 					
 					AddStatAmount('vers',pV.currHealFromVers,currHealFromVersOh,pV.versNow,amount,spellID,event.timestamp);
 				}
@@ -2496,7 +2547,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					});
 					
 					pV.currHealFromHaste = (1 - (1 / hasteMod)) * amount;
-					var currHealFromHasteOh = (1 - (1 / hasteMod)) * (amount + (event.overheal || 0));
+					var currHealFromHasteOh = (1 - (1 / hasteMod)) * (amount + overheal);
 					
 					pV.hasteNow = (hasteMod - 1) * 100 * 375;
 					
@@ -2511,10 +2562,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 				
 				for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
-					var CDdata = pV[ "buff"+delayedSpells[j][0] ];
-					if(CDdata && !delayedSpells[j][4][spellID] && event.timestamp <= CDdata.time){
-						CDdata.feed += (amount+(event.overheal || 0));
-						CDdata.spellsfeed[spellID] = (CDdata.spellsfeed[spellID] || 0) + (amount+(event.overheal || 0));
+					var CDdata = pV[ delayedSpells[j][0] ];
+					if(CDdata && !delayedSpells[j][2][spellID] && event.timestamp <= CDdata.time){
+						CDdata.feed += (amount+overheal);
+						CDdata.spellsfeed[spellID] = (CDdata.spellsfeed[spellID] || 0) + (amount+overheal);
 					}
 				}
 				
@@ -2696,6 +2747,9 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				
 				if(spellManaCost[spellID] && !pV.innervate){
 					rV.manaUsage += spellManaCost[spellID];
+					
+					rV.manaUsageBySpell[spellID] = (rV.manaUsageBySpell[spellID] || 0) + spellManaCost[spellID];
+					pV.manaUsageLastSpell = spellID;
 	
 					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
 						if(cooldownsTracking[j].opened){
@@ -2862,10 +2916,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 			}			
 		}
 		
-		} catch(err) {	
-			error_msg("Error: "+err);
-			throw new Error(err);
-		}
+		} catch(err) { error_msg("Error: "+err); throw new Error(err); }
 		
 		if(!data.nextPageTimestamp) {
 			$("#navbar-progress").width("100%").css('opacity', '0');
@@ -3191,7 +3242,7 @@ function BuildReport(){
 			var spellsKeys = Object.keys(healPerStat[ statData[0] ].spells);
 			spellsKeys.sort(function(a,b){ return healPerStat[ statData[0] ].spells[ a ] > healPerStat[ statData[0] ].spells[ b ] ? -1 : 1 });
 			for (var k = 0, k_len = spellsKeys.length; k < k_len; k++) {
-				var spellID = spellsKeys[k]
+				var spellID = spellsKeys[k];
 				var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
 				var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
 				subSpellsList += "<img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+" - "+healPerStat[ statData[0] ].spells[spellID].toFixed(1)+"<br>";
@@ -3202,7 +3253,18 @@ function BuildReport(){
 		
 		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+amountText+subSpellsList+"</div><div class=\"col size\">"+weightText+"</div><div class=\"col size\">"+totalText+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount).format()+"<span class=\"tip-text\" style=\"width: "+(statData[0] == "crit" ? 300 : 120)+"px;margin-left:-"+(statData[0] == "crit" ? 150 : 60)+"px;\">"+statData[2]+"</span></em></div></div>";
 	}
-	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 8800).format()+"<br>Base manapull: "+(1100000).format()+"</span></em></div></div>";
+	
+	
+	var manaSpellsText = "<br>Mana used by spells:";
+	var manaSpellsKeys = Object.keys(rV.manaUsageBySpell);
+	manaSpellsKeys.sort(function(a,b){ return rV.manaUsageBySpell[a] > rV.manaUsageBySpell[b] ? -1 : 1 });
+	for (var k = 0, k_len = manaSpellsKeys.length; k < k_len; k++) {
+		var spellID = manaSpellsKeys[k];
+		var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
+		var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
+		manaSpellsText += "<br><img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+" - "+NumberToFormattedNumber(rV.manaUsageBySpell[spellID],0,2);	
+	}
+	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 8800).format()+"<br>Base manapull: "+(1100000).format()+manaSpellsText+"</span></em></div></div>";
 	HTML += "</div></div>";	
 
 	/// Items predictions
@@ -3727,6 +3789,7 @@ function PrepParse(fightID,actorID){
 		},
 		healFromMana: 0,
 		manaUsage: 0,
+		manaUsageBySpell: [],
 		manaGain: 0,
 	};
 	cV = {
