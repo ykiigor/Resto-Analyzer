@@ -697,3 +697,160 @@ em.wipe {
 	background-color: #fff;
 	margin-top: .1em;
 }
+
+.statlist .ct-chart {
+	margin-right: auto;
+	margin-left: auto;
+	width:635px;
+	margin-top: 10px;
+}
+
+.ct-label {
+	color: rgba(255,255,255,.8);
+}
+
+.ct-grid {
+	stroke: rgba(255,255,255, 0.2);
+}
+
+.ct-series-a .ct-line,
+.ct-series-a .ct-point {
+	stroke: blue;
+	stroke-width: 2px;
+}
+.ct-series-a .ct-area {
+	fill: blue;
+}
+.ct-legend .ct-series-0:before {
+	background-color: blue;
+	border-color: blue;
+}
+
+.ct-series-b .ct-line,
+.ct-series-b .ct-point {
+	stroke-width: 2px;
+	stroke: green;
+}
+.ct-series-b .ct-area {
+	fill: green;
+}
+.ct-legend .ct-series-1:before {
+	background-color: green;
+	border-color: green;
+}
+
+.ct-series-c .ct-line,
+.ct-series-c .ct-point {
+	stroke-width: 2px;
+	stroke: red;
+}
+.ct-series-c .ct-area {
+	fill: red;
+}
+.ct-legend .ct-series-2:before {
+	background-color: red;
+	border-color: red;
+}
+
+.ct-series-d .ct-line,
+.ct-series-d .ct-point {
+	stroke-width: 2px;
+	stroke: yellow;
+}
+.ct-series-d .ct-area {
+	fill: yellow;
+}
+.ct-legend .ct-series-3:before {
+	background-color: yellow;
+	border-color: yellow;
+}
+
+.ct-series-e .ct-line,
+.ct-series-e .ct-point {
+	stroke-width: 2px;
+	stroke: GreenYellow;
+}
+.ct-series-e .ct-area {
+	fill: GreenYellow;
+}
+.ct-legend .ct-series-4:before {
+	background-color: GreenYellow;
+	border-color: GreenYellow;
+}
+
+.ct-grid-background, .ct-line {
+	fill: none;
+}
+
+.ct-legend {
+	position: relative;
+	z-index: 10;
+	list-style: none;
+	text-align: center;
+}
+.ct-legend li {
+	position: relative;
+	padding-left: 23px;
+	margin-right: 10px;
+	margin-bottom: 3px;
+	cursor: pointer;
+	display: inline-block;
+}
+.ct-legend li:before {
+	width: 12px;
+	height: 12px;
+	position: absolute;
+	left: 0;
+	content: '';
+	border: 3px solid transparent;
+	border-radius: 2px;
+}
+.ct-legend li.inactive:before {
+	background: transparent;
+}
+.ct-legend.ct-legend-inside {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+.ct-legend.ct-legend-inside li{
+	display: block;
+	margin: 0;
+}
+
+.chartist-tooltip {
+	position: absolute;
+	display: inline-block;
+	opacity: 0;
+	min-width: 5em;
+	padding: .5em;
+	background: #F4C63D;
+	color: #453D3F;
+	font-family: Oxygen,Helvetica,Arial,sans-serif;
+	font-weight: 700;
+	text-align: center;
+	pointer-events: none;
+	z-index: 1;
+	-webkit-transition: opacity .2s linear;
+	-moz-transition: opacity .2s linear;
+	-o-transition: opacity .2s linear;
+	transition: opacity .2s linear; 
+}
+.chartist-tooltip:before {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	width: 0;
+	height: 0;
+	margin-left: -15px;
+	border: 15px solid transparent;
+	border-top-color: #F4C63D; 
+}
+.chartist-tooltip.tooltip-show {
+	opacity: 1; 
+}
+
+.ct-area, .ct-line {
+	pointer-events: none; 
+}

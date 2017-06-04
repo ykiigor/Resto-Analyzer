@@ -494,6 +494,7 @@ var enchToStat = {
 };
 
 var WCL_API_KEY = "c715943c916421282ae9451912918422";
+var STATS_GRAPH_STEP = 15;
 
 var actors = [];		// Used for filter events only for char & his summons
 var actorsData = [];		// All units data
@@ -2360,6 +2361,13 @@ var multiplicateCDs = [
 ];
 
 function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timestamp){
+	Object.keys(statsBuffs[stat]).forEach(function (buffSpellID) {
+		if(buffStatus[buffSpellID]){
+			if(!rV.buffs[stat][buffSpellID]) rV.buffs[stat][buffSpellID] = 0;
+			rV.buffs[stat][buffSpellID] += statsBuffs[stat][buffSpellID] / statNow * amount * (typeof(buffStatus[buffSpellID]) == "number" ? buffStatus[buffSpellID] : 1);
+		}
+	});
+
 	healPerStat[stat].amount += amount / statNow;
 	healPerStat[stat].total += amount;
 	var healWOstat = stat == "int" ? amount : (totalHeal - amount);
@@ -2367,14 +2375,16 @@ function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timest
 	healPerStat[stat].avgCount += healWOstat;
 	healPerStat[stat].all += totalHeal;
 	if(!healPerStat[stat].spells) healPerStat[stat].spells = {};
-	healPerStat[stat].spells[spellID] = (healPerStat[stat].spells[spellID] || 0) + amount / statNow;	
+	healPerStat[stat].spells[spellID] = (healPerStat[stat].spells[spellID] || 0) + amount / statNow;
 	
-	Object.keys(statsBuffs[stat]).forEach(function (buffSpellID) {
-		if(buffStatus[buffSpellID]){
-			if(!rV.buffs[stat][buffSpellID]) rV.buffs[stat][buffSpellID] = 0;
-			rV.buffs[stat][buffSpellID] += statsBuffs[stat][buffSpellID] / statNow * amount * (typeof(buffStatus[buffSpellID]) == "number" ? buffStatus[buffSpellID] : 1);
-		}
-	});
+	var timeGraph = Math.floor((timestamp - currFightData.start_time) / 1000 / STATS_GRAPH_STEP);
+	if(!healPerStat.graph[timeGraph]) healPerStat.graph[timeGraph] = CreateHealPerStatTable();
+
+	healPerStat.graph[timeGraph][stat].amount += amount / statNow;
+	healPerStat.graph[timeGraph][stat].total += amount;
+	healPerStat.graph[timeGraph][stat].avg += statNow * healWOstat;
+	healPerStat.graph[timeGraph][stat].avgCount += healWOstat;
+	healPerStat.graph[timeGraph][stat].all += totalHeal;
 	
 	for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
 		var CDdata = pV[ delayedSpells[j][0] ];
@@ -3265,6 +3275,9 @@ function BuildReport(){
 		manaSpellsText += "<br><img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+" - "+NumberToFormattedNumber(rV.manaUsageBySpell[spellID],0,2);	
 	}
 	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 8800).format()+"<br>Base manapull: "+(1100000).format()+manaSpellsText+"</span></em></div></div>";
+
+	HTML += "<div class=\"row full\"><div class=\"col full\" id=\"stats_graph_more\"><a href=\"javascript:void(0)\" class=\"more_graph\">Show graph</a></div><div class=\"ct-chart\" style=\"display:none\"  id=\"stats_graph\"></div></div>";	
+
 	HTML += "</div></div>";	
 
 	/// Items predictions
@@ -3701,10 +3714,50 @@ function BuildReport(){
 	$("a.more_2").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_3").show();return false;});
 	$("a.more_3").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_1").show();return false;});
 	$("a.more_3-2").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_2").show();return false;});
+
 	
 	for (var i = 0, len = UpdateFromWowhead.length; i < len; i++) {
 		GetItemDataFromWowhead(UpdateFromWowhead[i]);
 	}
+
+	$("a.more_graph").click(function(){
+		var statsList = ["int","haste","mastery","vers","crit"];
+		var statsListNames = ["Int","Haste","Mastery","Vers","Crit (w/o resurgence)"];
+		var graphLabels = [];
+		var graphSeries = [];
+		for (var k = 0, k_len = statsList.length; k < k_len; k++) graphSeries.push([]);
+		for (var j = 0, j_len = (fightLen / 1000 / STATS_GRAPH_STEP); j < j_len; j++) {
+			if(healPerStat.graph[j]){
+				graphLabels.push(MsToFormattedTime(j * 1000 * STATS_GRAPH_STEP));
+				
+				for (var k = 0, k_len = statsList.length; k < k_len; k++) {
+					graphSeries[k].push(healPerStat.graph[j][ statsList[k] ].amount);
+				}
+			}
+		}
+		
+		var x_d = Math.floor(fightLen / 1000 / 20 / STATS_GRAPH_STEP) + 1;
+		
+		new Chartist.Line('.ct-chart', { labels: graphLabels, series: graphSeries}, {
+			fullWidth: true,
+			height: 200,
+			//showArea: true,
+			showPoint: false,
+			lineSmooth: Chartist.Interpolation.cardinal({tension: 0.65}),
+			axisX: {
+				labelInterpolationFnc: function(value, index) {
+					return (index % x_d) == 0 ? value : null;
+				}
+			},
+			plugins: [Chartist.plugins.legend({legendNames: statsListNames})]
+		});	
+	
+		$("#stats_graph_more").hide();
+		$("#stats_graph").show();
+		return false;
+	});
+	
+
 	
 }
 
@@ -3757,6 +3810,16 @@ function BuildFightsList(){
 	window.history.pushState('report', 'Report', '?report='+reportFightCode);
 }
 
+function CreateHealPerStatTable(){
+	return {
+		int: {amount:0,total:0,avg:0,avgCount:0,all:0},
+		crit: {amount:0,total:0,avg:0,avgCount:0,all:0},
+		haste: {amount:0,total:0,avg:0,avgCount:0,all:0},
+		mastery: {amount:0,total:0,avg:0,avgCount:0,all:0,b100:0,b80:0,b70:0,b60:0,b50:0,b40:0,b30:0,t:{}},
+		vers: {amount:0,total:0,avg:0,avgCount:0,all:0},	
+	}
+}
+
 function PrepParse(fightID,actorID){
 	$("#navbar-progress").width("1%").css('opacity', '1');
 	
@@ -3798,13 +3861,8 @@ function PrepParse(fightID,actorID){
 		talentInfo: [],
 		spellInfo: [],
 	};
-	healPerStat = {
-		int: {amount:0,total:0,avg:0,avgCount:0,all:0},
-		crit: {amount:0,total:0,avg:0,avgCount:0,all:0},
-		haste: {amount:0,total:0,avg:0,avgCount:0,all:0},
-		mastery: {amount:0,total:0,avg:0,avgCount:0,all:0,b100:0,b80:0,b70:0,b60:0,b50:0,b40:0,b30:0,t:{}},
-		vers: {amount:0,total:0,avg:0,avgCount:0,all:0},
-	};
+	healPerStat = CreateHealPerStatTable();
+	healPerStat.graph = [];
 	cooldownsTracking = [];
 	sltTracking = [];
 	buffStatus = [];
