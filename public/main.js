@@ -1,5 +1,5 @@
 ///
-///	item 134488 & recurgence
+///	item 134488 & resurgence
 ///
 ///
 
@@ -380,6 +380,16 @@ var vantusRunes = {
 	192774: 'etraeus',
 	192771: 'tich',
 	192769: 'trillax',
+	
+	237821: 'goroth',
+	237828: 'di',
+	237824: 'harj',
+	237826: 'saj',
+	237822: 'sotm',
+	237827: 'dh',
+	237823: 'mov',
+	237820: 'fa',
+	237825: 'kj',
 };
 
 var statsBuffs = {
@@ -437,6 +447,7 @@ var diffIdToName = {
 	3: 'Normal',
 	4: 'Heroic',
 	5: 'Mythic',
+	10: '5ppl keystone',
 };
 
 var classes = {
@@ -623,26 +634,49 @@ var ITEMS = [
 		init: function() {
 			rV.tidecallersAmount = 0;
 			rV.tidecallersPredictionAmount = 0;
+			pV.tidecallersHST = [];
+			pV.tidecallersQD = {};
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
 				if(spellID == 114942){ //htt
-					if(pV.tidecallersLast && event["timestamp"] >= pV.tidecallersLast) rV.tidecallersAmount += amount;
+					if(pV.tidecallersLast && event.timestamp >= pV.tidecallersLast) rV.tidecallersAmount += amount;
+				} else if (spellID == 52042) { //hst
+					for (var j = 0, j_len = pV.tidecallersHST.length; j < j_len; j++) {
+						if(event.timestamp >= pV.tidecallersHST[j][0] && event.timestamp <= pV.tidecallersHST[j][1]){
+							rV.tidecallersAmount += amount;
+						}
+					}
+				} else if (spellID == 208899) { //qd
+					if(pV.tidecallersQD[ event.targetID ] && event.timestamp <= pV.tidecallersQD[ event.targetID ]){
+						rV.tidecallersAmount += amount;
+					}
 				}
 			},
 			"cast", function(event,spellID){
 				if(spellID == 108280) { //htt
-					pV.tidecallersLast = event["timestamp"] + 10000;
+					pV.tidecallersLast = event.timestamp + 10000;
+				} else if (spellID == 5394) { //hst
+					pV.tidecallersHST.push([event.timestamp + 15000,event.timestamp + 18200]);
+				} 
+			},
+			"applybuff", function(event,spellID){
+				if(spellID == 208899) {
+					for (var j = 0, j_len = pV.tidecallersHST.length; j < j_len; j++) {
+						if(event.timestamp >= pV.tidecallersHST[j][0] && event.timestamp <= pV.tidecallersHST[j][1]){
+							pV.tidecallersQD[ event.targetID ] = event.timestamp + 6200;
+						}
+					}
 				}
 			},
 		],
 		afterParse: function() {
 			if(healingData[52042]) {
-				rV.tidecallersAmount += healingData[52042][0] * 0.16666;
+				//rV.tidecallersAmount += healingData[52042][0] * 0.16666;
 				rV.tidecallersPredictionAmount += healingData[52042][0] * 0.2;
 			}
 			if(healingData[208899]) {
-				rV.tidecallersAmount += healingData[208899][0] * 0.16666;
+				//rV.tidecallersAmount += healingData[208899][0] * 0.16666;
 				rV.tidecallersPredictionAmount += healingData[208899][0] * 0.2;
 			}
 			if(healingData[114942]) rV.tidecallersPredictionAmount += healingData[114942][0] * 0.2;
@@ -802,21 +836,29 @@ var ITEMS = [
 
 					//real
 					if(!event.tick){
-						if(event.timestamp <= pV.t20_2p_buffLast){
+						if(pV.t20_2p_buffActive || (event.timestamp <= pV.t20_2p_buffLast)){
 							pV.t20_2p_curr_targets[event.targetID] = event.timestamp + 18000;
 							rV.t20_2p_Count ++;
 						} else {
 							pV.t20_2p_curr_targets[event.targetID] = 0;
 						}
 					}
-					if(pV.t20_2p_curr_targets[event.targetID] && pV.t20_2p_curr_targets[event.targetID] <= event.timestamp && event.hitType == 2){
+					if(pV.t20_2p_curr_targets[event.targetID] && pV.t20_2p_curr_targets[event.targetID] >= event.timestamp && event.hitType == 2){
 						rV.t20_2p_Amount += pV.critAmount * Math.max(1 - (pV.critNow / 40000),0);
 					}
 				}
 			},
 			"removebuff", function(event,spellID){
-				if(spellID == 246729) pV.t20_2p_buffLast = event.timestamp + 500;
-			},			
+				if(spellID == 246729) {
+					pV.t20_2p_buffLast = event.timestamp + 500;
+					pV.t20_2p_buffActive = false;
+				}
+			},	
+			"applybuff", function(event,spellID){
+				if(spellID == 246729) {
+					pV.t20_2p_buffActive = true;
+				}
+			},				
 			"gear", function(itemData,itemID){
 				if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t20_2p_gearCount++;
 			}
@@ -1380,6 +1422,48 @@ var ITEMS = [
 			gear: "darkmoonCritAmount",
 		},
 	},
+	{	//chest leggo
+		init: function() {
+			rV.firedeepAmount = 0;
+			pV.firedeepLastAura = 0;
+			pV.firedeepLastCast = 0;
+			pV.firedeepTemp = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if(spellID == 114083 && pV.firedeepActive){
+					rV.firedeepAmount += amount;
+					pV.firedeepTemp += amount;
+				}
+			},
+			"applybuff", function(event,spellID){
+				if(spellID == 114052) {
+					pV.firedeepLastAura = event.timestamp + 500;
+					pV.firedeepActive = true;
+					if(event.timestamp <= pV.firedeepLastCast){
+						rV.firedeepAmount -= pV.firedeepTemp;
+						pV.firedeepActive = false;
+					}
+					pV.firedeepTemp = 0;
+				}
+			},
+			"cast", function(event,spellID){
+				if(spellID == 114052) {
+					pV.firedeepLastCast = event.timestamp + 500;
+					rV.firedeepAmount -= pV.firedeepTemp;
+					pV.firedeepActive = false;
+					pV.firedeepTemp = 0;
+				}
+			},
+		],
+		obj: {
+			type: "item",
+			name: "Fire in the Deep",
+			quality: 5,
+			id: 151785,
+			gear: "firedeepAmount",
+		},
+	},	
 ];
 
 var TRAITS = [
@@ -2489,7 +2573,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					AddStatAmount('crit',pV.critAmount,critAmountOh,pV.critNow,amount,spellID,event.timestamp);
 				}
 				
-				if(spellScaleMastery[spellID] && event.resourceActor == 2 && event.hitPoints && event.maxHitPoints){
+				if(spellScaleMastery[spellID] && (event.resourceActor == 2 || event.targetID == actor_id) && event.hitPoints && event.maxHitPoints){
 					var targetHPbeforeHeal = Math.max(event.hitPoints - amount,0) / event.maxHitPoints;
 				
 					pV.masteryNow = cV.mastery;
@@ -3749,7 +3833,9 @@ function BuildReport(){
 					return (index % x_d) == 0 ? value : null;
 				}
 			},
-			plugins: [Chartist.plugins.legend({legendNames: statsListNames})]
+			plugins: [
+				Chartist.plugins.legend({legendNames: statsListNames})
+			]
 		});	
 	
 		$("#stats_graph_more").hide();
