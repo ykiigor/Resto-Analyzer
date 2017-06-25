@@ -3851,7 +3851,7 @@ function BuildReport(){
 						HTML += unitData.name+"</div><div class=\"cd_more_3_info cd_more_3_info_amount slt-heal\">"+obj.heal[k].data[unitID].amount.format()+"</div>";
 						if(obj.heal[k].data[unitID].absorbed > 0) HTML += "<div class=\"cd_more_3_info cd_more_3_info_over\">"+obj.heal[k].data[unitID].absorbed.format()+"</div>";
 						HTML += "</div>";
-						prevTime = obj.heal[j].time;
+						prevTime = obj.heal[k].time;
 						TotalHealing += obj.heal[k].data[unitID].amount;
 					}
 				});
