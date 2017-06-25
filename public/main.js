@@ -1521,7 +1521,7 @@ var ITEMS = [
 			},
 		],
 		afterParse: function() {
-			rV.oceansEmbraceAmount += (healingData[242474][0] || 0);
+			if(healingData[242474][0]) rV.oceansEmbraceAmount += healingData[242474][0];
 			Object.keys(pV.oceansEmbraceFeedSpells).forEach(function (spellID) {
 				var healSpellID = pV.oceansEmbraceFeedSpellsToHealSpell[spellID];
 				if(healingData[healSpellID] && healingData[healSpellID][0] > 0){
