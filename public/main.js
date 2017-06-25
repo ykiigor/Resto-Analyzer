@@ -233,7 +233,7 @@ var spellManaCost = {
 	51505: 6 / 100 * baseMana,	//Lava Burst
 	192058: 10 / 100 * baseMana,	//Lightning Surge Totem	
 	207399: 11 / 100 * baseMana,	//apt
-	197995: 35 / 100 * baseMana,	//wellspring
+	197995: 20 / 100 * baseMana,	//wellspring
 };
 
 var OverallBlacklist = {
@@ -272,9 +272,10 @@ var spellScaleMastery = {
 	208899: true,	//qd
 	8004: true,	//surge
 	197997: true,	//wellspring
-	228401: true,	//Mark of the Ancient Priestess
+	//228401: true,	//Mark of the Ancient Priestess
 	209069: true,	//tidal
 	114942: true,	//htt
+	73685: true,	//ul [fixed in 7.2.5]
 };
 var spellNotScaleHaste = {
 	208899: true,	//qd
@@ -402,6 +403,7 @@ var statsBuffs = {
 		225749: 3892, //etraeus trinket: Sign of the Hippo
 		238499: 3892, //coen: Swarming Shadows
 		224151: 3000,	//Traitor's Oath [suramar 5ppl set]
+		242544: 3900,	//Solar Infusion
 	},
 	haste: {
 		240673: 800,	//Stat Buff: spriest
@@ -410,6 +412,7 @@ var statsBuffs = {
 		224347: 400,	//Flask of the Solemn Night
 		214128: 6008,	//Chrono Shard
 		190909: 1000, //Mark of the Claw
+		242543: 3900,	//Solar Infusion
 	},
 	haste_mod: {
 		80353: 1.3,	//BL
@@ -1462,6 +1465,77 @@ var ITEMS = [
 			quality: 5,
 			id: 151785,
 			gear: "firedeepAmount",
+		},
+	},
+	{	//Chalice of Moonlight
+		init: function() {
+			rV.chaliceofMoonlightAmount = 0;
+		},
+		parse: [
+			"gear", function(itemData,itemID){
+				if(itemID == 147005) {
+					statsBuffs.crit[242544] = ScaleStat(3900,920,itemData.itemLevel);
+					statsBuffs.haste[242543] = ScaleStat(3900,920,itemData.itemLevel);
+				}
+			}
+		],
+		afterParse: function() {
+			rV.chaliceofMoonlightAmount += (rV.buffs.crit[242544] || 0) + (rV.buffs.haste[242543] || 0);
+		},
+		obj: {
+			type: "item",
+			name: "Chalice of Moonlight",
+			quality: 4,
+			id: 147005,
+			gear: "chaliceofMoonlightAmount",
+		},
+	},
+	{	//Ocean's Embrace
+		init: function() {
+			rV.oceansEmbraceAmount = 0;
+			pV.oceansEmbraceFeedSpells = {
+				108281: 0.6,
+				114052: 1,
+				157153: 0.25,			
+			};
+			pV.oceansEmbraceFeedAmount = {
+				108281: 0,
+				114052: 0,
+				157153: 0,			
+			};
+			pV.oceansEmbraceFeedSpellsToHealSpell = {
+				108281: 114083,
+				114052: 114911,
+				157153: 157503,			
+			};			
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 242474){
+					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
+						if(cooldownsTracking[j].opened && pV.oceansEmbraceFeedSpells[ cooldownsTracking[j].spellID ]){
+							pV.oceansEmbraceFeedAmount[ cooldownsTracking[j].spellID ] += (amount + overheal) * pV.oceansEmbraceFeedSpells[ cooldownsTracking[j].spellID ];
+						}
+					}
+				}
+			},
+		],
+		afterParse: function() {
+			rV.oceansEmbraceAmount += (healingData[242474][0] || 0);
+			Object.keys(pV.oceansEmbraceFeedSpells).forEach(function (spellID) {
+				var healSpellID = pV.oceansEmbraceFeedSpellsToHealSpell[spellID];
+				if(healingData[healSpellID] && healingData[healSpellID][0] > 0){
+					rV.oceansEmbraceAmount += pV.oceansEmbraceFeedAmount[spellID] * (healingData[healSpellID][0] / (healingData[healSpellID][0] + healingData[healSpellID][1]));
+				}
+			});			
+		},
+		obj: {
+			type: "item",
+			name: "Sea Star of the Depthmother",
+			quality: 4,
+			id: 147004,
+			gear: "oceansEmbraceAmount",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Why amount different?<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC. Additional average amount added to pure healing number.</span></em>" },
 		},
 	},	
 ];
@@ -2673,7 +2747,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 							if(currTime == cooldownsTracking[j].heal[k].time && spellID == cooldownsTracking[j].heal[k].id){
 								pos = k;
 								break;
-							}else if(currTime > cooldownsTracking[j].heal[k].time && spellID == cooldownsTracking[j].heal[k].id && ((currTime - cooldownsTracking[j].heal[k].time) <= 300)){
+							}else if(currTime > cooldownsTracking[j].heal[k].time && spellID == cooldownsTracking[j].heal[k].id && ((currTime - cooldownsTracking[j].heal[k].time) <= 200)){
 								pos = k;
 								break;
 							}
@@ -2741,7 +2815,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 				
 				for (var j = 0, j_len = parsePlugins.heal.length; j < j_len; j++) {
-					parsePlugins.heal[j](event,spellID,amount);
+					parsePlugins.heal[j](event,spellID,amount,overheal);
 				}			
 			} else if(event.type == "summon" && actors[event.sourceID]){
 				actors[event.targetID] = true;
