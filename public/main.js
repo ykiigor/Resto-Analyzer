@@ -1581,7 +1581,7 @@ var ITEMS = [
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
-				if ((spellID == 77472 || spellID == 8004) && event.timestamp <= pV.t21_2p_HRLast){
+				if ((spellID == 77472 || spellID == 8004) && event.timestamp <= pV.t21_4p_HRLast){
 					rV.t21_4p_PredictionAmount += amount * 0.3;
 				}
 			},
