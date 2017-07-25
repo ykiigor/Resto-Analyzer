@@ -1245,14 +1245,14 @@ var ITEMS = [
 			rV.darkmoonAmountMana = 0;
 			pV.darkmoonManaNow = 0;
 			pV.darkmoonBuffs = {
-				191615: 317,
-				191616: 436,
-				191617: 555,
-				191618: 674,
-				191619: 792,
-				191620: 911,
-				191621: 1030,
-				191622: 1268,
+				191615: 770,
+				191616: 1059,
+				191617: 1349,
+				191618: 1636,
+				191619: 1924,
+				191620: 2212,
+				191621: 2501,
+				191622: 3078,
 			};
 		},
 		parse: [
@@ -1271,7 +1271,7 @@ var ITEMS = [
 				if(itemID == 128710) {
 					var updatedVals = {};
 					Object.keys(pV.darkmoonBuffs).forEach(function (buffSpellID) {
-						updatedVals[buffSpellID] = ScaleStat(pV.darkmoonBuffs[buffSpellID],805,itemData.itemLevel,1);
+						updatedVals[buffSpellID] = ScaleStat(pV.darkmoonBuffs[buffSpellID],900,itemData.itemLevel);
 					});
 					pV.darkmoonBuffs = updatedVals;
 				}
@@ -1537,7 +1537,73 @@ var ITEMS = [
 			gear: "oceansEmbraceAmount",
 			gearAdditionalText: function() { return "<em class=\"tooltip\">Why amount different?<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC. Additional average amount added to pure healing number.</span></em>" },
 		},
-	},	
+	},
+	{	//2t21
+		init: function() {
+			rV.t21_2p_PredictionAmount = 0;
+			pV.t21_2p_HRLast = 0;
+			pV.t21_2p_gearCount = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if (spellID == 73921 && event.timestamp <= pV.t21_2p_HRLast){
+					var heal = cV.intellect * 0.5;
+					if(cV.traitInfo[1352]) heal *= 1.06;
+					if(cV.traitInfo[1693]) heal *= 1.1;
+					if(cV.traitInfo[1389]) heal *= 1.05;
+					rV.t21_2p_PredictionAmount += heal;
+				}
+			},
+			"cast", function(event,spellID){
+				if(spellID == 73920){
+					pV.t21_2p_HRLast = event.timestamp + 500;
+				}
+			},
+			"gear", function(itemData,itemID){
+				//if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t21_2p_gearCount++;
+			}
+		],
+		obj: {
+			type: "spell",
+			name: "T21 2 set Bonus",
+			quality: 10,
+			id: 251764,
+			prediction: "t21_2p_PredictionAmount",
+			predictionСondition: function() { return pV.t21_2p_gearCount < 2 },
+			icon: "ability_shaman_ascendance.jpg",
+		},
+	},
+	{	//4t21
+		init: function() {
+			rV.t21_4p_PredictionAmount = 0;
+			pV.t21_4p_HRLast = 0;
+			pV.t21_4p_gearCount = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if ((spellID == 77472 || spellID == 8004) && event.timestamp <= pV.t21_2p_HRLast){
+					rV.t21_4p_PredictionAmount += amount * 0.3;
+				}
+			},
+			"cast", function(event,spellID){
+				if(spellID == 73920){
+					pV.t21_4p_HRLast = event.timestamp + 10500;
+				}
+			},
+			"gear", function(itemData,itemID){
+				//if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t21_4p_gearCount++;
+			}
+		],
+		obj: {
+			type: "spell",
+			name: "T21 4 set Bonus",
+			quality: 10,
+			id: 251765,
+			prediction: "t21_4p_PredictionAmount",
+			predictionСondition: function() { return pV.t21_4p_gearCount < 4 },
+			icon: "ability_shaman_ascendance.jpg",
+		},
+	},
 ];
 
 var TRAITS = [
