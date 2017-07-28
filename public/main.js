@@ -234,6 +234,8 @@ var spellManaCost = {
 	192058: 10 / 100 * baseMana,	//Lightning Surge Totem	
 	207399: 11 / 100 * baseMana,	//apt
 	197995: 20 / 100 * baseMana,	//wellspring
+	2825: 21.5 / 100 * baseMana,	//bl
+	32182: 21.5 / 100 * baseMana,	//heroism
 };
 
 var OverallBlacklist = {
@@ -245,6 +247,9 @@ var OverallBlacklist = {
 	143924: true, 	//leech
 	225723: true,	//cake
 	206838: true,	//trilliax
+	207472: true,	//prydaz
+	242621: true,	//tos(fa) trink
+	242623: true,	//tos(kj) trink
 };
 
 var spellScaleInt = {
@@ -282,7 +287,14 @@ var spellNotScaleHaste = {
 	209069: true,	//tidal
 	98021: true,	//slt
 	208981: true,	//roots
+	242622: true,	//kj trink
+	242619: true,	//tos(fa) trink
 }
+var spellAffectedByHaste = {	//not tick events, but still haste scaling
+	73921: true,	//hr
+	114942: true,	//htt
+};
+
 var spellScaleVers = {
 	1064: true,	//ch
 	73921: true,	//hr
@@ -297,6 +309,12 @@ var spellScaleVers = {
 	209069: true,	//tidal
 	114942: true,	//htt
 	73685: true,	//ul
+	242327: true,	//tos(di) trink
+	242622: true,	//tos(kj) trink
+	242623: true,	//tos(kj) trink
+	242474: true,	//tos(sea) trink
+	242619: true,	//tos(fa) trink
+	242621: true,	//tos(fa) trink
 };
 
 
@@ -399,20 +417,14 @@ var statsBuffs = {
 	},
 	crit: {
 		240671: 800,	//Stat Buff: Fire
-		190909: 1000, //Mark of the Claw
-		225749: 3892, //etraeus trinket: Sign of the Hippo
-		238499: 3892, //coen: Swarming Shadows
+		190909: 1000, 	//Mark of the Claw
 		224151: 3000,	//Traitor's Oath [suramar 5ppl set]
-		242544: 3900,	//Solar Infusion
 	},
 	haste: {
 		240673: 800,	//Stat Buff: spriest
-		225753: 3892, //etraeus trinket: Sign of the Dragon
-		238501: 3892, //coen: Swarming Shadows
 		224347: 400,	//Flask of the Solemn Night
 		214128: 6008,	//Chrono Shard
-		190909: 1000, //Mark of the Claw
-		242543: 3900,	//Solar Infusion
+		190909: 1000, 	//Mark of the Claw
 	},
 	haste_mod: {
 		80353: 1.3,	//BL
@@ -427,24 +439,13 @@ var statsBuffs = {
 		202842: 1.1,	//Innervate moonkin
 	},
 	mastery: {
-		225752: 3892, //etraeus trinket: Sign of the Hare
 		240672: 600,	//Stat Buff: Rouge
-		238500: 3892, //coen: Swarming Shadows
 		215198: 430,	//Thrumming Gossamer
 	},
 	int: {
 		33697: 2137,	//orc racial
 	},
 };
-
-var spellAffectedByHaste = {
-	73921: true,	//hr
-	114942: true,	//htt
-};
-var spellNotAffectedByHaste = {
-	208899: true,	//qd
-};
-
 
 var diffIdToName = {
 	3: 'Normal',
@@ -563,6 +564,7 @@ function GetTraitRank(traitID)
 
 function ScaleStat(stat,fromIlvl,toIlvl,isLinear)
 {
+	//	linear == 1 for int, linear == nil for secondaries, linear == 2 for jewel slots
 	var scalingFrom = (fromIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,fromIlvl - 800) : Math.pow(0.994435486,fromIlvl - 800));
 	var scalingTo = (toIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,toIlvl - 800) : Math.pow(0.994435486,toIlvl - 800));
 	
@@ -585,13 +587,15 @@ function MsToFormattedTime(ms,calcFromPull)
 
 function NumberToFormattedNumber(num,decimals,decimals_m,decimals_k)
 {
-	decimals = decimals || 0;
 	if(num > 1000000000){
+		decimals = decimals || 2;
 		return (num / 1000000000).toFixed(decimals)+"M";
 	} else if (num > 1000000){
+		decimals = decimals || 0;
 		if(decimals_m) decimals = decimals_m;
 		return (num / 1000000).toFixed(decimals)+"m";
 	} else if (num > 1000){
+		decimals = decimals || 0;
 		if(decimals_k) decimals = decimals_k;
 		return (num / 1000).toFixed(decimals)+"k";
 	} else {
@@ -707,6 +711,9 @@ var ITEMS = [
 			pV.jonatAmountCBT = 0;
 			pV.jonatAmountAG = 0;
 			pV.jonatAmountASC = 0;
+			
+			pV.jonatAvgBuff = 0;
+			pV.jonatAvgBuffCount = 0;
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
@@ -730,6 +737,9 @@ var ITEMS = [
 					pV.jonatPredictionCountNow = pV.jonatPredictionCount;
 					pV.jonatPredictionLast = event["timestamp"] + 1000;
 					pV.jonatPredictionCount = 0;
+					
+					pV.jonatAvgBuffCount++;
+					pV.jonatAvgBuff+=pV.jonatPredictionCountNow;
 				} else if(spellID == 77472 || spellID == 8004) { //hw & surge
 					pV.jonatPredictionCount = Math.min(pV.jonatPredictionCount+1,5);
 				}
@@ -760,6 +770,12 @@ var ITEMS = [
 			id: 137051,
 			prediction: "jonatPredictionAmount",
 			gear: "jonatAmount",
+			gearAdditionalText: function() { 
+				if(pV.jonatAvgBuffCount > 0)
+					return "Avg buff: "+(pV.jonatAvgBuff / pV.jonatAvgBuffCount * 10).toFixed(0)+"%";
+				else
+					return "Avg buff: 0%";
+			},
 		},
 	},
 	{	//prydaz
@@ -1431,6 +1447,8 @@ var ITEMS = [
 			pV.firedeepLastAura = 0;
 			pV.firedeepLastCast = 0;
 			pV.firedeepTemp = 0;
+			pV.firedeepHRCount = 0;
+			pV.firedeepProcCount = 0;
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
@@ -1443,9 +1461,11 @@ var ITEMS = [
 				if(spellID == 114052) {
 					pV.firedeepLastAura = event.timestamp + 500;
 					pV.firedeepActive = true;
+					pV.firedeepProcCount++;
 					if(event.timestamp <= pV.firedeepLastCast){
 						rV.firedeepAmount -= pV.firedeepTemp;
 						pV.firedeepActive = false;
+						pV.firedeepProcCount--;
 					}
 					pV.firedeepTemp = 0;
 				}
@@ -1456,6 +1476,8 @@ var ITEMS = [
 					rV.firedeepAmount -= pV.firedeepTemp;
 					pV.firedeepActive = false;
 					pV.firedeepTemp = 0;
+				} else if (spellID == 73920) {
+					pV.firedeepHRCount++;
 				}
 			},
 		],
@@ -1465,6 +1487,7 @@ var ITEMS = [
 			quality: 5,
 			id: 151785,
 			gear: "firedeepAmount",
+			gearAdditionalText: function() { return "Proc rate: "+(pV.firedeepHRCount > 0 ? (pV.firedeepProcCount / pV.firedeepHRCount * 100).toFixed(1) : 0)+"%" },
 		},
 	},
 	{	//Chalice of Moonlight
@@ -1488,6 +1511,55 @@ var ITEMS = [
 			quality: 4,
 			id: 147005,
 			gear: "chaliceofMoonlightAmount",
+		},
+	},
+	{	//Charm of the Rising Tide
+		init: function() {
+			rV.charmOTRTAmount = 0;
+			pV.charmOTRTLast10 = 0;
+		},
+		parse: [
+			"applybuffstack", function(event,spellID){
+				if(spellID == 242458 && event.stack == 10) {
+					pV.charmOTRTLast10 = event.timestamp + 1000;
+				}
+			},
+			"applybuff", function(event,spellID){
+				if(spellID == 242458 && event.timestamp <= pV.charmOTRTLast10) {
+					buffStatus[242458] = 10;
+				}
+			},
+			"gear", function(itemData,itemID){
+				if(itemID == 147002) {
+					statsBuffs.haste[242458] = ScaleStat(609,915,itemData.itemLevel);
+				}
+			}
+		],
+		afterParse: function() {
+			rV.charmOTRTAmount += (rV.buffs.haste[242458] || 0);
+		},
+		obj: {
+			type: "item",
+			name: "Charm of the Rising Tide",
+			quality: 4,
+			id: 147002,
+			gear: "charmOTRTAmount",
+		},
+	},
+	{	//Archive of Faith
+		init: function() {
+			rV.archiveofFaithAmount = 0;
+		},
+		afterParse: function() {
+			if(healingData[242619])	rV.archiveofFaithAmount += healingData[242619][0];
+			if(healingData[242621])	rV.archiveofFaithAmount += healingData[242621][0];
+		},
+		obj: {
+			type: "item",
+			name: "Archive of Faith",
+			quality: 4,
+			id: 147006,
+			gear: "archiveofFaithAmount",
 		},
 	},
 	{	//Ocean's Embrace
@@ -1560,7 +1632,7 @@ var ITEMS = [
 				}
 			},
 			"gear", function(itemData,itemID){
-				//if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t21_2p_gearCount++;
+				if(itemID == 152166 || itemID == 152168 || itemID == 152169 || itemID == 152170 || itemID == 152171 || itemID == 152167) pV.t21_2p_gearCount++;
 			}
 		],
 		obj: {
@@ -1582,7 +1654,7 @@ var ITEMS = [
 		parse: [
 			"heal", function(event,spellID,amount){
 				if ((spellID == 77472 || spellID == 8004) && event.timestamp <= pV.t21_4p_HRLast){
-					rV.t21_4p_PredictionAmount += amount * 0.3;
+					rV.t21_4p_PredictionAmount += amount * 0.5 * (cV.critSpell/40000+1);
 				}
 			},
 			"cast", function(event,spellID){
@@ -1591,7 +1663,7 @@ var ITEMS = [
 				}
 			},
 			"gear", function(itemData,itemID){
-				//if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t21_4p_gearCount++;
+				if(itemID == 152166 || itemID == 152168 || itemID == 152169 || itemID == 152170 || itemID == 152171 || itemID == 152167) pV.t21_4p_gearCount++;
 			}
 		],
 		obj: {
@@ -1604,6 +1676,16 @@ var ITEMS = [
 			icon: "ability_shaman_ascendance.jpg",
 		},
 	},
+	{	//Sephuz
+		parse: [
+			"gear", function(itemData,itemID){
+				if(itemID == 132452) {
+					statsBuffs.haste_mod[-132452] = 1.02;
+					buffStatus[-132452] = true;
+				}
+			}
+		],
+	}
 ];
 
 var TRAITS = [
@@ -1612,9 +1694,10 @@ var TRAITS = [
 			rV.traits[1352] = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(!OverallBlacklist[spellID]){
-					rV.traits[1352] += amount * (1 - 1 / 1.06);
+					//rV.traits[1352] += amount * (1 - 1 / 1.06);
+					rV.traits[1352] += Math.max((amount + overheal) * (1 - 1 / 1.06) - overheal,0);
 				}
 			},
 		],
@@ -1630,9 +1713,10 @@ var TRAITS = [
 			rV.traits[1693] = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(!OverallBlacklist[spellID]){
-					rV.traits[1693] += amount * (1 - 1 / 1.1);
+					//rV.traits[1693] += amount * (1 - 1 / 1.1);
+					rV.traits[1693] += Math.max((amount + overheal) * (1 - 1 / 1.1) - overheal,0);
 				}
 			},
 		],
@@ -1641,6 +1725,24 @@ var TRAITS = [
 			id: 1693,
 			spellID: 241205,
 			icon: "misc_legionfall_shaman.jpg",
+		},
+	},
+	{	//+5%
+		init: function() {
+			rV.traits[1389] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(!OverallBlacklist[spellID]){
+					rV.traits[1389] += Math.max((amount + overheal) * (1 - 1 / 1.05) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Flow of the Tides",
+			id: 1389,
+			spellID: 214933,
+			icon: "inv_mace_1h_artifactazshara_d_02.jpg",
 		},
 	},
 	{	//Paragon
@@ -1682,12 +1784,16 @@ var TRAITS = [
 	{	//BL trait
 		init: function() {
 			rV.traits[1112] = 0;
+			pV.trait1112Temp = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(!OverallBlacklist[spellID]){
 					if(pV.blTraitActive){
-						rV.traits[1112] += amount * (1 - 1 / 1.25);
+						//rV.traits[1112] += amount * (1 - 1 / 1.25);
+						rV.traits[1112] += Math.max((amount + overheal) * (1 - 1 / 1.25) - overheal,0);
+					} else {
+						pV.trait1112Temp += Math.max((amount + overheal) * (1 - 1 / 1.25) - overheal,0);
 					}
 				}
 			},
@@ -1695,7 +1801,13 @@ var TRAITS = [
 				if(spellID == 208416) pV.blTraitActive = true;
 			},
 			"removebuff", function(event,spellID){
-				if(spellID == 208416) pV.blTraitActive = false;
+				if(spellID == 208416) {
+					if(!pV.blTraitActive){
+						rV.traits[1112] += pV.trait1112Temp;
+						pV.trait1112Temp = 0;
+					}
+					pV.blTraitActive = false;
+				}
 			},
 		],
 		obj: {
@@ -1728,10 +1840,11 @@ var TRAITS = [
 			rV.traits[1107] = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 73921){
 					if(event.hitType == 2) rV.traits[1107] += pV.critAmount * ((GetTraitRank(1107) * 2 * 400) / pV.critNow);
-					rV.traits[1107] += amount * (1 - 1 / (1 + 0.02 * GetTraitRank(1107)));
+					//rV.traits[1107] += amount * (1 - 1 / (1 + 0.02 * GetTraitRank(1107)));
+					rV.traits[1107] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.02 * GetTraitRank(1107))) - overheal,0);
 				}
 			},
 		],
@@ -1774,7 +1887,7 @@ var TRAITS = [
 			pV.httTraitCount = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 114942){
 					if((event["timestamp"] - pV.httTraitLast) > 15000){
 						pV.httTraitCount = 0;
@@ -1783,7 +1896,8 @@ var TRAITS = [
 					}
 					pV.httTraitLast = event["timestamp"];
 					
-					rV.traits[1117] += amount * (1 - 1 / (1 + 0.1 * pV.httTraitCount));
+					//rV.traits[1117] += amount * (1 - 1 / (1 + 0.1 * pV.httTraitCount));
+					rV.traits[1117] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.1 * pV.httTraitCount)) - overheal,0);
 				}
 			},
 		],
@@ -1799,9 +1913,10 @@ var TRAITS = [
 			rV.traits[1598] = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 73921){
-					rV.traits[1598] += amount * (1 - 1 / 1.3);
+					//rV.traits[1598] += amount * (1 - 1 / 1.3);
+					rV.traits[1598] += Math.max((amount + overheal) * (1 - 1 / 1.3) - overheal,0);
 				}
 			},
 		],
@@ -1873,9 +1988,10 @@ var TRAITS = [
 			rV.traits[1105] = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 207778){
-					rV.traits[1105] += amount * (1 - 1 / (1 + 0.05 * GetTraitRank(1105)));
+					//rV.traits[1105] += amount * (1 - 1 / (1 + 0.05 * GetTraitRank(1105)));
+					rV.traits[1105] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.05 * GetTraitRank(1105))) - overheal,0);
 				}
 			},
 		],
@@ -1909,9 +2025,10 @@ var TRAITS = [
 			rV.traits[1104] = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 77472 || spellID == 8004){
-					rV.traits[1104] += amount * (1 - 1 / (1 + 0.05 * GetTraitRank(1104)));
+					//rV.traits[1104] += amount * (1 - 1 / (1 + 0.05 * GetTraitRank(1104)));
+					rV.traits[1104] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.05 * GetTraitRank(1104))) - overheal,0);
 				}
 			},
 		],
@@ -2032,9 +2149,10 @@ var TALENTS = [
 			rV.talents[200072] = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 61295 && !event.tick){
-					rV.talents[200072] += amount * (1 - 1 / 1.3);
+					//rV.talents[200072] += amount * (1 - 1 / 1.3);
+					rV.talents[200072] += Math.max((amount + overheal) * (1 - 1 / 1.3) - overheal,0);
 				}
 			},
 		],
@@ -2049,9 +2167,10 @@ var TALENTS = [
 			pV.ulLossTime = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if((event.timestamp - pV.ulLossTime) <= 300 && ((spellID == 61295 && !event.tick) || spellID == 77472 || spellID == 8004 || spellID == 1064)){
-					rV.talents[73685] += amount * (1 - 1 / 1.45);
+					//rV.talents[73685] += amount * (1 - 1 / 1.45);
+					rV.talents[73685] += Math.max((amount + overheal) * (1 - 1 / 1.45) - overheal,0);
 				} else if(spellID == 73685){
 					rV.talents[73685] += amount;
 				}
@@ -2121,7 +2240,7 @@ var TALENTS = [
 			id: 197995,
 		},
 	},
-	{
+	{	//highTide
 		init: function() {
 			rV.talents[157154] = 0;
 			pV.highTideBounds = 0;
@@ -2145,15 +2264,16 @@ var TALENTS = [
 			id: 157154,
 		},
 	},
-	{
+	{	//undulation
 		init: function() {
 			rV.talents[200071] = 0;
 			pV.undulationLossTime = 0;
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if((spellID == 77472 || spellID == 8004) && ((event.timestamp - pV.undulationLossTime) <= 300)){
-					rV.talents[200071] += amount * (1 - 1 / 1.5);
+					//rV.talents[200071] += amount * (1 - 1 / 1.5);
+					rV.talents[200071] += Math.max((amount + overheal) * (1 - 1 / 1.5) - overheal,0);
 				}
 			},
 			"removebuff", function(event,spellID){
@@ -3380,7 +3500,7 @@ function BuildReportMinor(){
 
 function BuildReport(){
 	if(!cV.combantantInfo){
-		error_msg("Error: Combantant info is missing.");
+		error_msg("Error: Combantant info is missing. Logs must be written with enabled 'Advanced combat logging' option");
 		throw new Error("Error: Combantant info is missing.");
 	}
 	
@@ -3405,7 +3525,7 @@ function BuildReport(){
 	
 	var fightStart = currFightData.start_time;
 	var fightEnd = currFightData.end_time;
-	var fightLen = fightEnd - fightStart;//$end_time - $start_time_saved
+	var fightLen = fightEnd - fightStart;
 	
 	HTML += "<div class=\"panel\" style=\"margin-top:-10px;\"><div class=\"row full\" style=\"margin-bottom:5px;\">";
 	var hps = Math.round(rV.total / fightLen * 1000);
@@ -3508,7 +3628,7 @@ function BuildReport(){
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix predictionlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Items predictions ";
 	HTML += "<sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only benefit from \"spell\" part of item is counted here</span></sup></header>";
 	for (var i = 0, len = ITEMS.length; i < len; i++) {
-		if(ITEMS[i].obj.prediction && (!ITEMS[i].obj.predictionСondition || ITEMS[i].obj.predictionСondition()) && (ITEMS[i].obj.type!="item" || (!ITEMS[i].obj.predictionСondition && !cV.gearInfo[ITEMS[i].obj.id]))){
+		if(ITEMS[i].obj && ITEMS[i].obj.prediction && (!ITEMS[i].obj.predictionСondition || ITEMS[i].obj.predictionСondition()) && (ITEMS[i].obj.type!="item" || (!ITEMS[i].obj.predictionСondition && !cV.gearInfo[ITEMS[i].obj.id]))){
 			var itemData = ITEMS[i].obj;
 			HTML += "<div class=\"row full\"><div class=\"col s-1\"><a href=\"//www.wowhead.com/"+itemData.type+"="+itemData.id+"\" target=\"_blank\" style=\"color: #"+qualityColors[ itemData.quality ]+";\">"+itemData.name+"</a></div><div class=\"col s-2\">"+NumberToFormattedNumber(rV[ itemData.prediction ],2)+(itemData.text ? (" "+itemData.text()) : "")+"</div><div class=\"col s-2\">"+(rV[ itemData.prediction ]/rV.total*100).toFixed(2)+"%</div></div>";
 		}
@@ -3523,7 +3643,7 @@ function BuildReport(){
 	HTML += "<sup class=\"tooltip\" style=\"font-size: 0.4em\"> [supported items]<span class=\"tip-text\" style=\"width: 400px;margin-left:-200px;\">";
 	var counter = false;
 	for (var i = 0, len = ITEMS.length; i < len; i++) {
-		if(ITEMS[i].obj.gear){
+		if(ITEMS[i].obj && ITEMS[i].obj.gear){
 			if(counter) HTML += ", ";
 			HTML += ITEMS[i].obj.name;
 			counter = true;
@@ -3533,39 +3653,41 @@ function BuildReport(){
 	counter = 0;
 	var itemsData = [];
 	for (var i = 0, len = ITEMS.length; i < len; i++) {
-		var obj = ITEMS[i].obj
-		if(obj.gear && ((!obj.gearFunc && cV.gearInfo[obj.id]) || (obj.gearFunc && obj.gearFunc()))) itemsData.push([ obj.gear,ITEMS[i] ]);
+		var obj = ITEMS[i].obj;
+		if(obj && obj.gear && ((!obj.gearFunc && cV.gearInfo[obj.id]) || (obj.gearFunc && obj.gearFunc()))) itemsData.push([ obj.gear,ITEMS[i] ]);
 	}
 	itemsData.sort(function(a,b){ return rV[ a[0] ] > rV[ b[0] ] ? - 1 : 1 });
 	for (var i = 0, len = itemsData.length; i < len; i++) {
-		var obj = itemsData[i][1].obj
-		var itemID = obj.id
-
-		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
-		
-		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-		HTML += "<a href=\"//www.wowhead.com/"+obj.type+"="+itemID+((cV.gearInfo[itemID] && cV.gearInfo[itemID].bonusIDs) ? "&bonus="+cV.gearInfo[itemID].bonusIDs.join(":") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+(obj.icon || cV.gearInfo[itemID].icon)+"\" alt=\""+obj.name+"\"></a></div>";
-
-		HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[obj.quality]+";\">"+obj.name+"</header>";
+		var obj = itemsData[i][1].obj;
+		if(obj){
+			var itemID = obj.id;
 	
-		var amount = rV[obj.gear]
-		if(amount > 0) HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
+			
+			HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
+			HTML += "<a href=\"//www.wowhead.com/"+obj.type+"="+itemID+((cV.gearInfo[itemID] && cV.gearInfo[itemID].bonusIDs) ? "&bonus="+cV.gearInfo[itemID].bonusIDs.join(":") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+(obj.icon || cV.gearInfo[itemID].icon)+"\" alt=\""+obj.name+"\"></a></div>";
+	
+			HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[obj.quality]+";\">"+obj.name+"</header>";
 		
-		var passiveStats = CalcHealingFromItem(itemID)
-		passiveStats.heal = 0;	//block passives
-		if(passiveStats.heal > 0){
-			HTML += "From passive stats: "+NumberToFormattedNumber(passiveStats.heal,2)+" ("+(passiveStats.heal/rV.total*100).toFixed(2)+"%)<br>";
+			var amount = rV[obj.gear]
+			if(amount > 0) HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+			
+			var passiveStats = CalcHealingFromItem(itemID)
+			passiveStats.heal = 0;	//block passives
+			if(passiveStats.heal > 0){
+				HTML += "From passive stats: "+NumberToFormattedNumber(passiveStats.heal,2)+" ("+(passiveStats.heal/rV.total*100).toFixed(2)+"%)<br>";
+			}
+						
+			HTML += "HPS: <em class=\"result-hps\">";
+			if(amount > 0) HTML += NumberToFormattedNumber(amount / fightLen * 1000,1);
+			if(passiveStats.heal > 0) HTML += (amount > 0 ? " / " : "")+NumberToFormattedNumber(passiveStats.heal / fightLen * 1000,1);
+			HTML += "</em>";
+		
+			if(obj.gearAdditionalText) HTML += "<br>"+obj.gearAdditionalText();
+		
+			HTML += "</div></div>";
+			counter++;
 		}
-					
-		HTML += "HPS: <em class=\"result-hps\">";
-		if(amount > 0) HTML += NumberToFormattedNumber(amount / fightLen * 1000,1);
-		if(passiveStats.heal > 0) HTML += (amount > 0 ? " / " : "")+NumberToFormattedNumber(passiveStats.heal / fightLen * 1000,1);
-		HTML += "</em>";
-	
-		if(obj.gearAdditionalText) HTML += "<br>"+obj.gearAdditionalText();
-	
-		HTML += "</div></div>";
-		counter++;
 	}	
 	HTML += "</ul></div></div></div>";
 	
@@ -3723,19 +3845,21 @@ function BuildReport(){
 	var procsData = [];
 	Object.keys(rV.buffs).forEach(function (statName) {
 		Object.keys(rV.buffs[statName]).forEach(function (spellID) {
-			var key = -1;
-			for (var i = 0, len = procsData.length; i < len; i++){
-				if(procsData[i][0] == spellID){
-					key = i;
-					break
+			if(spellID > 0){
+				var key = -1;
+				for (var i = 0, len = procsData.length; i < len; i++){
+					if(procsData[i][0] == spellID){
+						key = i;
+						break
+					}
 				}
+				if(key == -1) {
+					procsData.push([spellID,0,[]]);
+					key = procsData.length - 1;
+				}
+				procsData[key][1] += rV.buffs[statName][spellID];
+				procsData[key][2].push((statName=="haste_mod" ? "haste" : statName)+": "+NumberToFormattedNumber(rV.buffs[statName][spellID],0,2));
 			}
-			if(key == -1) {
-				procsData.push([spellID,0,[]]);
-				key = procsData.length - 1;
-			}
-			procsData[key][1] += rV.buffs[statName][spellID];
-			procsData[key][2].push((statName=="haste_mod" ? "haste" : statName)+": "+NumberToFormattedNumber(rV.buffs[statName][spellID],0,2));
 		});
 	});
 	procsData.sort(function(a,b){ return a[1] > b[1] ? - 1 : 1 });
