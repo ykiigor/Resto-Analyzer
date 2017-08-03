@@ -1610,9 +1610,59 @@ var ITEMS = [
 			gearAdditionalText: function() { return "<em class=\"tooltip\">Why amount different?<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC. Additional average amount added to pure healing number.</span></em>" },
 		},
 	},
+	{	//The Deceiver's Grand Design [kj]
+		init: function() {
+			rV.dgdAmount = 0;
+			pV.dgdFeedSpells = {
+				108281: 0.6,
+				114052: 1,
+				157153: 0.25,			
+			};
+			pV.dgdFeedAmount = {
+				108281: 0,
+				114052: 0,
+				157153: 0,			
+			};
+			pV.dgdFeedSpellsToHealSpell = {
+				108281: 114083,
+				114052: 114911,
+				157153: 157503,			
+			};			
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 242622){
+					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
+						if(cooldownsTracking[j].opened && pV.dgdFeedSpells[ cooldownsTracking[j].spellID ]){
+							pV.dgdFeedAmount[ cooldownsTracking[j].spellID ] += (amount + overheal) * pV.dgdFeedSpells[ cooldownsTracking[j].spellID ];
+						}
+					}
+				}
+			},
+		],
+		afterParse: function() {
+			if(healingData[242622]) rV.dgdAmount += healingData[242622][0];
+			if(healingData[242623]) rV.dgdAmount += healingData[242623][0];
+			Object.keys(pV.dgdFeedSpells).forEach(function (spellID) {
+				var healSpellID = pV.dgdFeedSpellsToHealSpell[spellID];
+				if(healingData[healSpellID] && healingData[healSpellID][0] > 0){
+					rV.dgdAmount += pV.dgdFeedAmount[spellID] * (healingData[healSpellID][0] / (healingData[healSpellID][0] + healingData[healSpellID][1]));
+				}
+			});			
+		},
+		obj: {
+			type: "item",
+			name: "The Deceiver's Grand Design",
+			quality: 4,
+			id: 147007,
+			gear: "dgdAmount",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Why amount different?<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC. Additional average amount added to pure healing number.</span></em>" },
+		},
+	},
 	{	//2t21
 		init: function() {
 			rV.t21_2p_PredictionAmount = 0;
+			rV.t21_2p_Amount = 0;
 			pV.t21_2p_HRLast = 0;
 			pV.t21_2p_gearCount = 0;
 		},
@@ -1624,6 +1674,8 @@ var ITEMS = [
 					if(cV.traitInfo[1693]) heal *= 1.1;
 					if(cV.traitInfo[1389]) heal *= 1.05;
 					rV.t21_2p_PredictionAmount += heal;
+				} else if (spellID == 252154) {
+					rV.t21_2p_Amount += amount;
 				}
 			},
 			"cast", function(event,spellID){
@@ -1642,12 +1694,15 @@ var ITEMS = [
 			id: 251764,
 			prediction: "t21_2p_PredictionAmount",
 			predictionСondition: function() { return pV.t21_2p_gearCount < 2 },
+			gear: "t21_2p_Amount",
+			gearFunc: function() { return pV.t21_2p_gearCount >= 2 },
 			icon: "ability_shaman_ascendance.jpg",
 		},
 	},
 	{	//4t21
 		init: function() {
 			rV.t21_4p_PredictionAmount = 0;
+			rV.t21_4p_Amount = 0;
 			pV.t21_4p_HRLast = 0;
 			pV.t21_4p_gearCount = 0;
 		},
@@ -1655,6 +1710,8 @@ var ITEMS = [
 			"heal", function(event,spellID,amount){
 				if ((spellID == 77472 || spellID == 8004) && event.timestamp <= pV.t21_4p_HRLast){
 					rV.t21_4p_PredictionAmount += amount * 0.5 * (cV.critSpell/40000+1);
+				} else if (spellID == 252159) {
+					rV.t21_4p_Amount += amount;
 				}
 			},
 			"cast", function(event,spellID){
@@ -1673,6 +1730,8 @@ var ITEMS = [
 			id: 251765,
 			prediction: "t21_4p_PredictionAmount",
 			predictionСondition: function() { return pV.t21_4p_gearCount < 4 },
+			gear: "t21_4p_Amount",
+			gearFunc: function() { return pV.t21_4p_gearCount >= 4 },
 			icon: "ability_shaman_ascendance.jpg",
 		},
 	},
