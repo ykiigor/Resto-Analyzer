@@ -1993,17 +1993,17 @@ var TRAITS = [
 		init: function() {
 			rV.traits[1599] = 0;
 			pV.gotqLast = 0;
-			pv.gotqDisableOldDetect = false;
+			pV.gotqDisableOldDetect = false;
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
-				if(spellID == 207778 && !pv.gotqDisableOldDetect){
+				if(spellID == 207778 && !pV.gotqDisableOldDetect){
 					if((event["timestamp"] - pV.gotqLast) > 2000 && (event["timestamp"] - pV.gotqLast) < 4000){
 						rV.traits[1599] += amount;
 					}
 				} else if (spellID == 255227){	//7.3 update
 					rV.traits[1599] += amount;
-					pv.gotqDisableOldDetect = true;
+					pV.gotqDisableOldDetect = true;
 				}
 			},
 			"cast", function(event,spellID){
