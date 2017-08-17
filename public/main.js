@@ -258,6 +258,7 @@ var spellScaleInt = {
 	77472: true,	//hw
 	61295: true,	//riptide
 	207778: true,	//GotQ
+	255227: true,	//GotQ
 	52042: true,	//hst
 	73685: true,	//ul
 	208899: true,	//qd
@@ -273,6 +274,7 @@ var spellScaleMastery = {
 	77472: true,	//hw
 	61295: true,	//riptide
 	207778: true,	//GotQ
+	255227: true,	//GotQ
 	52042: true,	//hst
 	208899: true,	//qd
 	8004: true,	//surge
@@ -301,6 +303,7 @@ var spellScaleVers = {
 	77472: true,	//hw
 	61295: true,	//riptide
 	207778: true,	//GotQ
+	255227: true,	//GotQ
 	52042: true,	//hst
 	208899: true,	//qd
 	8004: true,	//surge
@@ -1990,13 +1993,17 @@ var TRAITS = [
 		init: function() {
 			rV.traits[1599] = 0;
 			pV.gotqLast = 0;
+			pv.gotqDisableOldDetect = false;
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
-				if(spellID == 207778){
+				if(spellID == 207778 && !pv.gotqDisableOldDetect){
 					if((event["timestamp"] - pV.gotqLast) > 2000 && (event["timestamp"] - pV.gotqLast) < 4000){
 						rV.traits[1599] += amount;
 					}
+				} else if (spellID == 255227){	//7.3 update
+					rV.traits[1599] += amount;
+					pv.gotqDisableOldDetect = true;
 				}
 			},
 			"cast", function(event,spellID){
@@ -2048,7 +2055,7 @@ var TRAITS = [
 		},
 		parse: [
 			"heal", function(event,spellID,amount,overheal){
-				if(spellID == 207778){
+				if(spellID == 61295){
 					//rV.traits[1105] += amount * (1 - 1 / (1 + 0.05 * GetTraitRank(1105)));
 					rV.traits[1105] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.05 * GetTraitRank(1105))) - overheal,0);
 				}
