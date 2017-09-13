@@ -2195,6 +2195,197 @@ var TRAITS = [
 	},	
 ];
 
+var NETHERLIGHT = [
+	{	//Infusion of Light
+		init: function() {
+			rV.netherlight[253093] = 0;
+		},
+		afterParse: function() {
+			if(healingData[253099]) {
+				rV.netherlight[253093] = healingData[253099][0];
+			}
+		},		
+		obj: {
+			name: "Infusion of Light",
+			spellID: 253093,
+			icon: "ability_malkorok_blightofyshaarj_yellow.jpg",
+		},
+	},	
+	{	//Secure in the Light
+		init: function() {
+			rV.netherlight[253070] = 0;
+		},
+		afterParse: function() {
+			if(healingData[253072]) {
+				rV.netherlight[253070] = healingData[253072][0];
+			}
+		},		
+		obj: {
+			name: "Secure in the Light",
+			spellID: 253070,
+			icon: "ability_paladin_toweroflight.jpg",
+		},
+	},
+	{	//Light Speed
+		init: function() {
+			rV.netherlight[252088] = 0;
+		},
+		afterParse: function() {
+			rV.netherlight[252088] = healPerStat["haste"].amount * 500;
+		},		
+		obj: {
+			name: "Light Speed",
+			spellID: 252088,
+			icon: "ability_rogue_sprint.jpg",
+		},
+	},
+	{	//Master of Shadows
+		init: function() {
+			rV.netherlight[252091] = 0;
+		},
+		afterParse: function() {
+			rV.netherlight[252091] = healPerStat["mastery"].amount * 500;
+		},		
+		obj: {
+			name: "Master of Shadows",
+			spellID: 252091,
+			icon: "spell_shadow_shadesofdarkness.jpg",
+		},
+	},
+	{	//Shocklight
+		init: function() {
+			rV.netherlight[252799] = 0;
+			
+			statsBuffs.crit[242586] = 1500;
+		},
+		afterParse: function() {
+			if(rV.buffs.crit[242586]) {
+				rV.netherlight[252799] = rV.buffs.crit[242586];
+			}
+			
+			delete statsBuffs.crit[242586];
+		},		
+		obj: {
+			name: "Shocklight",
+			spellID: 252799,
+			icon: "paladin_icon_speedoflight.jpg",
+		},
+	},
+	{	//Murderous Intent
+		init: function() {
+			rV.netherlight[252191] = 0;
+			
+			statsBuffs.vers[242586] = 1500;
+		},
+		afterParse: function() {
+			if(rV.buffs.vers[242586]) {
+				rV.netherlight[252191] = rV.buffs.vers[242586];
+			}
+			
+			delete statsBuffs.vers[242586];
+		},		
+		obj: {
+			name: "Murderous Intent",
+			spellID: 252191,
+			icon: "spell_shadow_charm.jpg",
+		},
+	},
+	{	//Refractive Shell
+		init: function() {
+			rV.netherlight[252207] = 0;
+		},
+		afterParse: function() {
+			if(healingData[252208]) {
+				rV.netherlight[252207] = healingData[252208][0];
+			}
+		},		
+		obj: {
+			name: "Refractive Shell",
+			spellID: 252207,
+			icon: "ability_priest_reflectiveshield.jpg",
+		},
+	},
+	{	//Light's Embrace
+		init: function() {
+			rV.netherlight[253111] = 0;
+		},
+		afterParse: function() {
+			if(healingData[253216]) {
+				rV.netherlight[253111] = healingData[253216][0];
+			}
+		},		
+		obj: {
+			name: "Light's Embrace",
+			spellID: 253111,
+			icon: "achievement_reputation_07.jpg",
+		},
+	},
+	{	//Chaotic Darkness
+		init: function() {
+			rV.netherlight[252888] = 0;
+		},
+		afterParse: function() {
+			if(healingData[252897]) {
+				rV.netherlight[252888] = healingData[252897][0];
+			}
+		},		
+		obj: {
+			name: "Chaotic Darkness",
+			spellID: 252888,
+			icon: "inv_artifact_powerofthedarkside.jpg",
+		},
+	},
+	{	//Shadowbind
+		init: function() {
+			rV.netherlight[252875] = 0;
+		},
+		afterParse: function() {
+			if(healingData[252879]) {
+				rV.netherlight[252875] = healingData[252879][0];
+			}
+		},		
+		obj: {
+			name: "Shadowbind",
+			spellID: 252875,
+			icon: "spell_shadow_deathpact.jpg",
+		},
+	},
+	{	//+1 ilvl
+		init: function() {
+			rV.netherlight[-1] = 0;
+			
+			pV.netherlightIlvlCurrWeapon = 750;
+		},
+		parse: [
+			"gear", function(itemData,itemID){
+				if(itemID == 128911) pV.netherlightIlvlCurrWeapon = itemData.itemLevel;
+			}
+		],
+		afterParse: function() {
+			var items = [128911, 128934];
+			var stats = ["int","crit","mastery"];
+			for (var i = 0, len = items.length; i < len; i++) {
+				var itemData = itemsStats[ items[i] ];
+				for (var j = 0, j_len = stats.length; j < j_len; j++) {
+					var statName = stats[j];
+					
+					var valDef = ScaleStat(itemData[statName],itemData.ilvl,pV.netherlightIlvlCurrWeapon,statName == "int" ? 1 : 0);
+					var valBuffed = ScaleStat(itemData[statName],itemData.ilvl,pV.netherlightIlvlCurrWeapon + 1,statName == "int" ? 1 : 0)
+					
+					rV.netherlight[-1] += (valBuffed - valDef) * healPerStat[statName].amount;
+				}
+			}
+			
+		},		
+		obj: {
+			name: "+1 weapon item level",
+			spellID: -1,
+			icon: "inv_mace_1h_artifactazshara_d_02.jpg",
+			tip: function() { return "Not real trait. Just for compare numbers" },
+		},
+	},
+];
+
 var TALENTS = [
 	{	//CBT
 		init: function() {
@@ -2751,7 +2942,7 @@ var parsePlugins = {
 	combantantInfo: [],
 };
 
-var pluginsList = [OTHER, ITEMS, TRAITS, TALENTS, RESURGENCE, POTIONS];
+var pluginsList = [OTHER, ITEMS, TRAITS, NETHERLIGHT, TALENTS, RESURGENCE, POTIONS];
 for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 	var pluginData = pluginsList[k];
 	for (var i = 0, len = pluginData.length; i < len; i++) {
@@ -3282,6 +3473,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					var traitData = event.artifact[k];
 				
 					cV.traitInfo[traitData.traitID] = traitData;
+					cV.traitBySpell[traitData.spellID] = traitData;
 				}
 				for (var k = 0, k_len = event.talents.length; k < k_len; k++) {
 					var talentInfo = event.talents[k];
@@ -3821,7 +4013,34 @@ function BuildReport(){
 		}
 	}	
 	HTML += "</ul></div></div></div>";
+	
+	
+	/// NETHERLIGHT
+	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">NETHERLIGHT CRUCIBLE</header><div class=\"list-top-line\"> </div><ul class=\"list traits\">";
+	counter = 0;
+	var netherlightData = [];
+	for (var i = 0, len = NETHERLIGHT.length; i < len; i++) if(cV.traitBySpell[ NETHERLIGHT[i].obj.spellID ] || NETHERLIGHT[i].obj.spellID == -1) netherlightData.push([ NETHERLIGHT[i].obj.spellID,NETHERLIGHT[i] ]);
+	netherlightData.sort(function(a,b){ return rV.netherlight[ a[0] ] > rV.netherlight[ b[0] ] ? - 1 : 1 });
+	for (var i = 0, len = netherlightData.length; i < len; i++) {
+		var traitData = netherlightData[i][1].obj
 
+		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
+		
+		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
+		HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+traitData.icon+"\" alt=\""+traitData.name+"\"></a></div>";
+
+		HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\">"+traitData.name+"</a>"+"</header>";
+	
+		var amount = rV.netherlight[traitData.spellID];
+		HTML += "<em class=\"result "+(traitData.tip ? "tooltip" : "")+"\">"+NumberToFormattedNumber(amount,2)+(traitData.tip ? "<span class=\"tip-text\" style=\"width: 180px;margin-left:-90px;\">"+traitData.tip()+"</span>" : "")+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+		HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
+
+		if(traitData.additionalText) HTML += "<br>"+traitData.additionalText();
+	
+		HTML += "</div></div>";
+		counter++;
+	}	
+	HTML += "</ul></div></div></div>";
 
 	/// Talents
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">TALENTS</header><div class=\"list-top-line\"> </div><ul class=\"list talents\">";
@@ -3849,6 +4068,7 @@ function BuildReport(){
 		counter++;
 	}	
 	HTML += "</ul></div></div></div>";
+		
 	
 	
 	/// Resurgence
@@ -4270,9 +4490,11 @@ function PrepParse(fightID,actorID){
 		manaUsage: 0,
 		manaUsageBySpell: [],
 		manaGain: 0,
+		netherlight: [],
 	};
 	cV = {
 		traitInfo: [],
+		traitBySpell: [],
 		gearInfo: [],
 		talentInfo: [],
 		spellInfo: [],
