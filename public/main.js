@@ -2259,9 +2259,17 @@ var NETHERLIGHT = [
 	{	//Shocklight
 		init: function() {
 			rV.netherlight[252799] = 0;
-			
-			statsBuffs.crit[242586] = 1500;
 		},
+		parse: [
+			"combantantInfo", function(event){
+				for (var k = 0, k_len = event.artifact.length; k < k_len; k++) {
+					var traitData = event.artifact[k];
+					if( traitData.spellID == 252799 ){
+						statsBuffs.crit[242586] = 1500 * (traitData.rank || 1);
+					}
+				}
+			}
+		],		
 		afterParse: function() {
 			if(rV.buffs.crit[242586]) {
 				rV.netherlight[252799] = rV.buffs.crit[242586];
@@ -2278,9 +2286,17 @@ var NETHERLIGHT = [
 	{	//Murderous Intent
 		init: function() {
 			rV.netherlight[252191] = 0;
-			
-			statsBuffs.vers[242586] = 1500;
 		},
+		parse: [
+			"combantantInfo", function(event){
+				for (var k = 0, k_len = event.artifact.length; k < k_len; k++) {
+					var traitData = event.artifact[k];
+					if( traitData.spellID == 252191 ){
+						statsBuffs.vers[242586] = 1500 * (traitData.rank || 1);
+					}
+				}
+			}
+		],	
 		afterParse: function() {
 			if(rV.buffs.vers[242586]) {
 				rV.netherlight[252191] = rV.buffs.vers[242586];
