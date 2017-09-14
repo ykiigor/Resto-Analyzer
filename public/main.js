@@ -2235,7 +2235,9 @@ var NETHERLIGHT = [
 			rV.netherlight[252088] = 0;
 		},
 		afterParse: function() {
-			rV.netherlight[252088] = healPerStat["haste"].amount * 500;
+			var rank = 1;
+			if(cV.traitBySpell[252088]) rank = cV.traitBySpell[252088].rank || 1;
+			rV.netherlight[252088] = healPerStat["haste"].amount * 500 * rank;
 		},		
 		obj: {
 			name: "Light Speed",
@@ -2248,7 +2250,9 @@ var NETHERLIGHT = [
 			rV.netherlight[252091] = 0;
 		},
 		afterParse: function() {
-			rV.netherlight[252091] = healPerStat["mastery"].amount * 500;
+			var rank = 1;
+			if(cV.traitBySpell[252091]) rank = cV.traitBySpell[252091].rank || 1;
+			rV.netherlight[252091] = healPerStat["mastery"].amount * 500 * rank;
 		},		
 		obj: {
 			name: "Master of Shadows",
@@ -4042,7 +4046,10 @@ function BuildReport(){
 	for (var i = 0, len = NETHERLIGHT.length; i < len; i++) if(cV.traitBySpell[ NETHERLIGHT[i].obj.spellID ] || NETHERLIGHT[i].obj.spellID == -1) netherlightData.push([ NETHERLIGHT[i].obj.spellID,NETHERLIGHT[i] ]);
 	netherlightData.sort(function(a,b){ return rV.netherlight[ a[0] ] > rV.netherlight[ b[0] ] ? - 1 : 1 });
 	for (var i = 0, len = netherlightData.length; i < len; i++) {
-		var traitData = netherlightData[i][1].obj
+		var traitData = netherlightData[i][1].obj;
+		
+		var traitRank = 1;
+		if(cV.traitBySpell[traitData.spellID] && cV.traitBySpell[traitData.spellID].rank) traitRank = cV.traitBySpell[traitData.spellID].rank;
 
 		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 		
@@ -4056,6 +4063,7 @@ function BuildReport(){
 		HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
 
 		if(traitData.additionalText) HTML += "<br>"+traitData.additionalText();
+		if(traitRank > 1) HTML += "<br>Per rank: "+NumberToFormattedNumber(amount / traitRank,0,2)+" ("+(amount / traitRank/rV.total*100).toFixed(2)+"%)";		
 	
 		HTML += "</div></div>";
 		counter++;
