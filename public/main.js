@@ -615,6 +615,18 @@ function error_msg(msg) {
 
 }
 
+function GetDelayedSpellsFeed(spellID){
+	var result = {};
+	for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
+		var CDdata = pV[ delayedSpells[j][0] ];
+		if(CDdata.spellsfeed[spellID] && healingData[ delayedSpells[j][1] ] && healingData[ delayedSpells[j][1] ][0] > 0){
+			result.push([delayedSpells[j][1],CDdata.spellsfeed[spellID] / CDdata.feed * healingData[ delayedSpells[j][1] ][0]]);
+		}
+	}
+	return result;
+}
+
+var NETHERLIGHT;
 
 var ITEMS = [
 	{	//Velens
@@ -1676,7 +1688,7 @@ var ITEMS = [
 		parse: [
 			"heal", function(event,spellID,amount){
 				if (spellID == 73921 && event.timestamp <= pV.t21_2p_HRLast){
-					var heal = cV.intellect * 0.5;
+					var heal = cV.intellect * 2.25;
 					if(cV.traitInfo[1352]) heal *= 1.06;
 					if(cV.traitInfo[1693]) heal *= 1.1;
 					if(cV.traitInfo[1389]) heal *= 1.05;
@@ -1716,7 +1728,7 @@ var ITEMS = [
 		parse: [
 			"heal", function(event,spellID,amount){
 				if ((spellID == 77472 || spellID == 8004) && event.timestamp <= pV.t21_4p_HRLast){
-					rV.t21_4p_PredictionAmount += amount * 0.5 * (cV.critSpell/40000+1);
+					rV.t21_4p_PredictionAmount += amount * 0.6 * (cV.critSpell/40000+1);
 				} else if (spellID == 252159) {
 					rV.t21_4p_Amount += amount;
 				}
@@ -1751,7 +1763,29 @@ var ITEMS = [
 				}
 			}
 		],
-	}
+	},
+	{	//Insignia ring
+		init: function() {
+			rV.insigniaringAmount = 0;
+			rV.insigniaringPredictionAmount = 0;
+		},
+		afterParse: function() {			
+			for (var i = 0, len = NETHERLIGHT.length; i < len; i++) {
+				if(NETHERLIGHT[i].obj && !NETHERLIGHT[i].obj.fakeTrait){
+					rV.insigniaringAmount += rV.netherlight[ NETHERLIGHT[i].obj.spellID ] * (1 - 1 / 1.5);
+					rV.insigniaringPredictionAmount += rV.netherlight[ NETHERLIGHT[i].obj.spellID ] * 0.5;
+				}
+			}
+		},
+		obj: {
+			type: "item",
+			name: "Insignia of the Grand Army",
+			quality: 5,
+			id: 152626,
+			prediction: "insigniaringPredictionAmount",
+			gear: "insigniaringAmount",
+		},
+	},
 ];
 
 var TRAITS = [
@@ -2199,7 +2233,7 @@ var TRAITS = [
 	},	
 ];
 
-var NETHERLIGHT = [
+NETHERLIGHT = [
 	{	//Infusion of Light
 		init: function() {
 			rV.netherlight[253093] = 0;
@@ -2236,8 +2270,9 @@ var NETHERLIGHT = [
 		},
 		afterParse: function() {
 			var rank = 1;
+			var perRankBonus = cV.gearInfo[152626] ? 750 : 500;
 			if(cV.traitBySpell[252088]) rank = cV.traitBySpell[252088].rank || 1;
-			rV.netherlight[252088] = healPerStat["haste"].amount * 500 * rank;
+			rV.netherlight[252088] = healPerStat["haste"].amount * perRankBonus * rank;
 		},		
 		obj: {
 			name: "Light Speed",
@@ -2251,8 +2286,9 @@ var NETHERLIGHT = [
 		},
 		afterParse: function() {
 			var rank = 1;
+			var perRankBonus = cV.gearInfo[152626] ? 750 : 500;
 			if(cV.traitBySpell[252091]) rank = cV.traitBySpell[252091].rank || 1;
-			rV.netherlight[252091] = healPerStat["mastery"].amount * 500 * rank;
+			rV.netherlight[252091] = healPerStat["mastery"].amount * perRankBonus * rank;
 		},		
 		obj: {
 			name: "Master of Shadows",
@@ -2266,10 +2302,11 @@ var NETHERLIGHT = [
 		},
 		parse: [
 			"combantantInfo", function(event){
+				var perRankBonus = cV.gearInfo[152626] ? 2250 : 1500;
 				for (var k = 0, k_len = event.artifact.length; k < k_len; k++) {
 					var traitData = event.artifact[k];
 					if( traitData.spellID == 252799 ){
-						statsBuffs.crit[242586] = 1500 * (traitData.rank || 1);
+						statsBuffs.crit[242586] = perRankBonus * (traitData.rank || 1);
 					}
 				}
 			}
@@ -2293,10 +2330,11 @@ var NETHERLIGHT = [
 		},
 		parse: [
 			"combantantInfo", function(event){
+				var perRankBonus = cV.gearInfo[152626] ? 2250 : 1500;
 				for (var k = 0, k_len = event.artifact.length; k < k_len; k++) {
 					var traitData = event.artifact[k];
 					if( traitData.spellID == 252191 ){
-						statsBuffs.vers[242586] = 1500 * (traitData.rank || 1);
+						statsBuffs.vers[242586] = perRankBonus * (traitData.rank || 1);
 					}
 				}
 			}
@@ -2406,6 +2444,7 @@ var NETHERLIGHT = [
 			spellID: -1,
 			icon: "inv_mace_1h_artifactazshara_d_02.jpg",
 			tip: function() { return "Not real trait. Just for compare numbers" },
+			fakeTrait: true,
 		},
 	},
 ];
@@ -2966,7 +3005,7 @@ var parsePlugins = {
 	combantantInfo: [],
 };
 
-var pluginsList = [OTHER, ITEMS, TRAITS, NETHERLIGHT, TALENTS, RESURGENCE, POTIONS];
+var pluginsList = [OTHER, NETHERLIGHT, ITEMS, TRAITS, TALENTS, RESURGENCE, POTIONS];
 for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 	var pluginData = pluginsList[k];
 	for (var i = 0, len = pluginData.length; i < len; i++) {
