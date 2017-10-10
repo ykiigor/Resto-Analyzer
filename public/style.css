@@ -3,6 +3,7 @@ body, td {
 	margin: 0;
 	padding: 0;
 	
+	background-color: #003B55;
 	background: url('background-merged.png') 50% no-repeat;
 	background-size: cover;
 	background-attachment: fixed;
@@ -615,6 +616,7 @@ em.wipe {
 .Warlock{color:#9482c9!important}
 .Warrior{color:#c79c6e!important}
 .DemonHunter{color:#a330c9!important}
+.NPC{color:#aaaaaa!important}
 .DeathKnight-bg{background-color:#c41f3b!important}
 .Druid-bg{background-color:#ff7d0a!important}
 .Hunter-bg{background-color:#9ec76b!important}
@@ -627,6 +629,7 @@ em.wipe {
 .Warlock-bg{background-color:#9482c9!important}
 .Warrior-bg{background-color:#c79c6e!important}
 .DemonHunter-bg{background-color:#a330c9!important}
+.NPC-bg{background-color:#aaaaaa!important}
 .epic{color:#a335ee!important}
 .legendary{color:#ff8000!important}
 

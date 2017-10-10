@@ -470,6 +470,7 @@ var classes = {
 	'Paladin': true,
 	'Warrior': true,
 	'Rogue': true,
+	'NPC': true,
 };
 
 var qualityColors = {
