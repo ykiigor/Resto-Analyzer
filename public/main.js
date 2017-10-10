@@ -1771,7 +1771,7 @@ var ITEMS = [
 		},
 		afterParse: function() {			
 			for (var i = 0, len = NETHERLIGHT.length; i < len; i++) {
-				if(NETHERLIGHT[i].obj && !NETHERLIGHT[i].obj.fakeTrait){
+				if(NETHERLIGHT[i].obj && !NETHERLIGHT[i].obj.fakeTrait && rV.netherlight[ NETHERLIGHT[i].obj.spellID ]){
 					rV.insigniaringAmount += rV.netherlight[ NETHERLIGHT[i].obj.spellID ] * (1 - 1 / 1.5);
 					rV.insigniaringPredictionAmount += rV.netherlight[ NETHERLIGHT[i].obj.spellID ] * 0.5;
 				}
