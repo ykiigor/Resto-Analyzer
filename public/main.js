@@ -321,43 +321,57 @@ var spellScaleVers = {
 };
 
 
-var delayedSpells = [
-	["buffCBT", 157503, {
-	157503: true,	//cbt
-	52042: true,	//hst
-	209069: true,	//tidal
-	114942: true,	//htt
-	98021: true,	//slt
-	206985: true, 	//guldan absorb
-	143924: true, 	//leech
-	235967: true,	//velens
-	201633: true,	//est
-}],	//cbt
-	["buffAG", 114911, {
-	114911: true,	//ag
-	52042: true,	//hst
-	209069: true,	//tidal
-	114942: true,	//htt
-	98021: true,	//slt
-	206985: true, 	//guldan absorb
-	143924: true, 	//leech
-	235967: true,	//velens
-	201633: true,	//est
-}],	//ag
-	["buffASC", 114083, {
-	114083: true,	//asc
-	114911: true,	//ag
-	157503: true,	//cbt
-	52042: true,	//hst
-	209069: true,	//tidal
-	114942: true,	//htt
-	98021: true,	//slt
-	206985: true, 	//guldan absorb
-	143924: true, 	//leech
-	235967: true,	//velens
-	201633: true,	//est
-}],	//asc
-];
+function CreateSpecialSpellCurrentData(){
+	return {
+		feedBySpell: {},
+		feed: 0,
+	}
+}
+
+var sSpellsKeys = ["CBT","AG","ASC"];
+var sSpells = {		// specialSpellSpellID, blacklist of spells that not feed special spell, SpellID for icon
+	CBT: [157503,
+		{
+			157503: true,	//cbt
+			52042: true,	//hst
+			209069: true,	//tidal
+			114942: true,	//htt
+			98021: true,	//slt
+			206985: true, 	//guldan absorb
+			143924: true, 	//leech
+			235967: true,	//velens
+			201633: true,	//est
+		},	
+	157503],
+	AG: [114911, 
+		{
+			114911: true,	//ag
+			52042: true,	//hst
+			209069: true,	//tidal
+			114942: true,	//htt
+			98021: true,	//slt
+			206985: true, 	//guldan absorb
+			143924: true, 	//leech
+			235967: true,	//velens
+			201633: true,	//est
+		},
+	114911],
+	ASC: [114083, 
+		{
+			114083: true,	//asc
+			114911: true,	//ag
+			157503: true,	//cbt
+			52042: true,	//hst
+			209069: true,	//tidal
+			114942: true,	//htt
+			98021: true,	//slt
+			206985: true, 	//guldan absorb
+			143924: true, 	//leech
+			235967: true,	//velens
+			201633: true,	//est
+		},
+	114052],
+};
 
 var cooldownsTrackingIDs = {
 	108281: true,
@@ -611,20 +625,22 @@ function NumberToFormattedNumber(num,decimals,decimals_m,decimals_k)
 	}	
 }
 
+function GetFeedTooltip(spellID){
+	var feed_str = "";
+	for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+		if(rV.feed[ sSpellsKeys[k] ].spells[spellID]) {
+			var icon_spellID = sSpells[ sSpellsKeys[k] ][2];
+			var icon = cV.spellInfo[icon_spellID] ? cV.spellInfo[icon_spellID].icon : "";
+			var name = cV.spellInfo[icon_spellID] ? cV.spellInfo[icon_spellID].name : "";
+			feed_str += "<br><img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\" style=\"width:20px;height:20px;\"> "+name+" - "+NumberToFormattedNumber(rV.feed[ sSpellsKeys[k] ].spells[spellID][0],0,2);
+		}
+	}
+	return feed_str;
+}
+
 function error_msg(msg) {
 	$("#main").html("<div class=\"panel\"><div class=\"col-full\"><div class=\"box\">"+msg+"</div></div></div>");
 
-}
-
-function GetDelayedSpellsFeed(spellID){
-	var result = {};
-	for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
-		var CDdata = pV[ delayedSpells[j][0] ];
-		if(CDdata.spellsfeed[spellID] && healingData[ delayedSpells[j][1] ] && healingData[ delayedSpells[j][1] ][0] > 0){
-			result.push([delayedSpells[j][1],CDdata.spellsfeed[spellID] / CDdata.feed * healingData[ delayedSpells[j][1] ][0]]);
-		}
-	}
-	return result;
 }
 
 var NETHERLIGHT;
@@ -742,9 +758,9 @@ var ITEMS = [
 						rV.jonatAmount += amount * (1 - 1 / (1 + 0.10 * pV.jonatCount));
 						
 						var amWOh = (amount + (event.overheal || 0)) * (1 - 1 / (1 + 0.10 * pV.jonatCount));
-						if(pV.buffAGActive) pV.jonatAmountAG += amWOh;
-						if(pV.buffCBTActive) pV.jonatAmountCBT += amWOh;
-						if(pV.buffASCActive) pV.jonatAmountASC += amWOh;
+						if(pV.ssAGstatus) pV.jonatAmountAG += amWOh;
+						if(pV.ssCBTstatus) pV.jonatAmountCBT += amWOh;
+						if(pV.ssASCstatus) pV.jonatAmountASC += amWOh;
 					}
 					
 					if(event["timestamp"] < pV.jonatPredictionLast){
@@ -778,10 +794,7 @@ var ITEMS = [
 			},
 		],
 		afterParse: function() {
-			if(pV.buffAG.mod) rV.jonatAmount += pV.jonatAmountAG * pV.buffAG.mod;
-			if(pV.buffCBT.mod) rV.jonatAmount += pV.jonatAmountCBT * pV.buffCBT.mod;
-			if(pV.buffASC.mod) rV.jonatAmount += pV.jonatAmountASC * pV.buffASC.mod;
-			console.log(pV.jonatAmountCBT,pV.jonatAmountAG,pV.jonatAmountASC);
+
 		},		
 		obj: {
 			type: "item",
@@ -1193,7 +1206,10 @@ var ITEMS = [
 		},
 		afterParse: function() {
 			if(healingData[208981]) {
-				rV.rootsAmount = healingData[208981][0];
+				rV.rootsAmount += healingData[208981][0];
+			}
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[208981]) rV.rootsAmount += rV.feed[ sSpellsKeys[k] ].spells[208981][0];
 			}
 		},
 		obj: {
@@ -1202,6 +1218,7 @@ var ITEMS = [
 			quality: 5,
 			id: 132466,
 			gear: "rootsAmount",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This item also feed your CBT, AG and ASC."+GetFeedTooltip(208981)+"<br>Note! It also feed when player with full hp, but that event is missing in logs. Can be a little inaccurate in that way</span></em>" },
 		},
 	},
 	{	//cake
@@ -1584,42 +1601,13 @@ var ITEMS = [
 	},
 	{	//Ocean's Embrace
 		init: function() {
-			rV.oceansEmbraceAmount = 0;
-			pV.oceansEmbraceFeedSpells = {
-				108281: 0.6,
-				114052: 1,
-				157153: 0.25,			
-			};
-			pV.oceansEmbraceFeedAmount = {
-				108281: 0,
-				114052: 0,
-				157153: 0,			
-			};
-			pV.oceansEmbraceFeedSpellsToHealSpell = {
-				108281: 114083,
-				114052: 114911,
-				157153: 157503,			
-			};			
+			rV.oceansEmbraceAmount = 0;			
 		},
-		parse: [
-			"heal", function(event,spellID,amount,overheal){
-				if(spellID == 242474){
-					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
-						if(cooldownsTracking[j].opened && pV.oceansEmbraceFeedSpells[ cooldownsTracking[j].spellID ]){
-							pV.oceansEmbraceFeedAmount[ cooldownsTracking[j].spellID ] += (amount + overheal) * pV.oceansEmbraceFeedSpells[ cooldownsTracking[j].spellID ];
-						}
-					}
-				}
-			},
-		],
 		afterParse: function() {
 			if(healingData[242474]) rV.oceansEmbraceAmount += healingData[242474][0];
-			Object.keys(pV.oceansEmbraceFeedSpells).forEach(function (spellID) {
-				var healSpellID = pV.oceansEmbraceFeedSpellsToHealSpell[spellID];
-				if(healingData[healSpellID] && healingData[healSpellID][0] > 0){
-					rV.oceansEmbraceAmount += pV.oceansEmbraceFeedAmount[spellID] * (healingData[healSpellID][0] / (healingData[healSpellID][0] + healingData[healSpellID][1]));
-				}
-			});			
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[242474]) rV.oceansEmbraceAmount += rV.feed[ sSpellsKeys[k] ].spells[242474][0];
+			}			
 		},
 		obj: {
 			type: "item",
@@ -1627,48 +1615,19 @@ var ITEMS = [
 			quality: 4,
 			id: 147004,
 			gear: "oceansEmbraceAmount",
-			gearAdditionalText: function() { return "<em class=\"tooltip\">Why amount different?<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC. Additional average amount added to pure healing number.</span></em>" },
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(242474)+"</span></em>" },
 		},
-	},
+	},	
 	{	//The Deceiver's Grand Design [kj]
 		init: function() {
-			rV.dgdAmount = 0;
-			pV.dgdFeedSpells = {
-				108281: 0.6,
-				114052: 1,
-				157153: 0.25,			
-			};
-			pV.dgdFeedAmount = {
-				108281: 0,
-				114052: 0,
-				157153: 0,			
-			};
-			pV.dgdFeedSpellsToHealSpell = {
-				108281: 114083,
-				114052: 114911,
-				157153: 157503,			
-			};			
+			rV.dgdAmount = 0;			
 		},
-		parse: [
-			"heal", function(event,spellID,amount,overheal){
-				if(spellID == 242622){
-					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
-						if(cooldownsTracking[j].opened && pV.dgdFeedSpells[ cooldownsTracking[j].spellID ]){
-							pV.dgdFeedAmount[ cooldownsTracking[j].spellID ] += (amount + overheal) * pV.dgdFeedSpells[ cooldownsTracking[j].spellID ];
-						}
-					}
-				}
-			},
-		],
 		afterParse: function() {
 			if(healingData[242622]) rV.dgdAmount += healingData[242622][0];
 			if(healingData[242623]) rV.dgdAmount += healingData[242623][0];
-			Object.keys(pV.dgdFeedSpells).forEach(function (spellID) {
-				var healSpellID = pV.dgdFeedSpellsToHealSpell[spellID];
-				if(healingData[healSpellID] && healingData[healSpellID][0] > 0){
-					rV.dgdAmount += pV.dgdFeedAmount[spellID] * (healingData[healSpellID][0] / (healingData[healSpellID][0] + healingData[healSpellID][1]));
-				}
-			});			
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[242622]) rV.dgdAmount += rV.feed[ sSpellsKeys[k] ].spells[242622][0];
+			}			
 		},
 		obj: {
 			type: "item",
@@ -1676,7 +1635,9 @@ var ITEMS = [
 			quality: 4,
 			id: 147007,
 			gear: "dgdAmount",
-			gearAdditionalText: function() { return "<em class=\"tooltip\">Why amount different?<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC. Additional average amount added to pure healing number.</span></em>" },
+			gearAdditionalText: function() { 
+				return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(242622)+"</span></em>" 
+			},
 		},
 	},
 	{	//2t21
@@ -1772,7 +1733,8 @@ var ITEMS = [
 		},
 		afterParse: function() {			
 			for (var i = 0, len = NETHERLIGHT.length; i < len; i++) {
-				if(NETHERLIGHT[i].obj && !NETHERLIGHT[i].obj.fakeTrait && rV.netherlight[ NETHERLIGHT[i].obj.spellID ]){
+				if(NETHERLIGHT[i].obj && !NETHERLIGHT[i].obj.fakeTrait && rV.netherlight[ NETHERLIGHT[i].obj.spellID ] && cV.traitBySpell[ NETHERLIGHT[i].obj.spellID ]){
+					console.log('NETHERLIGHT[i].obj',NETHERLIGHT[i].obj);
 					rV.insigniaringAmount += rV.netherlight[ NETHERLIGHT[i].obj.spellID ] * (1 - 1 / 1.5);
 					rV.insigniaringPredictionAmount += rV.netherlight[ NETHERLIGHT[i].obj.spellID ] * 0.5;
 				}
@@ -2849,123 +2811,6 @@ var OTHER = [
 			},
 		],
 	},
-	{	//Fix
-		init: function() {
-			pV.critTidalLoss = 0;
-			function CreateStatData() {return {amount:0,total:0,avg:0,avgCount:0,all:0,buffs:[],spells:[]} };
-			function CreateCDData() {
-				return {
-					int: CreateStatData(),
-					haste: CreateStatData(),
-					mastery: CreateStatData(),
-					vers: CreateStatData(),
-					crit: CreateStatData(),
-					time:0,
-					feed:0,
-					spellsfeed:[],
-				}; 
-			};
-			
-			pV.buffAG = CreateCDData();
-			pV.buffAG.buffASC = CreateCDData();
-			pV.buffAG.buffCBT = CreateCDData();
-			
-			pV.buffASC = CreateCDData();
-			
-			pV.buffCBT = CreateCDData();
-			pV.buffCBT.buffASC = CreateCDData();
-			pV.buffCBT.buffAG = CreateCDData();
-		},
-		parse: [
-			"applybuff", function(event,spellID){
-				if(spellID == 108281) {		//Ancestral Guidance
-					pV.buffAG.time = event.timestamp + 11000;
-					pV.buffAGActive = true;
-				} else if(spellID == 114052) {	//Ascendance
-					pV.buffASC.time = event.timestamp + 16000;
-					pV.buffASCActive = true;
-				}
-			},
-			"removebuff", function(event,spellID){
-				if(spellID == 108281) {		//Ancestral Guidance
-					pV.buffAG.time = 0;
-					pV.buffAGActive = false;
-				} else if(spellID == 114052) {	//Ascendance
-					pV.buffASC.time = 0;
-					pV.buffASCActive = false;
-				}
-			},
-			"cast", function(event,spellID){
-				if(spellID == 157153) {	//CBT
-					pV.buffCBT.time = event.timestamp + 15500;
-					pV.buffCBTActive = true;
-				} else if (spellID == 201764) {	//return CBT
-					pV.buffCBT.time = 0;
-					pV.buffCBTActive = false;
-				}
-			}
-		],
-		afterParse: function() {
-			var statsList = ["int","haste","mastery","vers","crit"];
-			var dSL = ["buffAG","buffASC","buffCBT"];
-			for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
-				var spellData = delayedSpells[j];
-				if(healingData[ spellData[1] ]) {
-					pV[ spellData[0] ].itself = healingData[ spellData[1] ][0];
-				}
-			}
-			for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
-				var spellData = delayedSpells[j];
-				var CDdata = pV[ spellData[0] ];
-				var itself = 0;
-				if(healingData[ spellData[1] ]) {
-					itself = healingData[ spellData[1] ][0];
-				}
-				if(itself > 0 && CDdata.feed > 0){
-					var p = itself / CDdata.feed;
-					CDdata.mod = p;
-					for (var k = 0, k_len = statsList.length; k < k_len; k++) {
-						var stat = statsList[k];				
-						healPerStat[stat].amount += CDdata[stat].amount * p;
-						healPerStat[stat].total += CDdata[stat].total * p;
-						healPerStat[stat].avg += CDdata[stat].avg * p;
-						healPerStat[stat].avgCount += CDdata[stat].avgCount * p;
-						healPerStat[stat].all += CDdata[stat].all * p;
-						
-						if(!healPerStat[stat].spells) healPerStat[stat].spells = {};
-						healPerStat[stat].spells[ spellData[1] ] = (healPerStat[stat].spells[ spellData[1] ] || 0) + CDdata[stat].amount * p;
-						
-						Object.keys(CDdata[stat].buffs).forEach(function (buffSpellID) {
-							if(!rV.buffs[stat][buffSpellID]) rV.buffs[stat][buffSpellID] = 0;
-							rV.buffs[stat][buffSpellID] += CDdata[stat].buffs[buffSpellID] * p;
-						});
-					}
-					for (var k = 0, k_len = dSL.length; k < k_len; k++) {
-						var nCDdata = CDdata[ dSL[k] ];
-						if(nCDdata && pV[ dSL[k] ].feed > 0){
-							var p2 = pV[ dSL[k] ].itself / pV[ dSL[k] ].feed;
-							for (var l = 0, l_len = statsList.length; l < l_len; l++) {
-								var stat = statsList[l];			
-								healPerStat[stat].amount += nCDdata[stat].amount * p * p2;
-								healPerStat[stat].total += nCDdata[stat].total * p * p2;
-								healPerStat[stat].avg += nCDdata[stat].avg * p * p2;
-								healPerStat[stat].avgCount += nCDdata[stat].avgCount * p * p2;
-								healPerStat[stat].all += nCDdata[stat].all * p * p2;
-								
-								if(!healPerStat[stat].spells) healPerStat[stat].spells = {};
-								healPerStat[stat].spells[ spellData[1] ] = (healPerStat[stat].spells[ spellData[1] ] || 0) + nCDdata[stat].amount * p * p2;
-								
-								Object.keys(nCDdata[stat].buffs).forEach(function (buffSpellID) {
-									if(!rV.buffs[stat][buffSpellID]) rV.buffs[stat][buffSpellID] = 0;
-									rV.buffs[stat][buffSpellID] += nCDdata[stat].buffs[buffSpellID] * p * p2;
-								});							
-							}
-						}
-					}
-				}
-			}
-		},
-	},
 	{	//Crit resurgence
 		init: function() {
 			rV.resurgenceCrit = 0;
@@ -2988,8 +2833,17 @@ var OTHER = [
 			rV.resurgenceCritAmount = pV.resurgenceCritAvg / pV.resurgenceCritCount;
 		},
 	},
+	{	//Utility
+		init: function() {
+			pV.critTidalLoss = 0;
+			rV.feed = {
+				CBT: {spells:{},total:0,heal:0},
+				AG: {spells:{},total:0,heal:0},
+				ASC: {spells:{},total:0,heal:0},
+			};
+		},
+	},
 ];
-
 
 
 var parsePlugins = {
@@ -3004,6 +2858,8 @@ var parsePlugins = {
 	energize: [],
 	gear: [],
 	combantantInfo: [],
+	any: [],
+	special: [],
 };
 
 var pluginsList = [OTHER, NETHERLIGHT, ITEMS, TRAITS, TALENTS, RESURGENCE, POTIONS];
@@ -3018,14 +2874,7 @@ for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 	}
 }
 
-var multiplicateCDs = [
-	[function(sid,timestamp){if(sid==114911 && timestamp <= pV.buffCBT.time) return true;},"buffCBT","buffAG"],
-	[function(sid,timestamp){if(sid==114083 && timestamp <= pV.buffCBT.time) return true;},"buffCBT","buffASC"],
-	[function(sid,timestamp){if(sid==157503 && timestamp <= pV.buffAG.time) return true;},"buffAG","buffCBT"],
-	[function(sid,timestamp){if(sid==114083 && timestamp <= pV.buffAG.time) return true;},"buffAG","buffASC"],
-];
-
-function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timestamp){
+function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timestamp,event){
 	Object.keys(statsBuffs[stat]).forEach(function (buffSpellID) {
 		if(buffStatus[buffSpellID]){
 			if(!rV.buffs[stat][buffSpellID]) rV.buffs[stat][buffSpellID] = 0;
@@ -3051,46 +2900,74 @@ function AddStatAmount(stat,amount,amountWithOh,statNow,totalHeal,spellID,timest
 	healPerStat.graph[timeGraph][stat].avgCount += healWOstat;
 	healPerStat.graph[timeGraph][stat].all += totalHeal;
 	
-	for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
-		var CDdata = pV[ delayedSpells[j][0] ];
-		if(!delayedSpells[j][2][spellID] && timestamp <= CDdata.time){
-			CDdata[stat].amount += amountWithOh / statNow;
-			CDdata[stat].total += amountWithOh;
-			CDdata[stat].avg += statNow * amountWithOh;
-			CDdata[stat].avgCount += amountWithOh;
-			CDdata[stat].all += totalHeal;			
-
-			if(!CDdata[stat].spells) CDdata[stat].spells = {};
-			CDdata[stat].spells[spellID] = (CDdata[stat].spells[spellID] || 0) + totalHeal;	
-
-			
-			Object.keys(statsBuffs[stat]).forEach(function (buffSpellID) {
-				if(buffStatus[buffSpellID]){
-					if(!CDdata[stat].buffs[buffSpellID]) CDdata[stat].buffs[buffSpellID] = 0;
-					CDdata[stat].buffs[buffSpellID] += statsBuffs[stat][buffSpellID] / statNow * amountWithOh;
-				}
-			});
-			
-			for (var k = 0, k_len = multiplicateCDs.length; k < k_len; k++) {
-				if(multiplicateCDs[k][0](delayedSpells[j][1],timestamp)) {
-					CDdata = pV[ multiplicateCDs[k][1] ][ multiplicateCDs[k][2] ];
+	if(event.type != "absorbed") {
+		for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+			var sName = sSpellsKeys[k];
+		
+			if(pV["ss"+sName+"status"] && !sSpells[sName][1][spellID]){
+				if(!pV["ss"+sName+"stats"]) pV["ss"+sName+"stats"] = {}
+				if(!pV["ss"+sName+"stats"][spellID]) pV["ss"+sName+"stats"][spellID] = CreateHealPerStatTable();
 				
-					CDdata[stat].amount += amountWithOh / statNow;
-					CDdata[stat].total += amountWithOh;
-					CDdata[stat].avg += statNow * amountWithOh;
-					CDdata[stat].avgCount += amountWithOh;
-					CDdata[stat].all += totalHeal;			
-					
-					Object.keys(statsBuffs[stat]).forEach(function (buffSpellID) {
-						if(buffStatus[buffSpellID]){
-							if(!CDdata[stat].buffs[buffSpellID]) CDdata[stat].buffs[buffSpellID] = 0;
-							CDdata[stat].buffs[buffSpellID] += statsBuffs[stat][buffSpellID] / statNow * amountWithOh;
-						}
-					});			
-				}
+				var CDdata = pV["ss"+sName+"stats"][spellID];
+				
+				CDdata[stat].amount += amountWithOh / statNow;
+				CDdata[stat].total += amountWithOh;
+				CDdata[stat].avg += statNow * amountWithOh;
+				CDdata[stat].avgCount += amountWithOh;
+				CDdata[stat].all += totalHeal;
 			}
 		}
 	}
+}
+
+var AllStatsList = ['int','crit','mastery','vers','haste'];
+function AddStatAmountSpecialSpell(sName,sSpellID,spellID,delta,timestamp){
+	if(pV["ss"+sName+"stats"] && pV["ss"+sName+"stats"][spellID]){
+		var CDdata = pV["ss"+sName+"stats"][spellID];
+		
+		var isPrev = false;
+		if(CDdata.time && (timestamp - CDdata.time <= 200) && CDdata.prev) {
+			CDdata = CDdata.prev;
+			isPrev = true;
+		}
+		
+		for (var k = 0, k_len = AllStatsList.length; k < k_len; k++) {
+			var stat = AllStatsList[k];
+		
+			healPerStat[stat].amount += CDdata[stat].amount * delta;
+			healPerStat[stat].total += CDdata[stat].total * delta;
+			healPerStat[stat].avg += CDdata[stat].avg * delta;
+			healPerStat[stat].avgCount += CDdata[stat].avgCount * delta;
+			healPerStat[stat].all += CDdata[stat].all * delta;
+			if(!healPerStat[stat].spells) healPerStat[stat].spells = {};
+			healPerStat[stat].spells[sSpellID] = (healPerStat[stat].spells[sSpellID] || 0) + CDdata[stat].amount * delta;
+			
+			var timeGraph = Math.floor((timestamp - currFightData.start_time) / 1000 / STATS_GRAPH_STEP);
+			if(!healPerStat.graph[timeGraph]) healPerStat.graph[timeGraph] = CreateHealPerStatTable();
+		
+			healPerStat.graph[timeGraph][stat].amount +=  CDdata[stat].amount * delta;
+			healPerStat.graph[timeGraph][stat].total += CDdata[stat].total * delta;
+			healPerStat.graph[timeGraph][stat].avg +=  CDdata[stat].avg * delta;
+			healPerStat.graph[timeGraph][stat].avgCount +=  CDdata[stat].avgCount * delta;
+			healPerStat.graph[timeGraph][stat].all += CDdata[stat].all * delta;			
+			
+		}
+		
+		if(!isPrev){
+			var newRecord = CreateHealPerStatTable();
+			newRecord.time = timestamp;
+			newRecord.prev = pV["ss"+sName+"stats"][spellID];
+			delete pV["ss"+sName+"stats"][spellID].prev;
+			pV["ss"+sName+"stats"][spellID] = newRecord;
+		}
+	}
+}
+
+function SetSpecialSpellOn(sName,timestamp){
+	pV["ss"+sName+"status"] = true;
+	pV["ss"+sName] = CreateSpecialSpellCurrentData();
+	pV["ss"+sName].time = timestamp;
+	delete pV["ss"+sName+"stats"];
 }
 
 function ParseLog(fight_code,actor_id,start_time,end_time)
@@ -3131,7 +3008,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 				
 				if(spellScaleInt[spellID]){
-					AddStatAmount('int',amount,amount+overheal,cV.intellect,amount,spellID,event.timestamp);
+					AddStatAmount('int',amount,amount+overheal,cV.intellect,amount,spellID,event.timestamp,event);
 				}
 				
 				if(event.hitType == 2){
@@ -3151,7 +3028,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						pV.critNow += (GetTraitRank(1103) * 4 + 40) * 400;
 					}
 					
-					AddStatAmount('crit',pV.critAmount,critAmountOh,pV.critNow,amount,spellID,event.timestamp);
+					AddStatAmount('crit',pV.critAmount,critAmountOh,pV.critNow,amount,spellID,event.timestamp,event);
 				}
 				
 				if(spellScaleMastery[spellID] && (event.resourceActor == 2 || event.targetID == actor_id) && event.hitPoints && event.maxHitPoints){
@@ -3171,7 +3048,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
 					var currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
 				
-					AddStatAmount('mastery',pV.currHealFromMastery,currHealFromMasteryOh,pV.masteryNow,amount,spellID,event.timestamp);
+					AddStatAmount('mastery',pV.currHealFromMastery,currHealFromMasteryOh,pV.masteryNow,amount,spellID,event.timestamp,event);
 					
 					if(targetHPbeforeHeal < 0.30) healPerStat.mastery.b30 += pV.currHealFromMastery; else
 					if(targetHPbeforeHeal < 0.40) healPerStat.mastery.b40 += pV.currHealFromMastery; else
@@ -3202,7 +3079,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					pV.currHealFromVers = amount * ( 1 - (1 / ((pV.versNow / 475) / 100 + 1)) );
 					var currHealFromVersOh = (amount + overheal) * ( 1 - (1 / ((pV.versNow / 475) / 100 + 1)) );
 					
-					AddStatAmount('vers',pV.currHealFromVers,currHealFromVersOh,pV.versNow,amount,spellID,event.timestamp);
+					AddStatAmount('vers',pV.currHealFromVers,currHealFromVersOh,pV.versNow,amount,spellID,event.timestamp,event);
 				}
 				
 				if(!spellNotScaleHaste[spellID] && (event.tick || spellAffectedByHaste[spellID])){
@@ -3226,7 +3103,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					
 					pV.hasteNow = (hasteMod - 1) * 100 * 375;
 					
-					AddStatAmount('haste',pV.currHealFromHaste,currHealFromHasteOh,pV.hasteNow,amount,spellID,event.timestamp);
+					AddStatAmount('haste',pV.currHealFromHaste,currHealFromHasteOh,pV.hasteNow,amount,spellID,event.timestamp,event);
 
 					Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
 						if(buffStatus[buffSpellID]){
@@ -3234,14 +3111,6 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 							rV.buffs.haste_mod[buffSpellID] += ((statsBuffs.haste_mod[buffSpellID] - 1) * 100 * 375) / pV.hasteNow * pV.currHealFromHaste;
 						}
 					});
-				}
-				
-				for (var j = 0, j_len = delayedSpells.length; j < j_len; j++) {
-					var CDdata = pV[ delayedSpells[j][0] ];
-					if(CDdata && !delayedSpells[j][2][spellID] && event.timestamp <= CDdata.time){
-						CDdata.feed += (amount+overheal);
-						CDdata.spellsfeed[spellID] = (CDdata.spellsfeed[spellID] || 0) + (amount+overheal);
-					}
 				}
 				
 				for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
@@ -3275,12 +3144,76 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						if(event["overheal"]) cooldownsTracking[j].heal[pos].over += event["overheal"];
 						cooldownsTracking[j].heal[pos].count ++;
 						
-						if(spellID == 157503 && cooldownsTracking[j].spellID == 157153){
+						if(spellID == 157503 && cooldownsTracking[j].spellID == 157153){	//CBT
 							cooldownsTracking[j].ended = event["timestamp"];
 							cooldownsTracking[j].opened = false;
+							
+							for (var k = 0, k_len = parsePlugins.special.length; k < k_len; k++) {
+								parsePlugins.special[k]("CBT_end",event);
+							}
 						}
 					}
 				}
+				
+				if(spellID == 157503) pV.ssCBTstatus = false;
+				
+				//special Spells [CBT,AG,ASC]
+				if(event.type != "absorbed") {
+					for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+						var sName = sSpellsKeys[k];
+					
+						if(spellID == sSpells[sName][0]){
+							if(!pV["ss"+sName]){
+								// unk error here
+							} else if(event.timestamp - pV["ss"+sName].time <= 200) {
+								if(pV["ss"+sName].prev){
+									var ss_data = pV["ss"+sName].prev;
+									
+									var spells = Object.keys(ss_data.feedBySpell);
+									for (var j = 0, j_len = spells.length; j < j_len; j++) {
+										if(!rV.feed[sName].spells[ spells[j] ]) rV.feed[sName].spells[ spells[j] ] = [0,0];
+										var fromSpellAmount = amount / ss_data.feed * ss_data.feedBySpell[ spells[j] ];
+										rV.feed[sName].spells[ spells[j] ][0] += fromSpellAmount;
+										
+										rV.feed[sName].heal += fromSpellAmount;
+										
+										AddStatAmountSpecialSpell(sName,spellID,spells[j],amount / ss_data.feed,event.timestamp);
+									}
+								}
+							} else {
+								var ss_data = pV["ss"+sName];
+								
+								var spells = Object.keys(ss_data.feedBySpell);
+								for (var j = 0, j_len = spells.length; j < j_len; j++) {
+									if(!rV.feed[sName].spells[ spells[j] ]) rV.feed[sName].spells[ spells[j] ] = [0,0];
+									var fromSpellAmount = amount / ss_data.feed * ss_data.feedBySpell[ spells[j] ];
+									rV.feed[sName].spells[ spells[j] ][0] += fromSpellAmount;
+									
+									rV.feed[sName].heal += fromSpellAmount;
+									
+									AddStatAmountSpecialSpell(sName,spellID,spells[j],amount / ss_data.feed,event.timestamp);
+								}
+								
+								var newRecord = CreateSpecialSpellCurrentData()
+								newRecord.prev = pV["ss"+sName];
+								delete pV["ss"+sName].prev;
+								pV["ss"+sName] = newRecord;
+								pV["ss"+sName].time = event.timestamp;
+							}
+						} else if(pV["ss"+sName+"status"] && !sSpells[sName][1][spellID]){
+							pV["ss"+sName].feed += amount + overheal;
+							if(!pV["ss"+sName].feedBySpell[spellID]) pV["ss"+sName].feedBySpell[spellID] = 0;
+							pV["ss"+sName].feedBySpell[spellID] += amount + overheal;
+							
+							if(!rV.feed[sName].spells[spellID]) rV.feed[sName].spells[spellID] = [0,0];
+							rV.feed[sName].spells[spellID][1] += amount + overheal;
+							rV.feed[sName].total += amount + overheal;
+						}
+					}
+				}
+				
+				
+
 				
 				if(spellID == 98021){		//slt
 					for (var j = 0, j_len = sltTracking.length; j < j_len; j++) {
@@ -3334,6 +3267,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 				if(spellID == 29166){
 					pV.innervate = true;
+				} else if(spellID == 108281){	//AG
+					SetSpecialSpellOn("AG",event.timestamp);
+				} else if(spellID == 114052){	//ASC
+					SetSpecialSpellOn("ASC",event.timestamp);
 				}
 
 				if(cooldownsTrackingIDs[spellID]) {
@@ -3371,6 +3308,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					pV.innervate = false;
 				} else if(spellID == 53390) {
 					pV.critTidalLoss = event.timestamp + 500;
+				} else if(spellID == 108281){	//AG
+					pV.ssAGstatus = false;
+				}  else if(spellID == 114052){	//ASC
+					pV.ssASCstatus = false;
 				}
 
 				if(cooldownsTrackingIDs[spellID]) {
@@ -3440,21 +3381,28 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 							time: event["timestamp"] - cooldownsTracking[j].start,
 						});
 					}
-				}	
+				}
 				
 				if(spellID == 201764){	//manual return CBT
 					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
 						if(cooldownsTracking[j].opened && cooldownsTracking[j].spellID == 157153){
 							cooldownsTracking[j]['ended'] = event["timestamp"];
 							cooldownsTracking[j]['opened'] = false;
+							for (var k = 0, k_len = parsePlugins.special.length; k < k_len; k++) {
+								parsePlugins.special[k]("CBT_end",event);
+							}
 						}
 					}
+
+					pV.ssCBTstatus = false;				
 				} else if (spellID == 98008){	//slt
 					sltTracking.push({
 						start: event["timestamp"],
 						heal: [],
 						damage: [],
 					});
+				} else if (spellID == 157153){	//cbt
+					SetSpecialSpellOn("CBT",event.timestamp);				
 				}
 
 				for (var j = 0, j_len = parsePlugins.cast.length; j < j_len; j++) {
@@ -3576,11 +3524,20 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}
 			}
 			
+			for (var j = 0, j_len = parsePlugins.any.length; j < j_len; j++) {
+				parsePlugins.any[j](event);
+			}
+			
 			for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
 				if(cooldownsTracking[j].opened && cooldownsTracking[j].end_limit && event["timestamp"] >= cooldownsTracking[j].end_limit){
 					cooldownsTracking[j]['ended'] = event["timestamp"];
 					cooldownsTracking[j]['opened'] = false;
-					if(cooldownsTracking[j].spellID == 157153) pV.buffCBTActive = false;	//CBT
+					if(cooldownsTracking[j].spellID == 157153) {
+						pV.ssCBTstatus = false;	
+						for (var k = 0, k_len = parsePlugins.special.length; k < k_len; k++) {
+							parsePlugins.special[k]("CBT_end",event);
+						}
+					}
 				}
 			}
 			
@@ -3842,6 +3799,8 @@ function BuildReport(){
 	//console.log(healingData);
 	console.log(rV);
 	//console.log(healPerStat);
+	
+	if(cV.spellInfo[6262]) cV.spellInfo[6262].icon = "warlock_healthstone.jpg";
 	
 	var HTML = "";
 	
@@ -4285,6 +4244,42 @@ function BuildReport(){
 	HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">Average mastery effectiveness</div><div class=\"col w5 t-right\">"+(masteryTmp1*100).toFixed(2)+"%</div><div class=\"col w25 clearfix\"><div class=\"performance-bar\" style=\"width: "+(Math.min(masteryTmp1/masteryAVGMax,1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
 	HTML += "</div></div></div>";
 
+
+	/// FEED
+	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix\"><header class=\"box-header\">FEEDING</header><div class=\"list-top-line\"> </div><ul class=\"list cooldowns\">";
+	for (var i = 0, len = sSpellsKeys.length; i < len; i++) {
+		var keyName = sSpellsKeys[i];
+		if(rV.feed[keyName].total > 0){
+			var spellID = sSpells[keyName][2];
+			HTML += "<li class=\"item clearfix\"><div class=\"row full\"><div class=\"col w70p\">";
+			
+			HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[spellID].icon+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
+		
+			HTML += "<div class=\"col half\">";
+			HTML += "<header class=\"cd_header\">"+cV.spellInfo[spellID].name+"</header>";
+	
+			HTML += "<div class=\"col full div_more_3\">";
+
+			HTML += "<div class=\"row full\"><div class=\"cd_more_3_info cd_more_3_info_heal\"> </div><div class=\"cd_more_3_info cd_more_3_info_amount\"><em class=\"tooltip\">Clear number<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">How much exactly spell is part of another</span></em></div><div class=\"cd_more_3_info cd_more_3_info_amount\"><em class=\"tooltip\">Total<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">How much total healing spend to feed this spell</span></em></div></div>";				
+			
+			var spellsKeys = Object.keys(rV.feed[keyName].spells);
+			spellsKeys.sort(function(a,b){ return rV.feed[keyName].spells[a][0] > rV.feed[keyName].spells[b][0] ? -1 : 1 });
+			for (var j = 0, j_len = spellsKeys.length; j < j_len; j++) {
+				var j_spellID = spellsKeys[j];
+				HTML += "<div class=\"row full\"><div class=\"cd_more_3_info cd_more_3_info_heal\">";
+				HTML += "<a href=\"//www.wowhead.com/spell="+j_spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[j_spellID].icon+"\" alt=\""+cV.spellInfo[j_spellID].name+"\"> "+cV.spellInfo[j_spellID].name+"</a>";
+				HTML += "</div><div class=\"cd_more_3_info cd_more_3_info_amount\">"+NumberToFormattedNumber(rV.feed[keyName].spells[j_spellID][0],2)+"</div><div class=\"cd_more_3_info cd_more_3_info_amount\">"+NumberToFormattedNumber(rV.feed[keyName].spells[j_spellID][1],2)+"</div></div>";				
+			}
+			
+			HTML += "</div></div>";
+		
+			HTML += "<div class=\"col text-center w13\"> </div>";
+			HTML += "<div class=\"col text-center w13\"><div style=\"font-size: 2em;\">"+NumberToFormattedNumber(rV.feed[keyName].heal,2)+"</div>HPS: "+NumberToFormattedNumber(rV.feed[keyName].heal / fightLen * 1000)+"</div>";
+			HTML += "<div class=\"col text-center w13\"><div style=\"font-size: 2em;\">"+NumberToFormattedNumber(rV.feed[keyName].total)+"</div>total feeding</div>";
+			HTML += "</div></li>";
+		}
+	}
+	HTML += "</ul></div></div></div>";
 	
 	
 	/// COOLDOWNS
