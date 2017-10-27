@@ -19,7 +19,7 @@ body {
 }
 
 a {
-	color: #e45a5a;
+	color: #ff2f2f;
 	text-decoration:none;
 }
 
@@ -49,7 +49,7 @@ div {
 }
 
 .box {
-	background: rgba(0, 0, 0, 0.4); /* Цвет фона */
+	background: rgba(10, 5, 0, 0.65); /* Цвет фона */
 	border-radius: 10px; 
 	padding: 10px;
 	box-shadow: 0 5px 5px 0 rgba(0,0,0,.15);
@@ -137,7 +137,7 @@ div {
 }
 
 .t-grey {
-	color: rgb(100,100,100);
+	color: rgb(150,150,150);
 }
 
 .list .row {
@@ -295,7 +295,7 @@ li.item {
 .cd_more_3_info_over {
 	width: 20%;
 	text-align: right;
-	color: rgb(100,100,100);
+	color: rgb(150,150,150);
 }
 
 .div_more_2 .row,
@@ -366,7 +366,7 @@ img {
 
 .navbar-default {
 	line-height: 66px;
-	background: rgba(15,28,35,.85);
+	background: rgba(35,23,15,.85);
 	border: 0;
 	box-shadow: 2px 0 3px rgba(0,0,0,.5);
 	margin-bottom: 1.75em;
@@ -634,7 +634,7 @@ em.wipe {
 .legendary{color:#ff8000!important}
 
 .slt-damage {
-	color: #e45a5a;
+	color: #ff2f2f;
 }
 .slt-heal {
 	color: rgb(95,228,75);
@@ -662,7 +662,7 @@ em.wipe {
 }
 
 .fightslist a:hover li {
-	color: #e45a5a;
+	color: #ff2f2f;
 	
 	background: hsla(0,0%,100%,.1);
 	border-top-color: rgba(0,0,0,.4);

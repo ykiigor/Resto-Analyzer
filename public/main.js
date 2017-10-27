@@ -238,6 +238,32 @@ var spellManaCost = {
 	32182: 21.5 / 100 * baseMana,	//heroism
 };
 
+var spellCastTime = {
+	77472: 2.5,	//hw
+	1064: 2.5,	//ch
+	61295: 1.5,	//riptide
+	73685: 1.5,	//ul
+	5394: 1.5,	//hst
+	157153: 1.5,	//cbt
+	8004: 1.5,	//surge
+	73920: 2,	//hr
+	198838: 1.5,	//est
+	188838: 1.5,	//Flame Shock
+	51505: 2,	//Lava Burst
+	192058: 1.5,	//Lightning Surge Totem	
+	207399: 1.5,	//apt
+	197995: 1.5,	//wellspring
+	207778: 2,	//gotq
+	2645: 1.5,	//wolf
+};
+
+var spellCastIDToHealID = {
+	5394: [52042,208899],
+	207778: [207778, 255227],
+	157153: [157503],
+	198838: [201633],
+};
+
 var OverallBlacklist = {
 	98021: true,	//slt
 	208981: true,	//roots
@@ -488,7 +514,7 @@ var classes = {
 };
 
 var qualityColors = {
-	10: "e45a5a",
+	10: "ff2f2f",
 	2: "1eff00",
 	3: "0070dd",
 	4: "a335ee",
@@ -625,17 +651,50 @@ function NumberToFormattedNumber(num,decimals,decimals_m,decimals_k)
 	}	
 }
 
-function GetFeedTooltip(spellID){
+function GetFeedTooltip(spellID,dataName){
 	var feed_str = "";
 	for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
-		if(rV.feed[ sSpellsKeys[k] ].spells[spellID]) {
+		var amount;
+		if(dataName){
+			amount = rV[ dataName+"_feed"+sSpellsKeys[k] ];
+		} else if (rV.feed[ sSpellsKeys[k] ].spells[spellID]) {
+			amount = rV.feed[ sSpellsKeys[k] ].spells[spellID][0];
+		}
+		
+		if(amount) {
 			var icon_spellID = sSpells[ sSpellsKeys[k] ][2];
 			var icon = cV.spellInfo[icon_spellID] ? cV.spellInfo[icon_spellID].icon : "";
 			var name = cV.spellInfo[icon_spellID] ? cV.spellInfo[icon_spellID].name : "";
-			feed_str += "<br><img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\" style=\"width:20px;height:20px;\"> "+name+" - "+NumberToFormattedNumber(rV.feed[ sSpellsKeys[k] ].spells[spellID][0],0,2);
+			feed_str += "<br><img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\" style=\"width:20px;height:20px;\"> "+name+" - "+NumberToFormattedNumber(amount,0,2);
 		}
 	}
 	return feed_str;
+}
+
+function CreateFeedInfoInData(dataName){
+	pV[dataName+"_ssCBT"] = 0;
+	pV[dataName+"_ssAG"] = 0;
+	pV[dataName+"_ssASC"] = 0;
+	pV[dataName+"_ssCBTprev"] = 0;
+	pV[dataName+"_ssAGprev"] = 0;
+	pV[dataName+"_ssASCprev"] = 0;
+	rV[dataName+"_feedCBT"] = 0;
+	rV[dataName+"_feedAG"] = 0;
+	rV[dataName+"_feedASC"] = 0;
+}
+function AddFeedAmountToData(dataName,amount){
+	if(pV.ssCBTstatus) pV[dataName+"_ssCBT"] += amount;
+	if(pV.ssAGstatus) pV[dataName+"_ssAG"] += amount;
+	if(pV.ssASCstatus) pV[dataName+"_ssASC"] += amount;
+}
+function CollectFeedAmountToData(dataName,ssType,addType,totalAmount,totalSpellFeed){
+	if(addType == 1){
+		rV[dataName+"_feed"+ssType] += pV[dataName+"_ss"+ssType] / totalSpellFeed * totalAmount;
+		pV[dataName+"_ss"+ssType+"prev"] = pV[dataName+"_ss"+ssType];
+		pV[dataName+"_ss"+ssType] = 0;
+	} else if(addType == 2){
+		rV[dataName+"_feed"+ssType] += pV[dataName+"_ss"+ssType+"prev"] / totalSpellFeed * totalAmount;						
+	}
 }
 
 function error_msg(msg) {
@@ -862,6 +921,8 @@ var ITEMS = [
 			pV.t20_2p_curr_targets = [];
 			pV.t20_2p_pred_targets = [];
 			pV.t20_2p_buffLast = 0;
+			
+			CreateFeedInfoInData("t20_2p");
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
@@ -897,6 +958,8 @@ var ITEMS = [
 					}
 					if(pV.t20_2p_curr_targets[event.targetID] && pV.t20_2p_curr_targets[event.targetID] >= event.timestamp && event.hitType == 2){
 						rV.t20_2p_Amount += pV.critAmount * Math.max(1 - (pV.critNow / 40000),0);
+						
+						AddFeedAmountToData("t20_2p",pV.critAmount * Math.max(1 - (pV.critNow / 40000),0));
 					}
 				}
 			},
@@ -913,8 +976,19 @@ var ITEMS = [
 			},				
 			"gear", function(itemData,itemID){
 				if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t20_2p_gearCount++;
-			}
+			},
+			"special", function(sType,ssType,addType,spellID,totalAmount,totalSpellFeed){
+				if(sType == "SS" && spellID == 61295){
+					CollectFeedAmountToData("t20_2p",ssType,addType,totalAmount,totalSpellFeed);
+				}
+			},
 		],
+		afterParse: function() {
+			rV.t20_2p_AmountNoFeed = rV.t20_2p_Amount;
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV[ "t20_2p_feed"+sSpellsKeys[k] ]) rV.t20_2p_Amount += rV[ "t20_2p_feed"+sSpellsKeys[k] ];
+			}			
+		},
 		obj: {
 			type: "spell",
 			name: "T20 2 set Bonus",
@@ -924,21 +998,25 @@ var ITEMS = [
 			predictionСondition: function() { return pV.t20_2p_gearCount < 2 },
 			gear: "t20_2p_Amount",
 			gearFunc: function() { return pV.t20_4p_gearCount >= 2 },
-			gearAdditionalText: function() { return rV.t20_2p_Count+" times" },
+			//gearAdditionalText: function() { return rV.t20_2p_Count+" times" },
+			gearAdditionalText: function() { return rV.t20_2p_Count+" times<br><em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.t20_2p_AmountNoFeed,0,2)+"<br>This bonus also feed your CBT, AG and ASC."+GetFeedTooltip(null,"t20_2p")+"</span></em>" },
 			icon: "spell_nature_riptide.jpg",
 		},
 	},
 	{	//4t20
 		init: function() {
 			rV.t20_4p_Amount = 0;
+			rV.t20_4p_AmountNoFeed = 0;
 			rV.t20_4p_Count = 0;
 			rV.t20_4p_PredictionAmount = 0;
 			pV.t20_4p_gearCount = 0;
 			pV.t20_4p_PredictionNext = 0;
 			pV.t20_4p_buffLast = 0;
+			
+			CreateFeedInfoInData("t20_4p");
 		},
 		parse: [
-			"heal", function(event,spellID,amount){
+			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 61295 && !event.tick && event.hitType == 2){
 					pV.t20_4p_PredictionNext = event.timestamp + 15000;
 				} else if (spellID == 73921 && pV.t20_4p_PredictionEnabled){
@@ -946,7 +1024,8 @@ var ITEMS = [
 				}
 				
 				if(spellID == 73921 && pV.t20_4p_Active){
-					rV.t20_4p_Amount += amount * (1 - (1 / 1.5))
+					rV.t20_4p_Amount += amount * (1 - (1 / 1.5));
+					AddFeedAmountToData("t20_4p",(amount + overheal) * (1 - (1 / 1.5)));
 				}
 			},
 			"cast", function(event,spellID){
@@ -969,8 +1048,19 @@ var ITEMS = [
 			},
 			"gear", function(itemData,itemID){
 				if(itemID == 147175 || itemID == 147176 || itemID == 147177 || itemID == 147178 || itemID == 147179 || itemID == 147180) pV.t20_4p_gearCount++;
-			}
+			},
+			"special", function(sType,ssType,addType,spellID,totalAmount,totalSpellFeed){
+				if(sType == "SS" && spellID == 73921){
+					CollectFeedAmountToData("t20_4p",ssType,addType,totalAmount,totalSpellFeed);
+				}
+			},
 		],
+		afterParse: function() {
+			rV.t20_4p_AmountNoFeed = rV.t20_4p_Amount;
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV[ "t20_4p_feed"+sSpellsKeys[k] ]) rV.t20_4p_Amount += rV[ "t20_4p_feed"+sSpellsKeys[k] ];
+			}			
+		},
 		obj: {
 			type: "spell",
 			name: "T20 4 set Bonus",
@@ -980,7 +1070,7 @@ var ITEMS = [
 			predictionСondition: function() { return pV.t20_2p_gearCount < 4 },
 			gear: "t20_4p_Amount",
 			gearFunc: function() { return pV.t20_4p_gearCount >= 4 },
-			gearAdditionalText: function() { return rV.t20_4p_Count+" times" },
+			gearAdditionalText: function() { return rV.t20_4p_Count+" times<br><em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.t20_4p_AmountNoFeed,0,2)+"<br>This bonus also feed your CBT, AG and ASC."+GetFeedTooltip(null,"t20_4p")+"</span></em>" },
 			icon: "spell_nature_giftofthewaterspirit.jpg",
 		},
 	},
@@ -1203,11 +1293,13 @@ var ITEMS = [
 	{	//roots
 		init: function() {
 			rV.rootsAmount = 0;
+			rV.rootsAmountNoFeed = 0;
 		},
 		afterParse: function() {
 			if(healingData[208981]) {
 				rV.rootsAmount += healingData[208981][0];
 			}
+			rV.rootsAmountNoFeed = rV.rootsAmount;
 			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
 				if(rV.feed[ sSpellsKeys[k] ].spells[208981]) rV.rootsAmount += rV.feed[ sSpellsKeys[k] ].spells[208981][0];
 			}
@@ -1218,7 +1310,7 @@ var ITEMS = [
 			quality: 5,
 			id: 132466,
 			gear: "rootsAmount",
-			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This item also feed your CBT, AG and ASC."+GetFeedTooltip(208981)+"<br>Note! It also feed when player with full hp, but that event is missing in logs. Can be a little inaccurate in that way</span></em>" },
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.rootsAmountNoFeed,0,2)+"<br>This item also feed your CBT, AG and ASC."+GetFeedTooltip(208981)+"<br>Note! It also feed when player with full hp, but that event is missing in logs. Can be a little inaccurate in that way</span></em>" },
 		},
 	},
 	{	//cake
@@ -1602,9 +1694,11 @@ var ITEMS = [
 	{	//Ocean's Embrace
 		init: function() {
 			rV.oceansEmbraceAmount = 0;			
+			rV.oceansEmbraceAmountNoFeed = 0;			
 		},
 		afterParse: function() {
 			if(healingData[242474]) rV.oceansEmbraceAmount += healingData[242474][0];
+			rV.oceansEmbraceAmountNoFeed = rV.oceansEmbraceAmount;
 			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
 				if(rV.feed[ sSpellsKeys[k] ].spells[242474]) rV.oceansEmbraceAmount += rV.feed[ sSpellsKeys[k] ].spells[242474][0];
 			}			
@@ -1615,16 +1709,18 @@ var ITEMS = [
 			quality: 4,
 			id: 147004,
 			gear: "oceansEmbraceAmount",
-			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(242474)+"</span></em>" },
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.oceansEmbraceAmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(242474)+"</span></em>" },
 		},
 	},	
 	{	//The Deceiver's Grand Design [kj]
 		init: function() {
 			rV.dgdAmount = 0;			
+			rV.dgdAmountNoFeed = 0;			
 		},
 		afterParse: function() {
 			if(healingData[242622]) rV.dgdAmount += healingData[242622][0];
 			if(healingData[242623]) rV.dgdAmount += healingData[242623][0];
+			rV.dgdAmountNoFeed = rV.dgdAmount;
 			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
 				if(rV.feed[ sSpellsKeys[k] ].spells[242622]) rV.dgdAmount += rV.feed[ sSpellsKeys[k] ].spells[242622][0];
 			}			
@@ -1636,7 +1732,7 @@ var ITEMS = [
 			id: 147007,
 			gear: "dgdAmount",
 			gearAdditionalText: function() { 
-				return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(242622)+"</span></em>" 
+				return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.dgdAmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(242622)+"</span></em>" 
 			},
 		},
 	},
@@ -2841,6 +2937,51 @@ var OTHER = [
 				AG: {spells:{},total:0,heal:0},
 				ASC: {spells:{},total:0,heal:0},
 			};
+			pV.savedTime = 0;
+			pV.savedTimeTotal = 0;
+			pV.totalCastTime = 0;
+			pV.prevCastTime = 0;
+			pV.savedTimeSpells = {};
+			pV.castNum = {};
+			rV.hasteCastProfit = 0;
+			rV.hasteCastProfitBySpell = {};
+		},
+		afterParse: function() {
+			/*
+			var PENALTY_FOR_MANA = 0.5;
+			Object.keys(pV.savedTimeSpells).forEach(function (spellCastID) {
+				var spellIDs;
+				if(spellCastIDToHealID[spellCastID])
+					spellIDs = spellCastIDToHealID[spellCastID];
+				else
+					spellIDs = [spellCastID];
+				for (var k = 0, k_len = spellIDs.length; k < k_len; k++) {
+					var spellID = spellIDs[k];
+					if(healingData[spellID]) {
+						rV.hasteCastProfit += healingData[spellID][0] / pV.castNum[spellCastID] * pV.savedTimeSpells[spellCastID] * PENALTY_FOR_MANA;
+						rV.hasteCastProfitBySpell[spellCastID] = (rV.hasteCastProfitBySpell[spellCastID] || 0) + healingData[spellID][0] / pV.castNum[spellCastID] * pV.savedTimeSpells[spellCastID] * PENALTY_FOR_MANA;
+					}
+				}
+			});
+			*/
+			var PENALTY_FOR_DOWNTIME = pV.totalCastTime / (currFightData.end_time - currFightData.start_time);
+			var PENALTY_FOR_MANA = 0.65;
+			
+			Object.keys(spellCastTime).forEach(function (spellCastID) {
+				var spellIDs;
+				if(spellCastIDToHealID[spellCastID])
+					spellIDs = spellCastIDToHealID[spellCastID];
+				else
+					spellIDs = [spellCastID];
+				for (var k = 0, k_len = spellIDs.length; k < k_len; k++) {
+					var spellID = spellIDs[k];
+					if(healingData[spellID]) {
+						rV.hasteCastProfit += healingData[spellID][0] * pV.savedTimeTotal/pV.totalCastTime * PENALTY_FOR_DOWNTIME * PENALTY_FOR_MANA;
+						//rV.hasteCastProfitBySpell[spellCastID] = (rV.hasteCastProfitBySpell[spellCastID] || 0) + healingData[spellID][0] / pV.castNum[spellCastID] * pV.savedTimeSpells[spellCastID];
+					}
+				}
+
+			});
 		},
 	},
 ];
@@ -2949,8 +3090,24 @@ function AddStatAmountSpecialSpell(sName,sSpellID,spellID,delta,timestamp){
 			healPerStat.graph[timeGraph][stat].total += CDdata[stat].total * delta;
 			healPerStat.graph[timeGraph][stat].avg +=  CDdata[stat].avg * delta;
 			healPerStat.graph[timeGraph][stat].avgCount +=  CDdata[stat].avgCount * delta;
-			healPerStat.graph[timeGraph][stat].all += CDdata[stat].all * delta;			
+			healPerStat.graph[timeGraph][stat].all += CDdata[stat].all * delta;
 			
+			for (var j = 0, j_len = sSpellsKeys.length; j < j_len; j++) {
+				var sName_j = sSpellsKeys[j];
+			
+				if(sName_j != sName && pV["ss"+sName_j+"status"] && !sSpells[sName_j][1][sSpellID]){
+					if(!pV["ss"+sName_j+"stats"]) pV["ss"+sName_j+"stats"] = {}
+					if(!pV["ss"+sName_j+"stats"][sSpellID]) pV["ss"+sName_j+"stats"][sSpellID] = CreateHealPerStatTable();
+					
+					var CDdata_j = pV["ss"+sName_j+"stats"][sSpellID];
+					
+					CDdata_j[stat].amount += CDdata[stat].amount * delta;
+					CDdata_j[stat].total += CDdata[stat].total * delta;
+					CDdata_j[stat].avg += CDdata[stat].avg * delta;
+					CDdata_j[stat].avgCount += CDdata[stat].avgCount * delta;
+					CDdata_j[stat].all += CDdata[stat].all * delta;
+				}
+			}
 		}
 		
 		if(!isPrev){
@@ -3178,6 +3335,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 										rV.feed[sName].heal += fromSpellAmount;
 										
 										AddStatAmountSpecialSpell(sName,spellID,spells[j],amount / ss_data.feed,event.timestamp);
+										
+										for (var l = 0, l_len = parsePlugins.special.length; l < l_len; l++) {
+											parsePlugins.special[l]("SS",sName,2,spells[j],fromSpellAmount,ss_data.feedBySpell[ spells[j] ]);
+										}
 									}
 								}
 							} else {
@@ -3192,6 +3353,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 									rV.feed[sName].heal += fromSpellAmount;
 									
 									AddStatAmountSpecialSpell(sName,spellID,spells[j],amount / ss_data.feed,event.timestamp);
+									
+									for (var l = 0, l_len = parsePlugins.special.length; l < l_len; l++) {
+										parsePlugins.special[l]("SS",sName,1,spells[j],fromSpellAmount,ss_data.feedBySpell[ spells[j] ]);
+									}
 								}
 								
 								var newRecord = CreateSpecialSpellCurrentData()
@@ -3373,6 +3538,41 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						}
 					}
 				}
+				
+				pV.castNum[spellID] = (pV.castNum[spellID] || 0) + 1;
+				
+				if(spellCastTime[spellID]){
+					var hasteNow = cV.haste;
+					Object.keys(statsBuffs.haste).forEach(function (buffSpellID) {
+						if(buffStatus[buffSpellID]) {
+							if(typeof(buffStatus[buffSpellID]) == "number")
+								hasteNow += statsBuffs.haste[buffSpellID] * buffStatus[buffSpellID];
+							else
+								hasteNow += statsBuffs.haste[buffSpellID];
+						}
+					});
+					
+					var hasteMod = (hasteNow / 375 / 100) + 1;
+					Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
+						if(buffStatus[buffSpellID]) hasteMod *= statsBuffs.haste_mod[buffSpellID];
+					});
+					
+					var castTime = Math.max(spellCastTime[spellID] / hasteMod,0.75) * 1000;
+					//pV.totalCastTime += castTime;
+					pV.totalCastTime += Math.min(spellCastTime[spellID]*1000,event.timestamp - pV.prevCastTime);
+					
+					if(pV.savedTime > castTime){
+						pV.savedTimeSpells[spellID] = (pV.savedTimeSpells[spellID] || 0) + 1;
+						pV.savedTime = 0;
+					}
+					
+					var savedTime = Math.max(0,spellCastTime[spellID]*1000 - (event.timestamp - pV.prevCastTime));
+					pV.savedTime += savedTime;
+					pV.savedTimeTotal += savedTime;
+					
+					pV.prevCastTime = event.timestamp;
+				}
+					
 
 				for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
 					if(cooldownsTracking[j].opened && !ignoredSpellsForCDTracking[spellID]){
@@ -3818,7 +4018,6 @@ function BuildReport(){
 	HTML += "</div></div>";	
 	
 	
-	
 	HTML += "<div class=\"panel\">";
 	
 	/// Spells List
@@ -3839,7 +4038,8 @@ function BuildReport(){
 		["crit","Crit","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000<br>Avg number can be much higher due Floodwaters & Empowered Droplets traits and Tidal Waves buff"],
 		["mastery","Mastery","From gear: "+(cV.mastery-3200)+"<br>Base value: 3200"],
 		["vers","Vers","From gear: "+cV.versatility],
-		["haste","<em class=\"tooltip\">Haste<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Cast time not counted here, only profit from ticks</span></em>","From gear: "+cV.haste],
+		//["haste","<em class=\"tooltip\">Haste<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Cast time not counted here, only profit from ticks</span></em>","From gear: "+cV.haste],
+		["haste","Haste","From gear: "+cV.haste],
 	];
 	HTML += "<div class=\"row full\"><div class=\"col size\"> </div><div class=\"col size\">Heal per stat</div><div class=\"col size\">Stat weight</div><div class=\"col size\">Total from stat</div><div class=\"col size\">Avg on fight</div></div>";
 	for (var j = 0, j_len = allStatsList.length; j < j_len; j++) {
@@ -3869,11 +4069,20 @@ function BuildReport(){
 			totalText += "50-40: "+NumberToFormattedNumber(healPerStat.mastery.b50,0,1)+"<br>";
 			totalText += "40-30: "+NumberToFormattedNumber(healPerStat.mastery.b40,0,1)+"<br>";
 			totalText += "30-0: "+NumberToFormattedNumber(healPerStat.mastery.b30,0,1)+"</span></em>";
+		} else if(statData[0] == "haste") {
+			var hasteCastAmount = rV.hasteCastProfit / (healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount);
+			var preAmount = amount;
+			amount += hasteCastAmount;
+			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+preAmount.toFixed(3)+"<br>From cast speed: "+hasteCastAmount.toFixed(3)+"</span></em>";
+			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+(preAmount / fightLen * 1000).toFixed(2)+"<br>From cast speed: "+(hasteCastAmount / fightLen * 1000).toFixed(2)+"</span></em>";
+			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total+rV.hasteCastProfit)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+NumberToFormattedNumber(total)+"<br>From cast speed: "+NumberToFormattedNumber(rV.hasteCastProfit)+"</span></em>";			
 		}
 		
 		var subSpellsList = "";
 		if(healPerStat[ statData[0] ].spells){
 			subSpellsList = " <em class=\"tooltip\">[?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">";
+			if(statData[0] == "haste") subSpellsList += "From ticks: <br>";
+			
 			var spellsKeys = Object.keys(healPerStat[ statData[0] ].spells);
 			spellsKeys.sort(function(a,b){ return healPerStat[ statData[0] ].spells[ a ] > healPerStat[ statData[0] ].spells[ b ] ? -1 : 1 });
 			for (var k = 0, k_len = spellsKeys.length; k < k_len; k++) {
@@ -3882,6 +4091,20 @@ function BuildReport(){
 				var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
 				subSpellsList += "<img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+" - "+healPerStat[ statData[0] ].spells[spellID].toFixed(1)+"<br>";
 
+			}
+			
+			if(statData[0] == "haste") {
+				subSpellsList += "<br>From cast speed: <br>";
+				var spellsKeys = Object.keys(rV.hasteCastProfitBySpell);
+				spellsKeys.sort(function(a,b){ return rV.hasteCastProfitBySpell[ a ] > rV.hasteCastProfitBySpell[ b ] ? -1 : 1 });
+				for (var k = 0, k_len = spellsKeys.length; k < k_len; k++) {
+					var spellID = spellsKeys[k];
+					var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
+					var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
+					
+					subSpellsList += "<img src=\"http://media.blizzard.com/wow/icons/56/"+icon+"\" alt=\""+name+"\"> "+name+" - "+(rV.hasteCastProfitBySpell[spellID] / (healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount)).toFixed(1)+"<br>";
+	
+				}			
 			}
 			subSpellsList += "</span></em>"
 		};
@@ -3907,7 +4130,7 @@ function BuildReport(){
 
 	/// Items predictions
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix predictionlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Items predictions ";
-	HTML += "<sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only benefit from \"spell\" part of item is counted here</span></sup></header>";
+	HTML += "<sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only benefit from \"spell\" part of item is counted here.<br>Without feeding (CBT/AG/ASC) bonus</span></sup></header>";
 	for (var i = 0, len = ITEMS.length; i < len; i++) {
 		if(ITEMS[i].obj && ITEMS[i].obj.prediction && (!ITEMS[i].obj.predictionСondition || ITEMS[i].obj.predictionСondition()) && (ITEMS[i].obj.type!="item" || (!ITEMS[i].obj.predictionСondition && !cV.gearInfo[ITEMS[i].obj.id]))){
 			var itemData = ITEMS[i].obj;
