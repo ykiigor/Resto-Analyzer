@@ -1,5 +1,6 @@
 ///
-///	item 134488 & resurgence
+///
+///   Resto Shaman Analyzer by Afiya
 ///
 ///
 
@@ -654,7 +655,7 @@ function NumberToFormattedNumber(num,decimals,decimals_m,decimals_k)
 function GetFeedTooltip(spellID,dataName){
 	var feed_str = "";
 	for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
-		var amount;
+		var amount = null;
 		if(dataName){
 			amount = rV[ dataName+"_feed"+sSpellsKeys[k] ];
 		} else if (rV.feed[ sSpellsKeys[k] ].spells[spellID]) {
@@ -2676,7 +2677,7 @@ var RESURGENCE = [
 				if(spellID == 8004) pV.resurgenceLast6600 = 8004;
 			},
 			"energize", function(event,spellID){
-				if(event.resourceChange == 6600 && spellID == 101033 && pV.resurgenceLast6600 == 8004) {
+				if((event.resourceChange == 6600 || (cV.gearInfo[134488] && event.resourceChange == 6930)) && spellID == 101033 && pV.resurgenceLast6600 == 8004) {
 					rV.resurgence[8004][0] += event.resourceChange;
 					rV.resurgence[8004][1] ++;
 				}
@@ -2697,7 +2698,7 @@ var RESURGENCE = [
 				if(spellID == 61295) pV.resurgenceLast6600 = 61295;
 			},
 			"energize", function(event,spellID){
-				if(event.resourceChange == 6600 && spellID == 101033 && pV.resurgenceLast6600 == 61295) {
+				if((event.resourceChange == 6600 || (cV.gearInfo[134488] && event.resourceChange == 6930)) && spellID == 101033 && pV.resurgenceLast6600 == 61295) {
 					rV.resurgence[61295][0] += event.resourceChange;
 					rV.resurgence[61295][1] ++;
 				}
@@ -2718,7 +2719,7 @@ var RESURGENCE = [
 				if(spellID == 73685) pV.resurgenceLast6600 = 73685;
 			},
 			"energize", function(event,spellID){
-				if(event.resourceChange == 6600 && spellID == 101033 && pV.resurgenceLast6600 == 73685) {
+				if((event.resourceChange == 6600 || (cV.gearInfo[134488] && event.resourceChange == 6930)) && spellID == 101033 && pV.resurgenceLast6600 == 73685) {
 					rV.resurgence[73685][0] += event.resourceChange;
 					rV.resurgence[73685][1] ++;
 				}
@@ -2736,7 +2737,7 @@ var RESURGENCE = [
 		},
 		parse: [
 			"energize", function(event,spellID){
-				if((event.resourceChange == 4125 || event.resourceChange == 2750) && spellID == 101033) {
+				if((event.resourceChange == 4125 || event.resourceChange == 2750 || (cV.gearInfo[134488] && event.resourceChange >= 4330 && event.resourceChange <= 4333) || (cV.gearInfo[134488] && event.resourceChange >= 2886 && event.resourceChange <= 2889)) && spellID == 101033) {
 					rV.resurgence[1064][0] += event.resourceChange;
 					rV.resurgence[1064][1] ++;
 				}
@@ -2754,7 +2755,7 @@ var RESURGENCE = [
 		},
 		parse: [
 			"energize", function(event,spellID){
-				if(event.resourceChange == 11000 && spellID == 101033) {
+				if((event.resourceChange == 11000 || (cV.gearInfo[134488] && event.resourceChange == 11550)) && spellID == 101033) {
 					rV.resurgence[77472][0] += event.resourceChange;
 					rV.resurgence[77472][1] ++;
 				}
@@ -3557,6 +3558,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						if(buffStatus[buffSpellID]) hasteMod *= statsBuffs.haste_mod[buffSpellID];
 					});
 					
+					hasteNow = (hasteMod - 1) * 100 * 375;
+					
 					var castTime = Math.max(spellCastTime[spellID] / hasteMod,0.75) * 1000;
 					//pV.totalCastTime += castTime;
 					pV.totalCastTime += Math.min(spellCastTime[spellID]*1000,event.timestamp - pV.prevCastTime);
@@ -3602,7 +3605,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						damage: [],
 					});
 				} else if (spellID == 157153){	//cbt
-					SetSpecialSpellOn("CBT",event.timestamp);				
+					pV.ssCBTdelay = event.timestamp + 200; 
 				}
 
 				for (var j = 0, j_len = parsePlugins.cast.length; j < j_len; j++) {
@@ -3739,6 +3742,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						}
 					}
 				}
+			}
+			if(pV.ssCBTdelay && event.timestamp >= pV.ssCBTdelay){	// 200ms delay for CBT for beginning tracking <7.3 prefeeding fix>
+				SetSpecialSpellOn("CBT",pV.ssCBTdelay - 200);
+				delete pV.ssCBTdelay;
 			}
 			
 			if(event.ability && !cV.spellInfo[event.ability.guid]){
@@ -4278,7 +4285,9 @@ function BuildReport(){
 		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
 		HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+traitData.icon+"\" alt=\""+traitData.name+"\"></a></div>";
 
-		HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\">"+traitData.name+"</a>"+"</header>";
+		HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\">"+traitData.name+"</a>";
+		if(traitRank > 1) HTML += " x"+traitRank;		
+		HTML += "</header>";
 	
 		var amount = rV.netherlight[traitData.spellID];
 		HTML += "<em class=\"result "+(traitData.tip ? "tooltip" : "")+"\">"+NumberToFormattedNumber(amount,2)+(traitData.tip ? "<span class=\"tip-text\" style=\"width: 180px;margin-left:-90px;\">"+traitData.tip()+"</span>" : "")+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
@@ -4807,7 +4816,6 @@ function PrepParse(fightID,actorID){
 	$("#nav-btn-fights").click(function(e){ e.preventDefault(); BuildFightsList(); });
 	
 	$("#main").html("");
-
 
 	window.history.pushState('result', 'Result', '?report='+reportFightCode+'&fight='+fightID+'&actor='+actorID);
 
