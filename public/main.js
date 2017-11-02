@@ -310,6 +310,7 @@ var spellScaleMastery = {
 	209069: true,	//tidal
 	114942: true,	//htt
 	73685: true,	//ul [fixed in 7.2.5]
+	253228: true,	//abt machination 152289	???
 };
 var spellNotScaleHaste = {
 	208899: true,	//qd
@@ -318,6 +319,7 @@ var spellNotScaleHaste = {
 	208981: true,	//roots
 	242622: true,	//kj trink
 	242619: true,	//tos(fa) trink
+	257442: true,	//abt eonar
 }
 var spellAffectedByHaste = {	//not tick events, but still haste scaling
 	73921: true,	//hr
@@ -345,6 +347,10 @@ var spellScaleVers = {
 	242474: true,	//tos(sea) trink
 	242619: true,	//tos(fa) trink
 	242621: true,	//tos(fa) trink
+	257442: true,	//abt eonar 154175
+	253227: true,	//abt absorb shield trink 151957
+	253228: true,	//abt machination 152289
+	253282: true,	//abt key 151958
 };
 
 
@@ -453,6 +459,18 @@ var vantusRunes = {
 	237823: 'mov',
 	237820: 'fa',
 	237825: 'kj',
+	
+	250153: 'Garothi',
+	250156: 'Felhounds',
+	250150: 'Eonar',
+	250158: 'Imonar',
+	250148: 'Kingaroth',
+	250160: 'Portal',
+	250167: 'War Council',
+	250165: 'Varimathras',
+	250163: 'Shivarra',
+	250146: 'Aggramar',
+	250144: 'Argus',
 };
 
 var statsBuffs = {
@@ -469,6 +487,7 @@ var statsBuffs = {
 		224347: 400,	//Flask of the Solemn Night
 		214128: 6008,	//Chrono Shard
 		190909: 1000, 	//Mark of the Claw
+		253269: 855,	//abt trinket
 	},
 	haste_mod: {
 		80353: 1.3,	//BL
@@ -488,6 +507,7 @@ var statsBuffs = {
 	},
 	int: {
 		33697: 2137,	//orc racial
+		253258: 9000,	//abt trink
 	},
 };
 
@@ -2949,22 +2969,6 @@ var OTHER = [
 		},
 		afterParse: function() {
 			/*
-			var PENALTY_FOR_MANA = 0.5;
-			Object.keys(pV.savedTimeSpells).forEach(function (spellCastID) {
-				var spellIDs;
-				if(spellCastIDToHealID[spellCastID])
-					spellIDs = spellCastIDToHealID[spellCastID];
-				else
-					spellIDs = [spellCastID];
-				for (var k = 0, k_len = spellIDs.length; k < k_len; k++) {
-					var spellID = spellIDs[k];
-					if(healingData[spellID]) {
-						rV.hasteCastProfit += healingData[spellID][0] / pV.castNum[spellCastID] * pV.savedTimeSpells[spellCastID] * PENALTY_FOR_MANA;
-						rV.hasteCastProfitBySpell[spellCastID] = (rV.hasteCastProfitBySpell[spellCastID] || 0) + healingData[spellID][0] / pV.castNum[spellCastID] * pV.savedTimeSpells[spellCastID] * PENALTY_FOR_MANA;
-					}
-				}
-			});
-			*/
 			var PENALTY_FOR_DOWNTIME = pV.totalCastTime / (currFightData.end_time - currFightData.start_time);
 			var PENALTY_FOR_MANA = 0.65;
 			
@@ -2983,6 +2987,7 @@ var OTHER = [
 				}
 
 			});
+			*/
 		},
 	},
 ];
