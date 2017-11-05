@@ -258,11 +258,23 @@ var spellCastTime = {
 	2645: 1.5,	//wolf
 };
 
+var spellCastTimeNoCD = {	//only spells without cd
+	77472: true,	//hw
+	1064: true,	//ch
+	8004: true,	//surge
+};
+
 var spellCastIDToHealID = {
 	5394: [52042,208899],
 	207778: [207778, 255227],
 	157153: [157503],
 	198838: [201633],
+};
+
+var spellCastAffectedQA = {
+	77472: true,	//hw
+	1064: true,	//ch
+	8004: true,	//surge
 };
 
 var OverallBlacklist = {
@@ -2261,7 +2273,8 @@ var TRAITS = [
 		afterParse: function() {
 			var hps = rV.total / (currFightData.end_time - currFightData.start_time);
 			
-			rV.traits[1103] = rV.traits1103_Crit + hps * rV.traits1103_CastTime;
+			//rV.traits[1103] = rV.traits1103_Crit + hps * rV.traits1103_CastTime;
+			rV.traits[1103] = rV.traits1103_Crit + rV.buffs.haste[-53390];
 		},		
 		obj: {
 			name: "Tidal Chains",
@@ -2301,14 +2314,16 @@ var TRAITS = [
 		afterParse: function() {
 			var hps = rV.total / (currFightData.end_time - currFightData.start_time);
 			
-			rV.traits[1108] = hps * rV.traits1108_CastTime;
+			//rV.traits[1108] = hps * rV.traits1108_CastTime;
+			rV.traits[1108] = rV.buffs.haste[-207288];
 		},		
 		obj: {
 			name: "Queen Ascendant",
 			id: 1108,
 			spellID: 207288,
 			icon: "ability_shaman_watershield.jpg",
-			tip: function() { return "Reduced cast time: "+(rV.traits1108_CastTime/1000).toFixed(1)+"s<br>To value heal number used HPS*Reduced time" },
+			//tip: function() { return "Reduced cast time: "+(rV.traits1108_CastTime/1000).toFixed(1)+"s<br>To value heal number used HPS*Reduced time" },
+			tip: function() { return "Reduced cast time: "+(rV.traits1108_CastTime/1000).toFixed(1)+"s" },
 		},
 	},	
 ];
@@ -2884,6 +2899,7 @@ var OTHER = [
 			rV.hwWithoutTidal = 0;
 			rV.hwWithoutTidalTotal = 0;
 			pV.hwWithoutTidalLoss = 0;
+			pV.tidalwavesStatus = false;
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
@@ -2892,11 +2908,16 @@ var OTHER = [
 					rV.hwWithoutTidalTotal++;
 				}
 			},
+			"applybuff", function(event,spellID){
+				pV.tidalwavesStatus = true;
+			},
 			"removebuff", function(event,spellID){
 				if(spellID == 53390) pV.hwWithoutTidalLoss = event.timestamp + 500;
+				pV.tidalwavesStatus = false;
 			},
 			"removebuffstack", function(event,spellID){
 				if(spellID == 53390) pV.hwWithoutTidalLoss = event.timestamp + 500;
+				pV.tidalwavesStatus = false;
 			},
 		],
 	},
@@ -2966,13 +2987,16 @@ var OTHER = [
 			pV.castNum = {};
 			rV.hasteCastProfit = 0;
 			rV.hasteCastProfitBySpell = {};
+			pV.savedTimeNoCD = {};
+			pV.savedTimeNoCDTotal = 0;
+			pV.hasteCast = {};
 		},
 		afterParse: function() {
-			/*
-			var PENALTY_FOR_DOWNTIME = pV.totalCastTime / (currFightData.end_time - currFightData.start_time);
-			var PENALTY_FOR_MANA = 0.65;
+			pV.healFromHaste = 0;
 			
-			Object.keys(spellCastTime).forEach(function (spellCastID) {
+			pV.savedTimeTotal = Math.min(pV.savedTimeTotal,pV.savedTimeNoCDTotal);
+			
+			Object.keys(spellCastTimeNoCD).forEach(function (spellCastID) {
 				var spellIDs;
 				if(spellCastIDToHealID[spellCastID])
 					spellIDs = spellCastIDToHealID[spellCastID];
@@ -2981,13 +3005,28 @@ var OTHER = [
 				for (var k = 0, k_len = spellIDs.length; k < k_len; k++) {
 					var spellID = spellIDs[k];
 					if(healingData[spellID]) {
-						rV.hasteCastProfit += healingData[spellID][0] * pV.savedTimeTotal/pV.totalCastTime * PENALTY_FOR_DOWNTIME * PENALTY_FOR_MANA;
-						//rV.hasteCastProfitBySpell[spellCastID] = (rV.hasteCastProfitBySpell[spellCastID] || 0) + healingData[spellID][0] / pV.castNum[spellCastID] * pV.savedTimeSpells[spellCastID];
+						pV.healFromHaste += healingData[spellID][0] * (pV.savedTimeTotal / pV.savedTimeNoCDTotal) * (pV.savedTimeNoCD[spellID] / pV.savedTimeNoCDTotal); 
+						
+						for (var j = 0, j_len = sSpellsKeys.length; j < j_len; j++) {
+							if(rV.feed[ sSpellsKeys[j] ].spells[spellID]){
+								pV.healFromHaste += rV.feed[ sSpellsKeys[j] ].spells[spellID][0] * (pV.savedTimeTotal / pV.savedTimeNoCDTotal) * (pV.savedTimeNoCD[spellID] / pV.savedTimeNoCDTotal);
+							}
+						}
 					}
 				}
 
 			});
-			*/
+			
+			rV.hasteCastProfit = pV.healFromHaste / (pV.savedTimeTotal / pV.savedTime);
+			
+			Object.keys(pV.hasteCast).forEach(function (spellID) {
+				if(rV.buffs.haste_mod[spellID]) {
+					rV.buffs.haste_mod[spellID] += pV.hasteCast[spellID] / pV.savedTimeTotal * pV.healFromHaste;
+				} else {
+					if(!rV.buffs.haste[spellID]) rV.buffs.haste[spellID] = 0;
+					rV.buffs.haste[spellID] += pV.hasteCast[spellID] / pV.savedTimeTotal * pV.healFromHaste;
+				}				
+			});
 		},
 	},
 ];
@@ -3557,26 +3596,51 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 								hasteNow += statsBuffs.haste[buffSpellID];
 						}
 					});
-					
 					var hasteMod = (hasteNow / 375 / 100) + 1;
+					var hasteFromNumeric = hasteNow;
+					var hasteFromNumericMod = hasteMod;
 					Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
 						if(buffStatus[buffSpellID]) hasteMod *= statsBuffs.haste_mod[buffSpellID];
 					});
 					
+					if(spellCastAffectedQA[spellID]) hasteMod *= (1 + 0.05 * GetTraitRank(1108));
+					if(spellID == 77472 && pV.tidalwavesStatus) hasteMod *= 1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)));
+					
 					hasteNow = (hasteMod - 1) * 100 * 375;
 					
-					var castTime = Math.max(spellCastTime[spellID] / hasteMod,0.75) * 1000;
-					//pV.totalCastTime += castTime;
-					pV.totalCastTime += Math.min(spellCastTime[spellID]*1000,event.timestamp - pV.prevCastTime);
+					var castTime = Math.min(spellCastTime[spellID]*1000,event.timestamp - pV.prevCastTime);
 					
-					if(pV.savedTime > castTime){
-						pV.savedTimeSpells[spellID] = (pV.savedTimeSpells[spellID] || 0) + 1;
-						pV.savedTime = 0;
-					}
+					pV.totalCastTime += castTime;
 					
 					var savedTime = Math.max(0,spellCastTime[spellID]*1000 - (event.timestamp - pV.prevCastTime));
-					pV.savedTime += savedTime;
-					pV.savedTimeTotal += savedTime;
+					
+					if(savedTime > 0) {
+						pV.savedTime += savedTime / hasteNow;
+						pV.savedTimeTotal += savedTime;		
+									
+						pV.savedTimeSpells[spellID] = (pV.savedTimeSpells[spellID] || 0) + savedTime / hasteNow;
+						
+						Object.keys(statsBuffs.haste).forEach(function (buffSpellID) {
+							if(buffStatus[buffSpellID]){
+								if(!pV.hasteCast[buffSpellID]) pV.hasteCast[buffSpellID] = 0;
+								pV.hasteCast[buffSpellID] += hasteMod / hasteFromNumericMod * (hasteFromNumericMod - 1) * 100 * 375 / hasteNow * savedTime * (statsBuffs.haste[buffSpellID] * (typeof(buffStatus[buffSpellID]) == "number" ? buffStatus[buffSpellID] : 1) / hasteFromNumeric);
+							}
+						});						
+						pV.hasteCast[-1] = (pV.hasteCast[-1] || 0) + hasteMod / hasteFromNumericMod * (hasteFromNumericMod - 1) * 100 * 375 / hasteNow * savedTime * (cV.haste / hasteFromNumeric);
+						Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
+							if(buffStatus[buffSpellID]){
+								if(!pV.hasteCast[buffSpellID]) pV.hasteCast[buffSpellID] = 0;
+								pV.hasteCast[buffSpellID] += hasteMod / statsBuffs.haste_mod[buffSpellID] * (statsBuffs.haste_mod[buffSpellID] - 1) * 100 * 375 / hasteNow * savedTime;
+							}
+						});
+						if(spellCastAffectedQA[spellID]) pV.hasteCast[-207288] = (pV.hasteCast[-207288] || 0) + hasteMod / (0.05 * GetTraitRank(1108) + 1) * ((0.05 * GetTraitRank(1108) + 1) - 1) * 100 * 375 / hasteNow * savedTime;
+						if(spellID == 77472 && pV.tidalwavesStatus) pV.hasteCast[-53390] = (pV.hasteCast[-53390] || 0) + hasteMod / (1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)))) * ((1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)))) - 1) * 100 * 375 / hasteNow * savedTime;
+					}
+					
+					if(spellCastTimeNoCD[spellID]) {
+						pV.savedTimeNoCD[spellID] = (pV.savedTimeNoCD[spellID] || 0) + castTime;
+						pV.savedTimeNoCDTotal += castTime;
+					}
 					
 					pV.prevCastTime = event.timestamp;
 				}
@@ -4082,12 +4146,13 @@ function BuildReport(){
 			totalText += "40-30: "+NumberToFormattedNumber(healPerStat.mastery.b40,0,1)+"<br>";
 			totalText += "30-0: "+NumberToFormattedNumber(healPerStat.mastery.b30,0,1)+"</span></em>";
 		} else if(statData[0] == "haste") {
-			var hasteCastAmount = rV.hasteCastProfit / (healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount);
+			var hasteCastAmount = rV.hasteCastProfit;
+			var hasteCastProfit = pV.healFromHaste;
 			var preAmount = amount;
 			amount += hasteCastAmount;
 			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+preAmount.toFixed(3)+"<br>From cast speed: "+hasteCastAmount.toFixed(3)+"</span></em>";
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+(preAmount / fightLen * 1000).toFixed(2)+"<br>From cast speed: "+(hasteCastAmount / fightLen * 1000).toFixed(2)+"</span></em>";
-			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total+rV.hasteCastProfit)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+NumberToFormattedNumber(total)+"<br>From cast speed: "+NumberToFormattedNumber(rV.hasteCastProfit)+"</span></em>";			
+			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total+hasteCastProfit)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+NumberToFormattedNumber(total)+"<br>From cast speed: "+NumberToFormattedNumber(hasteCastProfit)+"</span></em>";			
 		}
 		
 		var subSpellsList = "";
