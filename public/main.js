@@ -329,7 +329,7 @@ var spellNotScaleHaste = {
 	209069: true,	//tidal
 	98021: true,	//slt
 	208981: true,	//roots
-	242622: true,	//kj trink
+	//242622: true,	//kj trink
 	242619: true,	//tos(fa) trink
 	257442: true,	//abt eonar
 }
@@ -2274,7 +2274,7 @@ var TRAITS = [
 			var hps = rV.total / (currFightData.end_time - currFightData.start_time);
 			
 			//rV.traits[1103] = rV.traits1103_Crit + hps * rV.traits1103_CastTime;
-			rV.traits[1103] = rV.traits1103_Crit + rV.buffs.haste[-53390];
+			rV.traits[1103] = rV.traits1103_Crit + (rV.buffs.haste[-53390] || 0);
 		},		
 		obj: {
 			name: "Tidal Chains",
@@ -2315,7 +2315,7 @@ var TRAITS = [
 			var hps = rV.total / (currFightData.end_time - currFightData.start_time);
 			
 			//rV.traits[1108] = hps * rV.traits1108_CastTime;
-			rV.traits[1108] = rV.buffs.haste[-207288];
+			rV.traits[1108] = rV.buffs.haste[-207288] || 0;
 		},		
 		obj: {
 			name: "Queen Ascendant",
@@ -3029,6 +3029,43 @@ var OTHER = [
 			});
 		},
 	},
+];
+
+function GetVersFactor(){ return healPerStat.vers.avgStat / 475 / 100 + 1; }
+function GetCritFactor(){ return cV.combantantInfo.critSpell / 400 / 100 + 1; }
+function GetFightLenFactor(cd){ return (currFightData.end_time - currFightData.start_time) / cd / 1000; }
+function GetHasteFactor(){ return healPerStat.haste.avgStat / 375 / 100 + 1; }
+function GetAftifactFactor(){ return 1.06 * 1.05 * 1.1; }
+
+var gear_charts_colors = {
+	1: ["Hunter","Tomb of Sargeras"],	//ToS
+	2: ["Mage","World drop"],	//World drop
+	3: ["Druid","Legendary"],	//leggo
+	4: ["Shaman","Antorus the Burning Throne <sup class=\"tooltip\">[!]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only simis used for trinkets, more accurate data will be after ABT release and logs</span></sup>"],	//ToS
+	10: ["DeathKnight","Equipped items"],
+};
+
+var GEAR = [
+	{slot:14,item:147002,ilvl:900,type:1,name:"Charm of the Rising Tide",int:2063,haste:992,icon:"inv_7_0raid_trinket_04a"},
+	{slot:14,item:147004,ilvl:900,type:1,name:"Sea Star of the Depthmothe",vers:1180,icon:"inv_jewelcrafting_starofelune_02",special:function(ilvl){ return ScaleStat(29716,900,ilvl,1) * 32 * (pV.castNum[1064] || 0) * 0.4 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 0.8; }},
+	{slot:14,item:141482,ilvl:860,type:2,name:"Unstable Arcanocrystal",haste:847,vers:847,crit:847,mastery:847,icon:"inv_datacrystal04"},
+	{slot:14,item:147007,ilvl:910,type:1,name:"The Deceiver's Grand Design",mastery:1225,icon:"inv_offhand_1h_pvpcataclysms3_c_01",special:function(ilvl){ return ScaleStat(96098,910,ilvl,1) * 40 * GetHasteFactor() * GetAftifactFactor() * (GetFightLenFactor(120) + 1.5) * GetVersFactor() * GetCritFactor() * 0.5 + ScaleStat(1680000,910,ilvl,1)* (GetFightLenFactor(120) + 2) * GetVersFactor() * 0.5; }},
+	{slot:14,item:134160,ilvl:865,type:2,name:"Stat Stick: Crit",int:1489,crit:1036,icon:"inv_misc_gem_bloodstone_01"},
+	{slot:14,item:134336,ilvl:865,type:2,name:"Stat Stick: Vers",int:1489,vers:1036,icon:"inv_misc_gem_crystalcut_01"},
+	{slot:14,item:134204,ilvl:865,type:2,name:"Stat Stick: Haste",int:1489,haste:1036,icon:"inv_weapon_crossbow_22"},
+	{slot:14,item:121311,ilvl:865,type:2,name:"Stat Stick: Mastery",int:1489,mastery:1036,icon:"inv_misc_herb_mana_thistle_leaf"},
+	{slot:14,item:144258,ilvl:940,type:3,name:"Velen's Future Sight",int:2994,crit:456,mastery:456,haste:456,icon:"spell_holy_healingfocus",scale:970,special:function(ilvl){ return rV.total * 10 / 75 * 0.15 + rV.totalOver * 10 / 75 * 0.5 * 0.65 * GetAftifactFactor(); }},
+	{slot:14,item:154172,ilvl:1000,type:3,name:"Aman'Thul's Vision",int:2345,crit:1429,mastery:1429,haste:1429,vers:1429,wicon:"inv_antorus_turquoise",scale:1000},
+	{slot:14,item:147006,ilvl:900,type:1,name:"Archive of Faith",crit:1180,icon:"inv__wod_arakoa4",special:function(ilvl){ return ScaleStat(1776330,900,ilvl,1) * (GetFightLenFactor(60) + 0.5) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 0.4 + ScaleStat(647633,900,ilvl,1) * (GetFightLenFactor(60) + 1) * GetVersFactor() * 0.7; }},
+	{slot:14,item:147005,ilvl:900,type:1,name:"Chalice of Moonlight: Day",int:2063,icon:"inv_offhand_pvealliance_d_01",special:function(ilvl){ return ScaleStat(3619,900,ilvl,1) * healPerStat.crit.amount * 12 / 60 * 1.5; }},
+	{slot:14,item:147005,ilvl:900,type:1,name:"Chalice of Moonlight: Night",int:2063,icon:"inv_offhand_pvealliance_d_01",special:function(ilvl){ return ScaleStat(3619,900,ilvl,1) * healPerStat.haste.amount * 12 / 60 * 1.5; }},
+	{slot:14,item:147003,ilvl:900,type:1,name:"Barbaric Mindslaver",int:2063,icon:"spell_priest_psyfiend",special:function(ilvl){ return ScaleStat(181467,900,ilvl,1) * 6 * GetFightLenFactor(60) * GetVersFactor() * GetCritFactor(); }},
+	{slot:14,item:151956,ilvl:930,type:4,name:"Garothi Feedback Conduit",int:2728,icon:"inv_misc_enggizmos_06",special:function(ilvl){ return ScaleStat(1284,930,ilvl,1) * healPerStat.haste.amount * 8 / 60 * 10; }},
+	{slot:14,item:151960,ilvl:930,type:4,name:"Carafe of Searing Light",int:2728,wicon:"inv_offhand_pvealliance_d_01_gold",special:function(ilvl){ return ScaleStat(10308,930,ilvl,1) / rV.manaUsage * rV.healFromMana * (GetFightLenFactor(60) + 1); }},
+	{slot:14,item:151956,ilvl:930,type:4,name:"Tarratus Keystone",int:2728,icon:"inv_datacrystal06",special:function(ilvl){ return ScaleStat(1633313,930,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * (GetFightLenFactor(90) + 1) * 0.9; }},
+	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.8; }},
+	{slot:14,item:151957,ilvl:930,type:4,name:"Ishkar's Felshield Emitter",vers:1320,wicon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(2416491,930,ilvl,1) * GetVersFactor() * GetCritFactor() * (GetFightLenFactor(60) + 0.5) * 0.9; }},
+	{slot:14,item:154175,ilvl:940,type:4,name:"Eonar's Compassion",int:2994,wicon:"inv_antorus_green",special:function(ilvl){ return ScaleStat(127273,940,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 7 * 1.2 * GetFightLenFactor(60) * 0.8 + ScaleStat(250782,940,ilvl,1) * GetVersFactor() * 4 * 1 * GetFightLenFactor(60); }},
 ];
 
 
@@ -3889,6 +3926,62 @@ function ParseHeader(fight_code,showPage,afterFunc)
 	});
 }
 
+function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
+	var gear_chart_list = [];
+	var HTML = "";
+	for (var i = 0, len = GEAR.length; i < len; i++) {
+		var gearData = GEAR[i];
+		
+		var profit = 0;
+		var equippedProfit = 0;
+		var isEquipped = false;
+		var scaleIlvl = gearData.scale ? gearData.scale : GEAR_CHARTS_ILVL;
+		
+		Object.keys(gearData).forEach(function (statName) {
+			if(healPerStat[statName]){
+				var value = ScaleStat(gearData[statName],gearData.ilvl,scaleIlvl,statName == "int" ? 1 : (jewelSlots[ gearData.slot ] ? 2 : 0));
+				profit += value * healPerStat[statName].amount;
+			} else if (statName == "special") {
+				profit += gearData[statName](scaleIlvl);
+			}
+		});
+		
+				
+		for (var j = 0, j_len = ITEMS.length; j < j_len; j++) {
+			if(ITEMS[j].obj && ITEMS[j].obj.id == gearData.item && ITEMS[j].obj.type == "item" && ITEMS[j].obj.gear && rV[ITEMS[j].obj.gear]){
+				equippedProfit = rV[ITEMS[j].obj.gear];
+				isEquipped = cV.gearInfo[gearData.item].itemLevel;
+				
+				Object.keys(gearData).forEach(function (statName) {
+					if(healPerStat[statName]){
+						var value = ScaleStat(gearData[statName],gearData.ilvl,isEquipped,statName == "int" ? 1 : (jewelSlots[ gearData.slot ] ? 2 : 0));
+						equippedProfit += value * healPerStat[statName].amount;
+					}
+				});
+				
+				break;
+			}
+		}
+		
+		profit /= fightLen / 1000;
+		equippedProfit /= fightLen / 1000;
+
+		if(isEquipped){
+			gear_chart_list.push([equippedProfit,isEquipped,(gearData.icon ? "<img src=\"http://media.blizzard.com/wow/icons/56/"+gearData.icon.replace(/\-/,"")+".jpg\" alt=\""+gearData.name+"\">" : "")+" <a href=\"//www.wowhead.com/item="+gearData.item+"\">"+gearData.name+"</a>","DeathKnight",true]);
+		}
+		
+		if(!isEquipped || isEquipped < scaleIlvl){
+			gear_chart_list.push([profit,scaleIlvl,(gearData.icon ? "<img src=\"http://media.blizzard.com/wow/icons/56/"+gearData.icon.replace(/\-/,"")+".jpg\" alt=\""+gearData.name+"\">" : "")+" <a href=\"//www.wowhead.com/item="+gearData.item+"\">"+gearData.name+"</a>",gear_charts_colors[gearData.type][0],false]);
+		}
+	}
+	gear_chart_list.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
+	for (var i = 0, len = gear_chart_list.length; i < len; i++) {
+		HTML += "<div class=\"row full "+(gear_chart_list[i][4] ? "eq" : "")+"\"><div class=\"col w5\">"+gear_chart_list[i][1]+"</div><div class=\"col w20\">"+gear_chart_list[i][2]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(gear_chart_list[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(gear_chart_list[i][3])+"-bg\" style=\"width: "+(Math.min(gear_chart_list[i][0]/gear_chart_list[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	}
+	
+	$("#gear_chart").html(HTML);
+}
+
 function CalcHealingFromItem(itemID,diffStats)
 {
 	var passiveStats = 0;
@@ -4060,8 +4153,12 @@ function BuildReport(){
 	}
 	
 	rV.total = 0;
+	rV.totalOver = 0;
 	Object.keys(healingData).forEach(function (spellID) {
-		if(spellID != 98021) rV.total += healingData[spellID][0];
+		if(spellID != 98021) {
+			rV.total += healingData[spellID][0];
+			rV.totalOver += healingData[spellID][1];
+		}
 	});
 
 	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
@@ -4134,6 +4231,8 @@ function BuildReport(){
 			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+preAmount.toFixed(3)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount).toFixed(3)+"</span></em>";
 			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+NumberToFormattedNumber(preTotal)+"<br>From resurgence: "+NumberToFormattedNumber(regurgenceAmount)+"</span></em>";			
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+(preAmount / fightLen * 1000).toFixed(2)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount / fightLen * 1000).toFixed(2)+"</span></em>";
+ 		
+ 			healPerStat[ statData[0] ].amount = amount;
  		} else if(statData[0] == "int") {
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000 * 1.05).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">5% armor bonus included</span></em>";
 		} else if(statData[0] == "mastery") {
@@ -4153,6 +4252,8 @@ function BuildReport(){
 			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+preAmount.toFixed(3)+"<br>From cast speed: "+hasteCastAmount.toFixed(3)+"</span></em>";
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+(preAmount / fightLen * 1000).toFixed(2)+"<br>From cast speed: "+(hasteCastAmount / fightLen * 1000).toFixed(2)+"</span></em>";
 			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total+hasteCastProfit)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+NumberToFormattedNumber(total)+"<br>From cast speed: "+NumberToFormattedNumber(hasteCastProfit)+"</span></em>";			
+ 			
+ 			healPerStat[ statData[0] ].amount = amount;
 		}
 		
 		var subSpellsList = "";
@@ -4187,6 +4288,8 @@ function BuildReport(){
 		};
 		
 		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+amountText+subSpellsList+"</div><div class=\"col size\">"+weightText+"</div><div class=\"col size\">"+totalText+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount).format()+"<span class=\"tip-text\" style=\"width: "+(statData[0] == "crit" ? 300 : 120)+"px;margin-left:-"+(statData[0] == "crit" ? 150 : 60)+"px;\">"+statData[2]+"</span></em></div></div>";
+
+		healPerStat[ statData[0] ].avgStat = healPerStat[ statData[0] ].avg / healPerStat[ statData[0] ].avgCount;
 	}
 	
 	
@@ -4305,7 +4408,20 @@ function BuildReport(){
 		}
 	}	
 	HTML += "</ul></div></div></div>";
+
 	
+	/// Gear Charts
+	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix gear_charts\"><header class=\"box-header\">GEAR CHARTS <sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Various numbers can be different based on buffs/fight length/overheal %/rng procs</span></sup></header><input type=\"range\" min=\"900\" max=\"985\" value=\"930\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
+	HTML += "<div class=\"full\">";
+	var gear_chart_colors_keys = Object.keys(gear_charts_colors);
+	for (var i = 0, len = gear_chart_colors_keys.length; i < len; i++) {
+		HTML += "<div class=\"col\" style=\"width:"+(100 / len).toFixed(2)+"%\">";
+		HTML += "<div class=\"col performance-bar "+(gear_charts_colors[ gear_chart_colors_keys[i] ][0])+"-bg\" style=\"width: 14px;height:14px;margin-top:4px\"></div>";
+		HTML += "<div class=\"col\" style=\"width:90%;\">"+gear_charts_colors[ gear_chart_colors_keys[i] ][1]+"</div>";
+		HTML += "</div>";
+	}
+	HTML += "</div><div id=\"gear_chart\"></div></div></div></div>";
+
 	
 	/// Traits
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">TRAITS</header><div class=\"list-top-line\"> </div><ul class=\"list traits\">";
@@ -4758,7 +4874,10 @@ function BuildReport(){
 		return false;
 	});
 	
-
+	CreateGearChartData(930,fightLen);
+	document.getElementById("gear_chart_slider").oninput = function() {
+		CreateGearChartData(this.value,fightLen);
+	}
 	
 }
 

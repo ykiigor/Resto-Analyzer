@@ -693,6 +693,71 @@ em.wipe {
 	font-size: 12px;
 }
 
+.gear_charts .row {
+	font-size: 14px;
+	margin-left: -10px;
+	margin-right: -10px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.gear_charts .col {
+	padding-left: 7px;
+	padding-right: 7px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+.gear_charts .row:hover {
+	background: rgba(100, 100, 100, 0.4);
+}
+
+.gear_charts .eq {
+	background: rgba(100, 100, 100, 0.4);
+}
+
+.gear_charts img {
+	height: 24px;
+	width: 24px;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;   
+    background: rgba(100, 100, 100, 0.7);
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    margin-bottom: 20px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+.slider:hover {
+	opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%; 
+    background: #ff7d0a;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #ff7d0a;
+    cursor: pointer;
+}
+
 .performance-bar {
 	opacity: .9;
 	height: 1.2em;
