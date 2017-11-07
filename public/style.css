@@ -721,6 +721,14 @@ em.wipe {
 	width: 24px;
 }
 
+.gear_charts .slot_select .col {
+	text-align: center;
+}
+
+.gear_charts .slot_select .col:hover {
+	background: rgba(100, 100, 100, 0.4);
+}
+
 .slider {
     -webkit-appearance: none;
     width: 100%;
