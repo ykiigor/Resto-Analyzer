@@ -3051,8 +3051,9 @@ var gear_charts_colors = {
 	1: ["Mage","World drop"],
 	2: ["Rogue","Dungeons"],
 	3: ["Hunter","Tomb of Sargeras"],
-	4: ["Shaman","Antorus the Burning Throne <sup class=\"tooltip\">[!]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only simis used for trinkets, more accurate data will be after ABT release and logs</span></sup>"],
+	4: ["Shaman","Antorus <sup class=\"tooltip\">[!]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only simis used for trinkets, more accurate data will be after ABT release and logs</span></sup>"],
 	5: ["Druid","Legendary"],
+	6: ["DemonHunter","Other"],
 	10: ["DeathKnight","Equipped items"],
 };
 
@@ -3062,14 +3063,15 @@ var GEAR = [
 	{slot:14,item:134336,ilvl:865,type:1,name:"Stat Stick: Vers",int:1489,vers:1036,icon:"inv_misc_gem_crystalcut_01",wilvl:810},
 	{slot:14,item:134204,ilvl:865,type:1,name:"Stat Stick: Haste",int:1489,haste:1036,icon:"inv_weapon_crossbow_22",wilvl:810},
 	{slot:14,item:121311,ilvl:865,type:1,name:"Stat Stick: Mastery",int:1489,mastery:1036,icon:"inv_misc_herb_mana_thistle_leaf",wilvl:810},
-	{slot:14,item:128710,ilvl:900,type:1,name:"Darkmoon Deck: Promises",int:2063,icon:"70_inscription_deck_promises",scale:900,special:function(ilvl){ return 0.05 * rV.healFromMana; },wilvl:835},
 
-	{slot:14,item:137419,ilvl:845,type:2,name:"Chrono Shard",int:1236,icon:"inv_7_0raid_trinket_05a",special:function(ilvl){ return ScaleStat(5269,845,ilvl,1) * healPerStat.haste.amount * 10 / 60 * 1; },wilvl:820},
+	{slot:14,item:137419,ilvl:845,type:2,name:"Chrono Shard",int:1236,icon:"inv_7_0raid_trinket_05a",special:function(ilvl){ return ScaleStat(5269,845,ilvl) * healPerStat.haste.amount * 10 / 60 * 1; },wilvl:820},
 	{slot:14,item:144480,ilvl:885,type:2,name:"Dreadstone of Endless Shadows",int:1794,icon:"inv_jewelcrafting_shadowsongamethyst_01",special:function(ilvl){ return ScaleStat(4040,885,ilvl) * healPerStat.haste.amount * 8 / 60 * 0.75 + ScaleStat(4040,885,ilvl) * healPerStat.crit.amount * 8 / 60 * 0.75 + ScaleStat(4040,885,ilvl) * healPerStat.mastery.amount * 8 / 60 * 0.75; },wilvl:820},
 	{slot:14,item:136714,ilvl:865,type:2,name:"Amalgam's Seventh Spine",int:1489,icon:"spell_priest_mindspike",special:function(ilvl){ return ScaleStat(4138,865,ilvl) * ((pV.castNum[77472] || 0) + (pV.castNum[8004] || 0)) / rV.manaUsage * rV.healFromMana * 0.8; },wilvl:820},
 	{slot:14,item:142162,ilvl:865,type:2,name:"Fluctuating Energy",int:1489,icon:"inv_elemental_primal_mana",special:function(ilvl){ return ScaleStat(19704,865,ilvl) * GetFightLenFactor(60) * 2 / rV.manaUsage * rV.healFromMana * 0.75; },wilvl:860},
+	{slot:14,item:137452,ilvl:825,type:2,name:"Thrumming Gossamer",int:1026,icon:"inv_misc_web_02",special:function(ilvl){ return ScaleStat(350,825,ilvl) * 10.5 * 20 / 60 * 0.75 * healPerStat.mastery.amount; },wilvl:820},
+	{slot:14,item:133642,ilvl:825,type:2,name:"Horn of Valor",vers:892,icon:"inv_misc_horn_03",special:function(ilvl){ return ScaleStat(2461,825,ilvl,1) * 30 / 120 * healPerStat.int.amount; },wilvl:820},
 
-	{slot:14,item:147002,ilvl:900,type:3,name:"Charm of the Rising Tide",int:2063,haste:992,icon:"inv_7_0raid_trinket_04a",wilvl:890},
+	{slot:14,item:147002,ilvl:900,type:3,name:"Charm of the Rising Tide",int:2063,icon:"inv_7_0raid_trinket_04a",special:function(ilvl){ return ScaleStat(576,900,ilvl) * 7.75 * healPerStat.haste.amount * 20 / 90; },wilvl:890},
 	{slot:14,item:147004,ilvl:900,type:3,name:"Sea Star of the Depthmothe",vers:1180,icon:"inv_jewelcrafting_starofelune_02",special:function(ilvl){ return ScaleStat(29716,900,ilvl,1) * 32 * (pV.castNum[1064] || 0) * 0.4 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 0.7 * GetFeedFactor(); },wilvl:890},
 	{slot:14,item:147007,ilvl:910,type:3,name:"The Deceiver's Grand Design",mastery:1225,icon:"inv_offhand_1h_pvpcataclysms3_c_01",special:function(ilvl){ return ScaleStat(96098,910,ilvl,1) * 40 * GetHasteFactor() * GetAftifactFactor() * (GetFightLenFactor(120) + 1.5) * GetVersFactor() * GetCritFactor() * 0.5 * GetFeedFactor() + ScaleStat(1680000,910,ilvl,1)* (GetFightLenFactor(120) + 2) * GetVersFactor() * 0.5; },wilvl:890},
 	{slot:14,item:147006,ilvl:900,type:3,name:"Archive of Faith",crit:1180,icon:"inv__wod_arakoa4",special:function(ilvl){ return ScaleStat(1776330,900,ilvl,1) * (GetFightLenFactor(60) + 0.5) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 0.5 * GetFeedFactor() + ScaleStat(647633,900,ilvl,1) * (GetFightLenFactor(60) + 1) * GetVersFactor() * 0.7; },wilvl:890},
@@ -3083,9 +3085,15 @@ var GEAR = [
 	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.8 * GetFeedFactor(); }},
 	{slot:14,item:151957,ilvl:930,type:4,name:"Ishkar's Felshield Emitter",vers:1320,wicon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(2416491,930,ilvl,1) * GetVersFactor() * GetCritFactor() * (GetFightLenFactor(60) + 0.5) * 0.9; }},
 	{slot:14,item:154175,ilvl:940,type:4,name:"Eonar's Compassion",int:2994,wicon:"inv_antorus_green",special:function(ilvl){ return ScaleStat(127273,940,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 7 * 1.2 * GetFightLenFactor(60) * 0.8 * GetFeedFactor() + ScaleStat(250782,940,ilvl,1) * GetVersFactor() * 4 * 1 * GetFightLenFactor(60) * GetFeedFactor(); }},
+	{slot:14,item:151970,ilvl:930,type:4,name:"Vitality Resonator",vers:1320,icon:"inv_7_0raid_trinket_08d",special:function(ilvl){ return ScaleStat(9705,930,ilvl,1) * healPerStat.int.amount * 15 / 60 * 0.75; }},
 
 	{slot:14,item:144258,ilvl:940,type:5,name:"Velen's Future Sight",int:2994,crit:456,mastery:456,haste:456,icon:"spell_holy_healingfocus",scale:970,special:function(ilvl){ return rV.total * 10 / 75 * 0.15 + rV.totalOver * 10 / 75 * 0.5 * 0.65 * GetAftifactFactor(); },wilvl:910},
 	{slot:14,item:154172,ilvl:1000,type:5,name:"Aman'Thul's Vision",int:2345,crit:1429,mastery:1429,haste:1429,vers:1429,wicon:"inv_antorus_turquoise",scale:1000,wilvl:940},
+
+	{slot:14,item:128710,ilvl:900,type:6,name:"Darkmoon Deck: Promises",int:2063,icon:"70_inscription_deck_promises",scale:900,special:function(ilvl){ return 0.05 * rV.healFromMana; },wilvl:835},
+	{slot:14,item:140805,ilvl:875,type:6,name:"Ephemeral Paradox",int:1634,icon:"inv_7_0raid_trinket_07c",special:function(ilvl){ return (ScaleStat(3457,875,ilvl) + 19800) * GetFightLenFactor(60) * 1.2 / rV.manaUsage * rV.healFromMana; }},
+	{slot:14,item:140793,ilvl:870,type:6,name:"Perfectly Preserved Cake",mastery:1055,icon:"inv_misc_celebrationcake_01",special:function(ilvl){ return ScaleStat(547872,870,ilvl,1) * 5 * (GetFightLenFactor(120) + 0.5); }},
+	{slot:14,item:139322,ilvl:850,type:6,name:"Cocoon of Enforced Solitude",int:1295,icon:"inv_misc_web_01",special:function(ilvl){ return ScaleStat(7043,850,ilvl) * 10 * (GetFightLenFactor(120) + 0.5) / rV.manaUsage * rV.healFromMana * 0.5; }},
 ];
 
 
