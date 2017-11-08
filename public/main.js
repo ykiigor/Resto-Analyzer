@@ -213,6 +213,52 @@ var itemsStats = {
 	140805:{ilvl:875,int:1634,},
 	140801:{ilvl:875,mastery:1075,},
 	144406:{ilvl:870,int:1231,crit:340,mastery:767,},
+	
+	152169:{ilvl:930,int:2870,haste:1043,vers:805},
+	152001:{ilvl:930,int:2870,crit:1162,haste:686},
+	152000:{ilvl:930,int:2870,crit:752,mastery:1096},
+	152423:{ilvl:940,int:3150,haste:1042,mastery:877},
+	151966:{ilvl:930,haste:2112,mastery:1408},
+	151965:{ilvl:930,crit:1609,vers:1911},
+	151973:{ilvl:930,vers:1509,mastery:2011},
+	152283:{ilvl:940,crit:2457,haste:1281},
+	152005:{ilvl:940,int:2362,crit:575,mastery:863},
+	152171:{ilvl:930,int:2153,crit:564,vers:822},
+	152004:{ilvl:930,int:2153,haste:861,mastery:525},
+	152062:{ilvl:930,int:1615,crit:475,haste:564},
+	151938:{ilvl:930,int:1615,haste:438,mastery:601},
+	152167:{ilvl:930,int:1615,vers:401,mastery:639},
+	151937:{ilvl:930,int:1615,crit:557,mastery:483},
+	151995:{ilvl:930,int:2870,haste:805,mastery:1043},
+	152166:{ilvl:930,int:2870,crit:1162,haste:686},
+	151994:{ilvl:930,int:2870,crit:1056,mastery:792},
+	152008:{ilvl:930,int:1615,haste:669,vers:371},
+	152280:{ilvl:930,int:1615,haste:386,mastery:654},
+	151999:{ilvl:930,int:2153,crit:832,haste:554},
+	152168:{ilvl:930,int:2153,crit:525,mastery:861},
+	151998:{ilvl:930,int:2153,vers:594,mastery:792},
+	152683:{ilvl:930,int:2153,crit:495,haste:891},
+	152007:{ilvl:930,int:2153,vers:802,mastery:584},
+	152006:{ilvl:930,int:2153,haste:604,mastery:782},
+	152002:{ilvl:930,int:2870,crit:752,haste:1096},
+	152170:{ilvl:930,int:2870,haste:1004,mastery:845},
+	152003:{ilvl:930,int:2870,crit:1162,vers:686},
+	151996:{ilvl:930,int:2153,crit:634,haste:752},
+	152684:{ilvl:930,int:2153,haste:534,mastery:852},
+	151997:{ilvl:930,int:2153,crit:802,vers:584},
+	152284:{ilvl:930,crit:1408,haste:2112},
+	152064:{ilvl:930,crit:1861,mastery:1659},
+	152688:{ilvl:930,haste:1207,mastery:2313},
+	152063:{ilvl:930,haste:1307,vers:2212},
+	151972:{ilvl:940,vers:1602,mastery:2137},
+	154172:{ilvl:1000,crit:1430,haste:1430,vers:1430,mastery:1430},
+	151957:{ilvl:930,vers:1320},
+	151960:{ilvl:930,int:2728},
+	152289:{ilvl:930,mastery:1320},
+	151958:{ilvl:930,int:2728},
+	151956:{ilvl:930,int:2728},
+	151970:{ilvl:930,vers:1320},
+	154175:{ilvl:940,int:2994},
 };
 
 
@@ -3125,6 +3171,112 @@ var GEAR = [
 	{slot:-1,item:151785,ilvl:970,type:5,name:"Fire in the Deep",int:4166,mastery:997,crit:1150,icon:"inv_chest_mail_raidshaman_m_01",scale:970,special:function(ilvl){ return (rV.total + rV.totalOver) * 6 / ((currFightData.end_time - currFightData.start_time) / 1000) * (pV.castNum[114052] || 0) * 0.15 * 0.5; },wilvl:910},	
 	{slot:-1,item:151647,ilvl:970,type:5,name:"Soul of the Farseer",mastery:1486,crit:1230,haste:974,icon:"inv_70_quest_ring2b",scale:970,special:function(ilvl){ return GetSocketFactor(); },wilvl:910},	
 	{slot:-1,item:132452,ilvl:970,type:5,name:"Sephuz's Secret",crit:3204,haste:1281,icon:"inv_jewelry_ring_149",scale:970,special:function(ilvl){ return 375 * 2 * healPerStat.haste.amount + GetSocketFactor(); },wilvl:910},	
+
+	//Neck
+	{slot:2,item:132444,ilvl:910,type:5,name:"Prydaz, Xavaric's Magnum Opus",crit:1247,haste:1247,mastery:1247,icon:"inv_misc_necklace15",scale:970,special:function(ilvl){ return rV.prydazPredictionAmount + GetSocketFactor(); },wilvl:910},	
+	{slot:2,item:142207,ilvl:885,haste:1913,vers:765,name:"Amulet of the Last Guardian",icon:"inv_jewelry_necklace_95",type:2,wilvl:860},
+	{slot:2,item:142174,ilvl:885,crit:1607,mastery:1071,name:"Choker of Barbed Reins",icon:"inv_jewelry_necklace_22",type:2,wilvl:855},
+	{slot:2,item:137536,ilvl:885,crit:918,haste:1760,name:"Pendant of the Watchful Eye",icon:"inv_7_0raid_necklace_11c",type:2,wilvl:820},
+	{slot:2,item:137535,ilvl:885,haste:1071,mastery:1607,name:"Lavadrip Pendant",icon:"inv_neck_firelands_03",type:2,wilvl:820},
+	{slot:2,item:134488,ilvl:885,crit:1530,vers:1148,name:"Stabilized Energy Pendant",icon:"inv_7_0raid_necklace_14d",special:function(ilvl){ var a=0;for(var i = 0, len = RESURGENCE.length; i < len; i++) a+=rV.resurgence[ RESURGENCE[i].obj.id ][0]; return a * 0.05 / rV.manaUsage * rV.healFromMana; },type:2,wilvl:820},
+	{slot:2,item:137418,ilvl:885,crit:1224,mastery:1454,name:"Erratically Ticking Talisman",icon:"inv_7_0raid_necklace_10d",type:2,wilvl:820},
+	{slot:2,item:134529,ilvl:885,haste:1760,vers:918,name:"Chain of Scorched Bones",icon:"inv_7_0raid_necklace_13d",type:2,wilvl:820},
+	{slot:2,item:137487,ilvl:885,vers:1454,mastery:1224,name:"Strand of the Stars",icon:"inv_7_0raid_necklace_12b",type:2,wilvl:820},
+	{slot:2,item:134499,ilvl:885,vers:1683,mastery:995,name:"Raven Filigree Pendant",icon:"inv_7_0raid_necklace_08c",type:2,wilvl:820},
+	{slot:2,item:134491,ilvl:885,crit:1760,vers:918,name:"Understone Gorget",icon:"inv_7_0raid_necklace_13c",type:2,wilvl:820},
+	{slot:2,item:134495,ilvl:885,crit:1607,mastery:1071,name:"Chain of the Underking",icon:"inv_7_0raid_necklace_11d",type:2,wilvl:820},
+	{slot:2,item:134492,ilvl:885,haste:1607,mastery:1071,name:"Hatecoil Commander's Amulet",icon:"inv_7_0raid_necklace_11b",type:2,wilvl:820},
+	{slot:2,item:134497,ilvl:885,crit:1837,mastery:841,name:"Stormcharged Choker",icon:"inv_7_0raid_necklace_01d",type:2,wilvl:820},
+	{slot:2,item:151309,ilvl:885,haste:1500,vers:1178,name:"Necklace of the Twisting Void",icon:"inv_7_0raid_necklace_06d",type:2,wilvl:820},
+	{slot:2,item:144479,ilvl:885,crit:841,haste:1837,name:"Master Thrasher's Lockcollar",icon:"inv_7_0raid_necklace_04c",type:2,wilvl:820},
+	{slot:2,item:133636,ilvl:885,vers:765,mastery:1913,name:"Brysngamen, Torc of Helheim",icon:"inv_7_0raid_necklace_13a",type:2,wilvl:820},
+	{slot:2,item:137311,ilvl:885,crit:841,mastery:1837,name:"Chain of the Green Flight",icon:"inv_7_0raid_necklace_12c",type:2,wilvl:820},
+	{slot:2,item:133633,ilvl:885,haste:765,mastery:1913,name:"Wolfstride Pendant",icon:"inv_7_0raid_necklace_01b",type:2,wilvl:820},
+	{slot:2,item:133767,ilvl:885,crit:1683,haste:995,name:"Pendant of the Stormforger",icon:"inv_7_0raid_necklace_14a",type:2,wilvl:820},
+	{slot:2,item:137461,ilvl:885,crit:1913,haste:765,name:"Breathless Choker",icon:"inv_7_0raid_necklace_12d",type:2,wilvl:820},
+	{slot:2,item:134541,ilvl:885,crit:1148,haste:1530,name:"Tightweb Choker",icon:"inv_7_0raid_necklace_02c",type:2,wilvl:820},
+	{slot:2,item:137458,ilvl:885,vers:1224,mastery:1454,name:"Chaos-Forged Necklace",icon:"inv_7_0raid_necklace_01c",type:2,wilvl:820},
+	{slot:2,item:134498,ilvl:885,haste:1913,mastery:765,name:"Chain of a Hundred Maws",icon:"inv_jewelry_necklace_ahnqiraj_02",type:2,wilvl:820},
+	{slot:2,item:139332,ilvl:850,crit:1422,haste:742,name:"Blackened Portalstone Necklace",icon:"inv_7_0raid_necklace_07d",type:6,wilvl:850},
+	{slot:2,item:139239,ilvl:850,haste:990,mastery:1175,name:"Cursed Beartooth Necklace",icon:"inv_7_0raid_necklace_13b",type:6,wilvl:850},
+	{slot:2,item:142428,ilvl:865,vers:1490,mastery:880,name:"Sea Fan Pendant",icon:"inv_7_0raid_necklace_13b",type:6,wilvl:855},
+	{slot:2,item:140900,ilvl:875,haste:1151,vers:1368,name:"Brooch of the Astral Scryer",icon:"inv_7_0raid_necklace_17b",type:6,wilvl:875},
+	{slot:2,item:140899,ilvl:875,crit:1440,mastery:1080,name:"Beleron's Choker of Misery",icon:"inv_7_0raid_necklace_04d",type:6,wilvl:875},
+	{slot:2,item:140894,ilvl:870,vers:908,mastery:1537,name:"Zealous Timestone Pendant",icon:"inv_7_0raid_necklace_09a",type:6,wilvl:875},
+	{slot:2,item:140898,ilvl:870,crit:768,haste:1677,name:"Radiant String of Scorpid Eyes",icon:"inv_7_0raid_necklace_16c",type:6,wilvl:875},
+	{slot:2,item:147014,ilvl:900,crit:1341,mastery:1592,name:"Locket of Splintered Souls",icon:"inv_jewelry_necklace_46",type:3,wilvl:890},
+	{slot:2,item:147013,ilvl:900,haste:1760,vers:1173,name:"String of Extracted Incisors",icon:"inv_misc_necklace_bone04",type:3,wilvl:890},
+	{slot:2,item:151966,ilvl:930,haste:2112,mastery:1408,name:"Riveted Choker of Delirium",icon:"inv_7_0raid_necklace_04b",type:4,wilvl:930},
+	{slot:2,item:151965,ilvl:930,crit:1609,vers:1911,name:"Vulcanarcore Pendant",icon:"inv_7_0raid_necklace_14b",type:4,wilvl:930},
+	{slot:2,item:151973,ilvl:930,vers:1509,mastery:2011,name:"Collar of Null-Flame",icon:"inv_7_0raid_necklace_07b",type:4,wilvl:930},
+	{slot:2,item:152283,ilvl:940,crit:2457,haste:1281,name:"Chain of the Unmaker",icon:"inv_7_0raid_necklace_18a",type:4,wilvl:940},
+	
+	//Rings
+	{slot:11,item:137051,ilvl:910,type:5,name:"Focuser of Jonat, the Elder",crit:2004,haste:1114,icon:"inv_jewelry_ring_96",scale:970,special:function(ilvl){ return rV.jonatPredictionAmount * GetFeedFactor() + GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:152626,ilvl:910,type:5,name:"Insignia of the Grand Army",mastery:1067,crit:1011,haste:1039,icon:"inv_jewelry_ring_60",scale:970,special:function(ilvl){ return rV.insigniaringPredictionAmount + GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:151647,ilvl:970,type:5,name:"Soul of the Farseer",mastery:1486,crit:1230,haste:974,icon:"inv_70_quest_ring2b",scale:970,special:function(ilvl){ return GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:132452,ilvl:970,type:5,name:"Sephuz's Secret",crit:3204,haste:1281,icon:"inv_jewelry_ring_149",scale:970,special:function(ilvl){ return 375 * 2 * healPerStat.haste.amount + GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:142173,ilvl:885,haste:841,mastery:1837,name:"Ring of Collapsing Futures",icon:"inv_70_raid_ring3c",type:2,wilvl:860},
+	{slot:11,item:142172,ilvl:885,crit:1148,haste:1530,name:"Terestian's Signet Ring",icon:"inv_jewelry_ring_37",type:2,wilvl:860},
+	{slot:11,item:142171,ilvl:885,vers:1683,mastery:995,name:"Seal of Darkshire Nobility",icon:"inv_70_dungeon_ring4d",type:2,wilvl:855},
+	{slot:11,item:137533,ilvl:885,vers:1071,mastery:1607,name:"Ring of Minute Mirrors",icon:"inv_jewelry_ring_155",type:2,wilvl:820},
+	{slot:11,item:137532,ilvl:885,haste:1683,mastery:995,name:"Seal of Saltheril",icon:"inv_70_dungeon_ring2c",type:2,wilvl:820},
+	{slot:11,item:134540,ilvl:885,haste:995,mastery:1683,name:"Ring of Twisted Webbing",icon:"inv_jewelry_ring_62",type:2,wilvl:820},
+	{slot:11,item:134533,ilvl:885,haste:1607,vers:1071,name:"Ring of Looming Menace",icon:"inv_70_dungeon_ring8d",type:2,wilvl:820},
+	{slot:11,item:134526,ilvl:885,crit:1530,mastery:1148,name:"Gnawed Thumb Ring",icon:"inv_70_dungeon_ring6a",special:function(ilvl){ return rV.total * 0.05 * 12 / 180; },type:2,wilvl:820},
+	{slot:11,item:134542,ilvl:885,crit:1224,haste:1454,name:"Jeweled Signet of Melandrus",icon:"inv_70_dungeon_ring7d",type:2,wilvl:820},
+	{slot:11,item:134528,ilvl:885,crit:1913,haste:765,name:"Band of Callous Dominance",icon:"inv_70_dungeon_ring2d",type:2,wilvl:820},
+	{slot:11,item:134490,ilvl:885,haste:1837,vers:841,name:"Ring of Contempt",icon:"inv_70_dungeon_ring3b",type:2,wilvl:820},
+	{slot:11,item:134530,ilvl:885,haste:1837,mastery:841,name:"Loop of Vitriolic Intent",icon:"inv_70_dungeon_ring6b",type:2,wilvl:820},
+	{slot:11,item:134524,ilvl:885,crit:1683,vers:995,name:"Band of the Wyrm Matron",icon:"inv_70_dungeon_ring5c",type:2,wilvl:820},
+	{slot:11,item:134532,ilvl:885,crit:765,haste:1913,name:"Band of Fused Coral",icon:"inv_70_dungeon_ring6d",type:2,wilvl:820},
+	{slot:11,item:134525,ilvl:885,crit:1760,haste:918,name:"Seal of the Nazjatar Empire",icon:"inv_70_dungeon_ring4a",type:2,wilvl:820},
+	{slot:11,item:134539,ilvl:885,vers:1224,mastery:1454,name:"Braided Silver Ring",icon:"inv_jewelry_ring_118",type:2,wilvl:820},
+	{slot:11,item:151308,ilvl:885,crit:1040,vers:1637,name:"Mac'Aree Seal of Nobility",icon:"inv_70_dungeon_ring3c",type:2,wilvl:820},
+	{slot:11,item:151311,ilvl:885,haste:1530,vers:1148,name:"Band of the Triumvirate",icon:"inv_70_dungeon_ring2b",type:2,wilvl:820},
+	{slot:11,item:144481,ilvl:885,vers:1837,mastery:841,name:"Ring of Fel Domination",icon:"inv_70_dungeon_ring8b",type:2,wilvl:820},
+	{slot:11,item:144478,ilvl:885,crit:1913,vers:765,name:"Band of Dark Solitude",icon:"inv_70_dungeon_ring5b",type:2,wilvl:820},
+	{slot:11,item:133634,ilvl:885,haste:1148,mastery:1530,name:"Grasping Tentacle Loop",icon:"inv_misc_ring_6_0_013",type:2,wilvl:820},
+	{slot:11,item:133637,ilvl:885,crit:1837,vers:841,name:"Utgarde Royal Signet",icon:"inv_70_dungeon_ring4c",type:2,wilvl:820},
+	{slot:11,item:134531,ilvl:885,crit:1837,mastery:841,name:"Band of Twisted Bark",icon:"inv_70_dungeon_ring1d",type:2,wilvl:820},
+	{slot:11,item:134487,ilvl:885,haste:765,mastery:1913,name:"Arch-Druid's Tainted Seal",icon:"inv_70_dungeon_ring2a",type:2,wilvl:820},
+	{slot:11,item:134537,ilvl:885,crit:995,mastery:1683,name:"Signet of the Highborne Magi",icon:"inv_70_dungeon_ring7c",type:2,wilvl:820},
+	{slot:11,item:133638,ilvl:885,crit:1148,mastery:1530,name:"Woe-Bearer's Band",icon:"inv_70_dungeon_ring5a",type:2,wilvl:820},
+	{slot:11,item:133679,ilvl:885,crit:1607,mastery:1071,name:"Val'kyr Ascension Signet",icon:"inv_70_dungeon_ring8a",type:2,wilvl:820},
+	{slot:11,item:134527,ilvl:885,vers:841,mastery:1837,name:"Loop of Eightfold Eyes",icon:"inv_70_dungeon_ring1c",type:2,wilvl:820},
+	{slot:11,item:134493,ilvl:885,vers:1683,mastery:995,name:"Band of Crystalline Bone",icon:"inv_jewelry_ring_84",type:2,wilvl:820},
+	{slot:11,item:137438,ilvl:885,crit:1607,haste:1071,name:"Band of Decaying Rubies",icon:"item_icecrownringc",type:2,wilvl:820},
+	{slot:11,item:137432,ilvl:885,crit:918,mastery:1760,name:"Ring of Mind-Shielding",icon:"inv_70_dungeon_ring5d",type:2,wilvl:820},
+	{slot:11,item:134489,ilvl:885,crit:995,haste:1683,name:"Seal of Malicious Deceit",icon:"inv_70_dungeon_ring3a",type:2,wilvl:820},
+	{slot:11,item:134534,ilvl:885,haste:1454,mastery:1224,name:"Dingy Wedding Band",icon:"inv_70_dungeon_ring4b",type:2,wilvl:820},
+	{slot:11,item:141486,ilvl:860,crit:1644,haste:658,name:"Demonic Birthstone Ring",icon:"inv_70_quest_ring7d",type:1},
+	{slot:11,item:141545,ilvl:860,vers:854,mastery:1447,name:"Ring of Deep Sea Pearls",icon:"inv_70_dungeon_ring3d",type:1},
+	{slot:11,item:141533,ilvl:860,crit:920,haste:1381,name:"Ring of Frozen Magic",icon:"inv_70_raid_ring2d",type:1},
+	{slot:11,item:141534,ilvl:860,crit:1052,mastery:1249,name:"Loop of Polished Pebbles",icon:"inv_70_pvp_ring1a",type:1},
+	{slot:11,item:141488,ilvl:860,haste:1513,vers:789,name:"Mana-Dowsing Ring",icon:"inv_70_raid_ring6d",type:1},
+	{slot:11,item:141544,ilvl:860,haste:1644,mastery:658,name:"Marshstomper Oracle's Loop",icon:"inv_70_raid_ring7b",type:1},
+	{slot:11,item:147766,ilvl:900,haste:1844,vers:1090,name:"Band of Dark Millennia",icon:"inv_70_raid_ring6c",type:1},
+	{slot:11,item:147767,ilvl:900,crit:1928,mastery:1006,name:"Coral Band of the Abyss",icon:"inv_70_raid_ring4c",type:1},
+	{slot:11,item:141492,ilvl:860,crit:1644,vers:658,name:"Dingy Suramar Mercantile Signet",icon:"inv_70_raid_ring5c",type:1},
+	{slot:11,item:141546,ilvl:860,crit:1315,mastery:986,name:"Cursed Warden's Keepsake",icon:"inv_70_quest_ring8c",type:1},
+	{slot:11,item:139236,ilvl:850,crit:1237,vers:928,name:"Grubby Silver Ring",icon:"inv_70_raid_ring1b",type:6},
+	{slot:11,item:139238,ilvl:850,crit:1484,haste:680,name:"Twice-Warped Azsharan Signet",icon:"inv_70_raid_ring6b",type:6},
+	{slot:11,item:139237,ilvl:850,haste:1175,mastery:990,name:"Dreadful Cyclopean Signet",icon:"inv_70_raid_ring3b",type:6},
+	{slot:11,item:138220,ilvl:850,haste:804,mastery:1361,name:"Mindrend Band",icon:"inv_70_raid_ring8a",type:6},
+	{slot:11,item:142520,ilvl:860,crit:1052,haste:1249,name:"Ring of Ascended Glory",icon:"inv_70_dungeon_ring8c",type:6,wilvl:855},
+	{slot:11,item:140895,ilvl:875,crit:1728,mastery:792,name:"Spellblade's Gemmed Signet",icon:"inv_70_raid_ring4b",type:6},
+	{slot:11,item:140896,ilvl:875,haste:1512,vers:1008,name:"Ring of Braided Stems",icon:"inv_70_raid_ring1a",type:6},
+	{slot:11,item:140906,ilvl:875,crit:864,vers:1656,name:"Ring of Exclusive Servitude",icon:"inv_70_raid_ring5a",type:6},
+	{slot:11,item:140897,ilvl:880,haste:742,mastery:1856,name:"Ring of the Scoured Clan",icon:"inv_70_raid_ring2b",type:6},
+	{slot:11,item:147194,ilvl:900,vers:1844,mastery:1090,name:"Band of Rescinded Truths",icon:"inv_70_quest_ring7b",type:3,wilvl:890},
+	{slot:11,item:147021,ilvl:900,crit:2011,vers:922,name:"Yathae's Thumb Ring",icon:"inv_70_dungeon_ring1b",type:3,wilvl:890},
+	{slot:11,item:147195,ilvl:910,crit:1425,haste:1693,name:"Seal of the Second Duumvirate",icon:"inv_misc_ring_mop19",type:3,wilvl:890},
+	{slot:11,item:147020,ilvl:900,haste:1257,mastery:1676,name:"Scaled Band of Servitude",icon:"inv_70_raid_ring5b",type:3,wilvl:890},
+	{slot:11,item:152284,ilvl:930,crit:1408,haste:2112,name:"Zealous Tormentor's Ring",icon:"inv_70_quest_ring7a",type:4},
+	{slot:11,item:152064,ilvl:930,crit:1861,mastery:1659,name:"Band of the Sargerite Smith",icon:"inv_70_raid_ring4a",type:4},
+	{slot:11,item:152688,ilvl:930,haste:1207,mastery:2313,name:"Loop of the Life-Binder",icon:"inv_70_raid_ring7d",type:4},
+	{slot:11,item:152063,ilvl:930,haste:1307,vers:2212,name:"Seal of the Portalmaster",icon:"inv_70_raid_ring2c",type:4},
+	{slot:11,item:151972,ilvl:940,vers:1602,mastery:2137,name:"Sullied Seal of the Pantheon",icon:"inv_70_raid_ring3a",type:4},
 ];
 
 
@@ -4013,7 +4165,7 @@ function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
 			
 			Object.keys(gearData).forEach(function (statName) {
 				if(healPerStat[statName]){
-					var value = ScaleStat(gearData[statName],gearData.ilvl,scaleIlvl,statName == "int" ? 1 : (jewelSlots[ gearData.slot ] ? 2 : 0));
+					var value = ScaleStat(gearData[statName],gearData.ilvl,scaleIlvl,statName == "int" ? 1 : (jewelSlots[ gearData.slot - 1 ] ? 2 : 0));
 					profit += value * healPerStat[statName].amount * (statName == "int" ? 1.05 : 1);
 				} else if (statName == "special") {
 					profit += gearData[statName](scaleIlvl);
@@ -4027,7 +4179,7 @@ function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
 					
 					Object.keys(gearData).forEach(function (statName) {
 						if(healPerStat[statName]){
-							var value = ScaleStat(gearData[statName],gearData.ilvl,isEquipped,statName == "int" ? 1 : (jewelSlots[ gearData.slot ] ? 2 : 0));
+							var value = ScaleStat(gearData[statName],gearData.ilvl,isEquipped,statName == "int" ? 1 : (jewelSlots[ gearData.slot - 1 ] ? 2 : 0));
 							equippedProfit += value * healPerStat[statName].amount * (statName == "int" ? 1.05 : 1);
 						}
 					});
@@ -4035,10 +4187,24 @@ function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
 					break;
 				}
 			}
-			if(GEAR_CHARTS_SLOT == -1 && !isEquipped && cV.gearInfo[gearData.item]){
+			if(GEAR_CHARTS_SLOT != 14 && !isEquipped && cV.gearInfo[gearData.item]){
 				equippedProfit = profit;
 				isEquipped = cV.gearInfo[gearData.item].itemLevel;
+				
+				if(GEAR_CHARTS_SLOT != -1){
+					equippedProfit = 0;
+					Object.keys(gearData).forEach(function (statName) {
+						if(healPerStat[statName]){
+							var value = ScaleStat(gearData[statName],gearData.ilvl,isEquipped,statName == "int" ? 1 : (jewelSlots[ gearData.slot - 1 ] ? 2 : 0));
+							equippedProfit += value * healPerStat[statName].amount * (statName == "int" ? 1.05 : 1);
+						} else if (statName == "special") {
+							equippedProfit += gearData[statName](isEquipped);
+						}
+					});
+				}
 			}
+			
+			
 			
 			profit /= fightLen / 1000;
 			equippedProfit /= fightLen / 1000;
@@ -4063,7 +4229,7 @@ function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
 				new_list.push([
 					gear_chart_list[i][0] + gear_chart_list[j][0],
 					gear_chart_list[i][1],
-					gear_chart_list[i][2] + "<br>" + gear_chart_list[j][2],
+					gear_chart_list[i][0] > gear_chart_list[j][0] ? (gear_chart_list[i][2] + "<br>" + gear_chart_list[j][2]) : (gear_chart_list[j][2] + "<br>" + gear_chart_list[i][2]),
 					gear_chart_list[i][3] == gear_chart_list[j][3] ? gear_chart_list[i][3] : "Druid",
 					gear_chart_list[i][4] == gear_chart_list[j][4] ? gear_chart_list[i][4] : false,
 				]);
@@ -4071,13 +4237,19 @@ function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
 		}
 		gear_chart_list = new_list;	
 	}
-	console.log(gear_chart_list);
+	
 	gear_chart_list.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
 	for (var i = 0, len = gear_chart_list.length; i < len; i++) {
 		HTML += "<div class=\"row full "+(gear_chart_list[i][4] ? "eq" : "")+"\"><div class=\"col w5\">"+gear_chart_list[i][1]+"</div><div class=\"col w20\">"+gear_chart_list[i][2]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(gear_chart_list[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(gear_chart_list[i][3])+"-bg\" style=\"width: "+(Math.min(gear_chart_list[i][0]/gear_chart_list[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
 	}
 	
-	$("#gear_chart").html(HTML);
+	$("#gear_chart").html(HTML);	
+	
+	if(GEAR_CHARTS_SLOT != -1){
+		$("#gear_chart_adv").show();
+	} else {
+		$("#gear_chart_adv").hide();
+	}
 }
 
 function CalcHealingFromItem(itemID,diffStats)
@@ -4509,11 +4681,16 @@ function BuildReport(){
 
 	
 	/// Gear Charts
-	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix gear_charts\"><header class=\"box-header\">GEAR CHARTS <sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Various numbers can be different based on buffs/fight length/overheal %/rng procs<br>Feeding into CBT/AG/ASC included in calculation.</span></sup></header><input type=\"range\" min=\"900\" max=\"985\" value=\"930\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
+	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix gear_charts\"><header class=\"box-header\">GEAR CHARTS <sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Various numbers can be different based on buffs/fight length/overheal %/rng procs<br>Feeding into CBT/AG/ASC included in calculation.</span></sup></header>";
 	HTML += "<div class=\"full clearfix slot_select\" style=\"padding-bottom:10px;\">";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:20%;height:68px;\" data-id=\"14\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_datacrystal04.jpg\" style=\"width:48px;height:48px;\"><br>Trinkets</div>";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:20%;height:68px;\" data-id=\"-1\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_hammer_unique_sulfuras.jpg\" style=\"width:48px;height:48px;\"><br>Legendaries</div>";
+	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"14\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_datacrystal04.jpg\" style=\"width:48px;height:48px;\"><br>Trinkets</div>";
+	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-1\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_hammer_unique_sulfuras.jpg\" style=\"width:48px;height:48px;\"><br>Legendaries</div>";
+	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"2\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_misc_necklace_firelands_2.jpg\" style=\"width:48px;height:48px;\"><br>Necks</div>";
+	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"11\"><img src=\"http://media.blizzard.com/wow/icons/56/item_icecrownringc.jpg\" style=\"width:48px;height:48px;\"><br>Rings</div>";
 	HTML += "</div>";
+	
+	HTML += "<div class=\"full clearfix\" style=\"padding-bottom:5px;display:none\" id=\"gear_chart_adv\">";
+	HTML += "<input type=\"range\" min=\"900\" max=\"985\" value=\"930\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
 	HTML += "<div class=\"full\">";
 	var gear_chart_colors_keys = Object.keys(gear_charts_colors);
 	for (var i = 0, len = gear_chart_colors_keys.length; i < len; i++) {
@@ -4522,7 +4699,9 @@ function BuildReport(){
 		HTML += "<div class=\"col\" style=\"width:auto;\">"+gear_charts_colors[ gear_chart_colors_keys[i] ][1]+"</div>";
 		HTML += "</div>";
 	}
-	HTML += "</div><div id=\"gear_chart\"></div></div></div></div>";
+	HTML += "</div></div>";
+
+	HTML += "<div id=\"gear_chart\"></div></div></div></div>";
 
 	
 	/// Traits
@@ -4978,11 +5157,11 @@ function BuildReport(){
 		return false;
 	});
 	
-	CreateGearChartData(930,fightLen);
 	document.getElementById("gear_chart_slider").oninput = function() {
 		CreateGearChartData(this.value,fightLen);
 	}
 	
+	CreateGearChartData(930,fightLen);
 }
 
 function BuildFightsList(){
