@@ -2572,7 +2572,7 @@ NETHERLIGHT = [
 				if(itemID == 128911) pV.netherlightIlvlCurrWeapon = itemData.itemLevel;
 			}
 		],
-		afterParse: function() {
+		afterStats: function() {
 			var items = [128911, 128934];
 			var stats = ["int","crit","mastery"];
 			for (var i = 0, len = items.length; i < len; i++) {
@@ -2583,7 +2583,7 @@ NETHERLIGHT = [
 					var valDef = ScaleStat(itemData[statName],itemData.ilvl,pV.netherlightIlvlCurrWeapon,statName == "int" ? 1 : 0);
 					var valBuffed = ScaleStat(itemData[statName],itemData.ilvl,pV.netherlightIlvlCurrWeapon + 1,statName == "int" ? 1 : 0)
 					
-					rV.netherlight[-1] += (valBuffed - valDef) * healPerStat[statName].amount;
+					rV.netherlight[-1] += (valBuffed - valDef) * healPerStat[statName].amount * (statName == "int" ? 1.05 : 1);
 				}
 			}
 			
@@ -3146,7 +3146,7 @@ var GEAR = [
 	{slot:14,item:151958,ilvl:930,type:4,name:"Tarratus Keystone",int:2728,icon:"inv_datacrystal06",special:function(ilvl){ return ScaleStat(1633313,930,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * (GetFightLenFactor(90) + 1) * 0.9 * GetFeedFactor(); }},
 	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.8 * GetFeedFactor(); }},
 	{slot:14,item:151957,ilvl:930,type:4,name:"Ishkar's Felshield Emitter",vers:1320,wicon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(2416491,930,ilvl,1) * GetVersFactor() * GetCritFactor() * (GetFightLenFactor(60) + 0.5) * 0.9; }},
-	{slot:14,item:154175,ilvl:940,type:4,name:"Eonar's Compassion",int:2994,wicon:"inv_antorus_green",special:function(ilvl){ return ScaleStat(127273,940,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 7 * 1.2 * GetFightLenFactor(60) * 0.8 * GetFeedFactor() + ScaleStat(250782,940,ilvl,1) * GetVersFactor() * 4 * 1 * GetFightLenFactor(60) * GetFeedFactor(); }},
+	{slot:14,item:154175,ilvl:940,type:4,name:"Eonar's Compassion",int:2994,wicon:"inv_antorus_green",special:function(ilvl){ return ScaleStat(127273,940,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 7 * 1.2 * GetFightLenFactor(60) * 0.8 * GetFeedFactor() + ScaleStat(250782,940,ilvl,1) * GetVersFactor() * 4 * 1 * GetFightLenFactor(60) * GetFeedFactor(); },max:1000},
 	{slot:14,item:151970,ilvl:930,type:4,name:"Vitality Resonator",vers:1320,icon:"inv_7_0raid_trinket_08d",special:function(ilvl){ return ScaleStat(9705,930,ilvl,1) * healPerStat.int.amount * 1.05 * 15 / 60 * 0.75; }},
 
 	{slot:14,item:144258,ilvl:940,type:5,name:"Velen's Future Sight",int:2994,crit:456,mastery:456,haste:456,icon:"spell_holy_healingfocus",scale:970,special:function(ilvl){ return rV.total * 10 / 75 * 0.15 + rV.totalOver * 10 / 75 * 0.5 * 0.65 * GetAftifactFactor(); },wilvl:910},
@@ -3213,7 +3213,7 @@ var GEAR = [
 	
 	//Rings
 	{slot:11,item:137051,ilvl:910,type:5,name:"Focuser of Jonat, the Elder",crit:2004,haste:1114,icon:"inv_jewelry_ring_96",scale:970,special:function(ilvl){ return rV.jonatPredictionAmount * GetFeedFactor() + GetSocketFactor(); },wilvl:910},	
-	{slot:11,item:152626,ilvl:910,type:5,name:"Insignia of the Grand Army",mastery:1067,crit:1011,haste:1039,icon:"inv_jewelry_ring_60",scale:970,special:function(ilvl){ return rV.insigniaringPredictionAmount + GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:152626,ilvl:910,type:5,name:"Insignia of the Grand Army",mastery:1067,crit:1011,haste:1039,icon:"inv_jewelry_ring_60",scale:1000,special:function(ilvl){ return rV.insigniaringPredictionAmount + GetSocketFactor(); },wilvl:910},	
 	{slot:11,item:151647,ilvl:970,type:5,name:"Soul of the Farseer",mastery:1486,crit:1230,haste:974,icon:"inv_70_quest_ring2b",scale:970,special:function(ilvl){ return GetSocketFactor(); },wilvl:910},	
 	{slot:11,item:132452,ilvl:970,type:5,name:"Sephuz's Secret",crit:3204,haste:1281,icon:"inv_jewelry_ring_149",scale:970,special:function(ilvl){ return 375 * 2 * healPerStat.haste.amount + GetSocketFactor(); },wilvl:910},	
 	{slot:11,item:142173,ilvl:885,haste:841,mastery:1837,name:"Ring of Collapsing Futures",icon:"inv_70_raid_ring3c",type:2,wilvl:860},
@@ -3277,6 +3277,68 @@ var GEAR = [
 	{slot:11,item:152688,ilvl:930,haste:1207,mastery:2313,name:"Loop of the Life-Binder",icon:"inv_70_raid_ring7d",type:4},
 	{slot:11,item:152063,ilvl:930,haste:1307,vers:2212,name:"Seal of the Portalmaster",icon:"inv_70_raid_ring2c",type:4},
 	{slot:11,item:151972,ilvl:940,vers:1602,mastery:2137,name:"Sullied Seal of the Pantheon",icon:"inv_70_raid_ring3a",type:4},
+	{slot:11,item:134323,ilvl:925,crit:1463,mastery:1951,name:"Glinting Quartz Ring",icon:"inv_70_quest_ring3b",type:1,wilvl:810},
+	{slot:11,item:146767,ilvl:845,crit:780,vers:1320,name:"Portal Keeper's Seal",icon:"inv_70_quest_ring3b",type:1,wilvl:810},
+
+	// Netherlight
+	{slot:15,spell:253093,type:2,tier:2,name:"Infusion of Light",icon:"ability_malkorok_blightofyshaarj_yellow",special:function(){ return 101000 * GetCritFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 4 * 0.7 * GetFeedFactor(); }},
+	{slot:15,spell:253070,type:2,tier:2,name:"Secure in the Light",icon:"ability_paladin_toweroflight",special:function(){ return 135000 * GetVersFactor() * GetFightLenFactor(60) * 3 * 0.9; }},
+	{slot:15,spell:252088,type:2,tier:2,name:"Light Speed",icon:"ability_rogue_sprint",special:function(){ return healPerStat.haste.amount * 500; }},
+	{slot:15,spell:252091,type:6,tier:2,name:"Master of Shadows",icon:"spell_shadow_shadesofdarkness",special:function(){ return healPerStat.mastery.amount * 500; }},
+	{slot:15,spell:252799,type:2,tier:2,name:"Shocklight",icon:"paladin_icon_speedoflight",special:function(){ return healPerStat.crit.amount * 1500 * 0.3; }},
+	{slot:15,spell:252191,type:6,tier:2,name:"Murderous Intent",icon:"spell_shadow_charm",special:function(){ return healPerStat.vers.amount * 1500 * 0.3; }},
+	{slot:15,spell:252207,type:2,tier:2,name:"Refractive Shell",icon:"ability_priest_reflectiveshield",special:function(){ return 300000 * GetVersFactor() * GetFightLenFactor(60) * 2 * 0.9; }},
+	{slot:15,spell:253111,type:2,tier:2,name:"Light's Embrace",icon:"achievement_reputation_07",special:function(){ return 45500 * GetCritFactor() * GetHasteFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 8 * 0.6 * GetFeedFactor(); }},
+	{slot:15,spell:252888,type:6,tier:2,name:"Chaotic Darkness",icon:"inv_artifact_powerofthedarkside",special:function(){ return 180000 * GetCritFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 2  * 0.75 * GetFeedFactor(); }},
+	{slot:15,spell:252875,type:6,tier:2,name:"Shadowbind",icon:"spell_shadow_deathpact",special:function(){ return 200000 * GetCritFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 2 * 0.65 * GetFeedFactor(); }},
+
+	{slot:15,spell:-1,type:2,tier:1,name:"+1 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 1; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+2 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 2; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+3 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 3; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+4 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 4; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+5 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 5; }},
+
+	{slot:15,spell:207348,type:4,tier:3,name:"Floodwaters",icon:"spell_nature_healingwavegreater",special:function(){ return rV.traits[1109] / GetTraitRank(1109); }},
+	{slot:15,spell:207255,type:4,tier:3,name:"Empowered Droplets",icon:"spell_nature_giftofthewaterspirit",special:function(){ return rV.traits[1107] / GetTraitRank(1107); }},
+	{slot:15,spell:210031,type:4,tier:3,name:"Pull of the Sea",icon:"inv_tradeskillitem_sorcererswater",special:function(){ return rV.traits[1105] / GetTraitRank(1105); }},
+	{slot:15,spell:207206,type:4,tier:3,name:"Wavecrash",icon:"inv_spear_04",special:function(){ return rV.traits[1106] / GetTraitRank(1106); }},
+	{slot:15,spell:207092,type:4,tier:3,name:"Buffeting Waves",icon:"ability_skyreach_four_wind",special:function(){ return rV.traits[1104] / GetTraitRank(1104); }},
+	{slot:15,spell:207088,type:4,tier:3,name:"Tidal Chains",icon:"spell_frost_chainsofice",special:function(){ return rV.traits[1103] / GetTraitRank(1103); }},
+	{slot:15,spell:207288,type:4,tier:3,name:"Queen Ascendant",icon:"ability_shaman_watershield",special:function(){ return rV.traits[1108] / GetTraitRank(1108); }},
+
+	//Boots
+	{slot:8,item:137036,ilvl:910,type:5,name:"Elemental Rebalancers",int:1786,haste:459,mastery:827,icon:"inv_boots_mail_raidshaman_j_01",scale:970,special:function(ilvl){ return rV.bootsPredictionAmount * GetFeedFactor(); },wilvl:910},	
+	{slot:8,item:142132,ilvl:885,int:1415,haste:812,vers:360,name:"Doomstride Footguards",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:142204,ilvl:885,int:1415,crit:385,mastery:787,name:"Boots of False Promises",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134386,ilvl:885,int:1415,crit:787,vers:385,name:"Mardum Chain Boots",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:137517,ilvl:885,int:1415,crit:761,haste:410,name:"Striders of Furious Flight",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:134298,ilvl:885,int:1415,haste:376,mastery:795,name:"Ley Dragoon's Stompers",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134298,ilvl:885,int:1415,haste:376,mastery:795,name:"Ley Dragoon's Stompers",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134477,ilvl:885,int:1415,haste:787,mastery:385,name:"Ravencrest's Unerring Striders",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:134166,ilvl:885,int:1415,haste:736,vers:435,name:"Bitestone Boots",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134465,ilvl:885,int:1415,crit:485,haste:686,name:"Hydra Scale Sabatons",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:151320,ilvl:885,int:1415,crit:652,haste:519,name:"Void-Coated Stompers",icon:"inv_boot_mail_legiondungeon_c_03",type:2},
+	{slot:8,item:144490,ilvl:885,int:1415,haste:435,mastery:736,name:"Corruption-Fused Stompers",icon:"inv_boot_mail_legiondungeon_c_02",type:2},
+	{slot:8,item:134210,ilvl:885,int:1415,crit:686,mastery:485,name:"Tideskorn Sabatons",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134464,ilvl:885,int:1415,haste:435,mastery:736,name:"Whelp Handler's Lined Boots",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:133623,ilvl:885,int:1415,crit:334,mastery:837,name:"Felstep Footguards",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:134466,ilvl:885,int:1415,crit:812,mastery:360,name:"Begrudging Trudgers",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:137444,ilvl:885,int:1415,haste:812,vers:360,name:"Plasma-Drilled Steel Toes",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:147744,ilvl:900,int:1628,crit:433,haste:805,name:"Treads of Disorderly Retreat",icon:"inv_boot_mail_raidshaman_r_01",type:1},
+	{slot:8,item:141432,ilvl:860,int:1121,crit:648,haste:419,name:"Frostburned Sabatons",icon:"inv_boot_mail_raidhunter_q_01",type:1},
+	{slot:8,item:139219,ilvl:850,int:1021,haste:712,mastery:316,name:"Black Venom Sabatons",icon:"inv_boot_mail_raidshaman_q_01",type:6},
+	{slot:8,item:138211,ilvl:850,int:1021,crit:734,haste:293,name:"Malignant Sabatons",icon:"inv_boot_mail_raidhunter_q_01",type:6},
+	{slot:8,item:139220,ilvl:850,int:1021,crit:646,haste:382,name:"Scored Ironclaw Sabatons",icon:"inv_boot_mail_raidshaman_q_01",type:6},
+	{slot:8,item:142422,ilvl:860,int:1121,vers:671,mastery:396,name:"Radiant Soul Sabatons",icon:"inv_boot_mail_legionraid_d_01",type:6},
+	{slot:8,item:140867,ilvl:875,int:1289,vers:443,mastery:685,name:"Sabatons of Burning Steps",icon:"inv_boot_mail_raidshaman_q_01",type:6},
+	{slot:8,item:140873,ilvl:875,int:1289,crit:515,haste:612,name:"Shal'dorei Weedstompers",icon:"inv_boot_mail_raidhunter_q_01",type:6},
+	{slot:8,item:147046,ilvl:910,int:1786,crit:809,mastery:477,name:"Star-Stalker Treads",icon:"inv_boot_mail_raidhunter_r_01",type:3},
+	{slot:8,item:147045,ilvl:900,int:1628,haste:460,mastery:779,name:"Insulated Finpads",icon:"inv_boot_mail_raidshaman_r_01",type:3},
+	{slot:8,item:151996,ilvl:930,int:2153,crit:634,haste:752,name:"Deft Soulhunter's Sabatons",icon:"inv_boot_mail_raidhunter_s_01",type:4},
+	{slot:8,item:152684,ilvl:930,int:2153,haste:534,mastery:852,name:"Greatboots of the Searing Tempest",icon:"inv_boot_mail_raidshamanraid_s_01",type:4},
+	{slot:8,item:151997,ilvl:930,int:2153,crit:802,vers:584,name:"Nathrezim Shade-Walkers",icon:"inv_boot_mail_raidshamanraid_s_01",type:4},
+	{slot:8,item:152367,ilvl:930,int:2153,haste:832,vers:554,name:"Sabatons of Ceaseless Assault",icon:"inv_boot_mail_raidhunter_s_01",type:1},
+
 ];
 
 
@@ -4150,9 +4212,78 @@ function GetIlvBonusID(baseIlvl,needIlvl){
 	return 0;
 }
 
-var GEAR_CHARTS_SLOT = 14;
+function CreateNCChartData(fightLen){
+	var tier_1 = [],tier_2 = [],tier_3 = [];
+	for (var i = 0, len = GEAR.length; i < len; i++) {
+		var gearData = GEAR[i];
+		if(gearData.slot == 15) {
+			var name = (gearData.icon ? "<img src=\"http://media.blizzard.com/wow/icons/56/"+gearData.icon.replace(/\-/,"")+".jpg\" alt=\""+gearData.name+"\">" : "")+" <a href=\"//www.wowhead.com/spell="+gearData.spell+"\" target=\"_blank\">"+gearData.name+"</a>";
+		
+			if(gearData.tier == 1) {
+				tier_1.push( [ gearData.special() / (fightLen / 1000),name,false,gear_charts_colors[gearData.type][0] ] );
+			} else if(gearData.tier == 2) {
+				if(cV.traitBySpell[ gearData.spell ]){
+					var amount = rV.netherlight[gearData.spell] / ( cV.traitBySpell[gearData.spell].rank ? cV.traitBySpell[gearData.spell].rank : 1 );
+					tier_2.push( [ amount / (fightLen / 1000),name,true,"DeathKnight" ] );
+				} else {
+					tier_2.push( [ gearData.special() / (fightLen / 1000),name,false,gear_charts_colors[gearData.type][0] ] );
+				}
+			} else if(gearData.tier == 3) {
+				tier_3.push( [ gearData.special() / (fightLen / 1000),name,false,gear_charts_colors[gearData.type][0] ] );
+			}
+		}
+	}
+	
+	tier_1.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
+	tier_2.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
+	tier_3.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
 
-function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
+	var HTML = "";
+	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 1</div><div class=\"list-top-line\"></div></div>";
+	for (var i = 0, len = tier_1.length; i < len; i++) {
+		HTML += "<div class=\"row full "+(tier_1[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_1[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_1[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_1[i][3])+"-bg\" style=\"width: "+(Math.min(tier_1[i][0]/tier_1[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	}
+	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 2</div><div class=\"list-top-line\"></div></div>";
+	for (var i = 0, len = tier_2.length; i < len; i++) {
+		HTML += "<div class=\"row full "+(tier_2[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_2[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_2[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_2[i][3])+"-bg\" style=\"width: "+(Math.min(tier_2[i][0]/tier_2[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	}
+	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 3</div><div class=\"list-top-line\"></div></div>";
+	for (var i = 0, len = tier_3.length; i < len; i++) {
+		HTML += "<div class=\"row full "+(tier_3[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_3[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_3[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_3[i][3])+"-bg\" style=\"width: "+(Math.min(tier_3[i][0]/tier_3[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	}
+	
+	var tier_2_3 = [];
+	for (var i = 0, len = tier_2.length; i < len; i++) {
+		for (var j = 0, j_len = tier_3.length; j < j_len; j++) {
+			tier_2_3.push([
+				tier_2[i][0] + tier_3[j][0],
+				tier_2[i][0] > tier_3[j][0] ? (tier_2[i][1] + "<br>" + tier_3[j][1]) : (tier_3[j][1] + "<br>" + tier_2[i][1]),
+				false,
+				gear_charts_colors[3][0],
+			]);
+		}
+	}
+	tier_2_3.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
+	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 2+3</div><div class=\"list-top-line\"></div></div>";
+	for (var i = 0, len = tier_2_3.length; i < len; i++) {
+		HTML += "<div class=\"row full "+(tier_2_3[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_2_3[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_2_3[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_2_3[i][3])+"-bg\" style=\"width: "+(Math.min(tier_2_3[i][0]/tier_2_3[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	}
+	
+	
+	$("#gear_chart").html(HTML);
+	
+	$("#gear_chart_adv").hide();	
+}
+
+var GEAR_CHARTS_SLOT = 14;
+var GEAR_CHARTS_ILVL = 930;
+
+function CreateGearChartData(fightLen){
+	if(GEAR_CHARTS_SLOT == 15){
+		CreateNCChartData(fightLen)
+		return;
+	}
+
 	var gear_chart_list = [];
 	var HTML = "";
 	for (var i = 0, len = GEAR.length; i < len; i++) {
@@ -4161,7 +4292,7 @@ function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
 			var profit = 0;
 			var equippedProfit = 0;
 			var isEquipped = false;
-			var scaleIlvl = gearData.scale ? gearData.scale : GEAR_CHARTS_ILVL;
+			var scaleIlvl = gearData.scale ? gearData.scale : Math.min(GEAR_CHARTS_ILVL,gearData.max || 985);
 			
 			Object.keys(gearData).forEach(function (statName) {
 				if(healPerStat[statName]){
@@ -4250,6 +4381,8 @@ function CreateGearChartData(GEAR_CHARTS_ILVL,fightLen){
 	} else {
 		$("#gear_chart_adv").hide();
 	}
+
+	$("#gear_chart_slider").attr("max",GEAR_CHARTS_SLOT == 14 ? 1000 : 985);
 }
 
 function CalcHealingFromItem(itemID,diffStats)
@@ -4577,6 +4710,15 @@ function BuildReport(){
 	HTML += "<div class=\"row full\"><div class=\"col full\" id=\"stats_graph_more\"><a href=\"javascript:void(0)\" class=\"more_graph\">Show graph</a></div><div class=\"ct-chart\" style=\"display:none\"  id=\"stats_graph\"></div></div>";	
 
 	HTML += "</div></div>";	
+	
+	
+	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
+		var pluginData = pluginsList[k];
+		for (var i = 0, len = pluginData.length; i < len; i++) {
+			if(pluginData[i].afterStats) pluginData[i].afterStats();
+		}
+	}
+	
 
 	/// Items predictions
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix predictionlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Items predictions ";
@@ -4687,6 +4829,7 @@ function BuildReport(){
 	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-1\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_hammer_unique_sulfuras.jpg\" style=\"width:48px;height:48px;\"><br>Legendaries</div>";
 	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"2\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_misc_necklace_firelands_2.jpg\" style=\"width:48px;height:48px;\"><br>Necks</div>";
 	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"11\"><img src=\"http://media.blizzard.com/wow/icons/56/item_icecrownringc.jpg\" style=\"width:48px;height:48px;\"><br>Rings</div>";
+	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"15\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Netherlight Crucible</div>";
 	HTML += "</div>";
 	
 	HTML += "<div class=\"full clearfix\" style=\"padding-bottom:5px;display:none\" id=\"gear_chart_adv\">";
@@ -5112,7 +5255,7 @@ function BuildReport(){
 	$("a.more_3-2").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_2").show();return false;});
 
 
-	$(".gear_charts_slot_select").click(function(){GEAR_CHARTS_SLOT=Number($(this).attr("data-id")); CreateGearChartData(930,fightLen); return false;});
+	$(".gear_charts_slot_select").click(function(){GEAR_CHARTS_SLOT=Number($(this).attr("data-id")); CreateGearChartData(fightLen); return false;});
 	
 	for (var i = 0, len = UpdateFromWowhead.length; i < len; i++) {
 		GetItemDataFromWowhead(UpdateFromWowhead[i]);
@@ -5158,10 +5301,11 @@ function BuildReport(){
 	});
 	
 	document.getElementById("gear_chart_slider").oninput = function() {
-		CreateGearChartData(this.value,fightLen);
+		GEAR_CHARTS_ILVL = this.value;
+		CreateGearChartData(fightLen);
 	}
 	
-	CreateGearChartData(930,fightLen);
+	CreateGearChartData(fightLen);
 }
 
 function BuildFightsList(){
