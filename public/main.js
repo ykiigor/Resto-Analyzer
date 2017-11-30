@@ -534,11 +534,13 @@ var vantusRunes = {
 var statsBuffs = {
 	vers: {
 		240670: 600,	//Stat Buff: Feral
+		253901: 2000,	//Argus
 	},
 	crit: {
 		240671: 800,	//Stat Buff: Fire
 		190909: 1000, 	//Mark of the Claw
 		224151: 3000,	//Traitor's Oath [suramar 5ppl set]
+		253903: 2000,	//Argus
 	},
 	haste: {
 		240673: 800,	//Stat Buff: spriest
@@ -546,6 +548,7 @@ var statsBuffs = {
 		214128: 6008,	//Chrono Shard
 		190909: 1000, 	//Mark of the Claw
 		253269: 855,	//abt trinket
+		253901: 2000,	//Argus
 	},
 	haste_mod: {
 		80353: 1.3,	//BL
@@ -562,6 +565,7 @@ var statsBuffs = {
 	mastery: {
 		240672: 600,	//Stat Buff: Rouge
 		215198: 430,	//Thrumming Gossamer
+		253903: 2000,	//Argus
 	},
 	int: {
 		33697: 2137,	//orc racial
@@ -3178,7 +3182,7 @@ var GEAR = [
 	{slot:2,item:142174,ilvl:885,crit:1607,mastery:1071,name:"Choker of Barbed Reins",icon:"inv_jewelry_necklace_22",type:2,wilvl:855},
 	{slot:2,item:137536,ilvl:885,crit:918,haste:1760,name:"Pendant of the Watchful Eye",icon:"inv_7_0raid_necklace_11c",type:2,wilvl:820},
 	{slot:2,item:137535,ilvl:885,haste:1071,mastery:1607,name:"Lavadrip Pendant",icon:"inv_neck_firelands_03",type:2,wilvl:820},
-	{slot:2,item:134488,ilvl:885,crit:1530,vers:1148,name:"Stabilized Energy Pendant",icon:"inv_7_0raid_necklace_14d",special:function(ilvl){ var a=0;for(var i = 0, len = RESURGENCE.length; i < len; i++) a+=rV.resurgence[ RESURGENCE[i].obj.id ][0]; return a * 0.05 / rV.manaUsage * rV.healFromMana; },type:2,wilvl:820},
+	{slot:2,item:134488,ilvl:885,crit:1530,vers:1148,name:"Stabilized Energy Pendant",icon:"inv_7_0raid_necklace_14d",special:function(ilvl){ var a=0;for(var i = 0, len = RESURGENCE.length; i < len; i++) a+=rV.resurgence[ RESURGENCE[i].obj.id ][0]; return (a * 0.05 + 55000 * 0.85) / rV.manaUsage * rV.healFromMana; },type:2,wilvl:820},
 	{slot:2,item:137418,ilvl:885,crit:1224,mastery:1454,name:"Erratically Ticking Talisman",icon:"inv_7_0raid_necklace_10d",type:2,wilvl:820},
 	{slot:2,item:134529,ilvl:885,haste:1760,vers:918,name:"Chain of Scorched Bones",icon:"inv_7_0raid_necklace_13d",type:2,wilvl:820},
 	{slot:2,item:137487,ilvl:885,vers:1454,mastery:1224,name:"Strand of the Stars",icon:"inv_7_0raid_necklace_12b",type:2,wilvl:820},
@@ -3210,6 +3214,7 @@ var GEAR = [
 	{slot:2,item:151965,ilvl:930,crit:1609,vers:1911,name:"Vulcanarcore Pendant",icon:"inv_7_0raid_necklace_14b",type:4,wilvl:930},
 	{slot:2,item:151973,ilvl:930,vers:1509,mastery:2011,name:"Collar of Null-Flame",icon:"inv_7_0raid_necklace_07b",type:4,wilvl:930},
 	{slot:2,item:152283,ilvl:940,crit:2457,haste:1281,name:"Chain of the Unmaker",icon:"inv_7_0raid_necklace_18a",type:4,wilvl:940},
+	{slot:2,item:121284,ilvl:845,crit:1261,haste:840,name:"Nightmare Pendant",icon:"inv_7_0raid_necklace_08d",type:1,wilvl:810},
 	
 	//Rings
 	{slot:11,item:137051,ilvl:910,type:5,name:"Focuser of Jonat, the Elder",crit:2004,haste:1114,icon:"inv_jewelry_ring_96",scale:970,special:function(ilvl){ return rV.jonatPredictionAmount * GetFeedFactor() + GetSocketFactor(); },wilvl:910},	
@@ -4226,7 +4231,7 @@ function CreateNCChartData(fightLen){
 					var amount = rV.netherlight[gearData.spell] / ( cV.traitBySpell[gearData.spell].rank ? cV.traitBySpell[gearData.spell].rank : 1 );
 					tier_2.push( [ amount / (fightLen / 1000),name,true,"DeathKnight" ] );
 				} else {
-					tier_2.push( [ gearData.special() / (fightLen / 1000),name,false,gear_charts_colors[gearData.type][0] ] );
+					tier_2.push( [ gearData.special() / (fightLen / 1000) * (cV.gearInfo[152626] ? 1.5 : 1),name,false,gear_charts_colors[gearData.type][0] ] );
 				}
 			} else if(gearData.tier == 3) {
 				tier_3.push( [ gearData.special() / (fightLen / 1000),name,false,gear_charts_colors[gearData.type][0] ] );
