@@ -3784,7 +3784,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				}			
 			} else if(event.type == "summon" && actors[event.sourceID]){
 				actors[event.targetID] = true;
-			} else if(event.type == "applybuff" && actors[event.targetID]){
+			} else if((event.type == "applybuff" || event.type == "applydebuff") && actors[event.targetID]){
 				var spellID = event.ability.guid;
 				
 				if(statsBuffs['vers'][spellID] || statsBuffs['crit'][spellID] || statsBuffs['haste'][spellID] || statsBuffs['haste_mod'][spellID] || statsBuffs['mastery'][spellID] || statsBuffs['int'][spellID]) {		//stats buffs
@@ -3813,7 +3813,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				for (var j = 0, j_len = parsePlugins.applybuff.length; j < j_len; j++) {
 					parsePlugins.applybuff[j](event,spellID);
 				}				
-			} else if(event.type == "applybuffstack" && actors[event.targetID]){
+			} else if((event.type == "applybuffstack" || event.type == "applydebuffstack") && actors[event.targetID]){
 				var spellID = event.ability.guid;
 				
 				if(statsBuffs['vers'][spellID] || statsBuffs['crit'][spellID] || statsBuffs['haste'][spellID] || statsBuffs['haste_mod'][spellID] || statsBuffs['mastery'][spellID] || statsBuffs['int'][spellID]) {		//stats buffs
@@ -3823,7 +3823,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				for (var j = 0, j_len = parsePlugins.applybuffstack.length; j < j_len; j++) {
 					parsePlugins.applybuffstack[j](event,spellID);
 				}
-			} else if(event.type == "removebuff" && actors[event.targetID]){
+			} else if((event.type == "removebuff" || event.type == "removedebuff") && actors[event.targetID]){
 				var spellID = event.ability.guid;
 				
 				if(statsBuffs['vers'][spellID] || statsBuffs['crit'][spellID] || statsBuffs['haste'][spellID] || statsBuffs['haste_mod'][spellID] || statsBuffs['mastery'][spellID] || statsBuffs['int'][spellID]) {		//stats buffs
@@ -3851,7 +3851,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				for (var j = 0, j_len = parsePlugins.removebuff.length; j < j_len; j++) {
 					parsePlugins.removebuff[j](event,spellID);
 				}
-			} else if(event.type == "removebuffstack" && actors[event.targetID]){
+			} else if((event.type == "removebuffstack" || event.type == "removedebuffstack") && actors[event.targetID]){
 				var spellID = event.ability.guid;
 				
 				if(statsBuffs['vers'][spellID] || statsBuffs['crit'][spellID] || statsBuffs['haste'][spellID] || statsBuffs['haste_mod'][spellID] || statsBuffs['mastery'][spellID] || statsBuffs['int'][spellID]) {		//stats buffs
