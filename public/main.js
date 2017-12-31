@@ -1831,6 +1831,7 @@ var ITEMS = [
 		init: function() {
 			rV.t21_2p_PredictionAmount = 0;
 			rV.t21_2p_Amount = 0;
+			rV.t21_2p_AmountNoFeed = 0;
 			pV.t21_2p_HRLast = 0;
 			pV.t21_2p_gearCount = 0;
 		},
@@ -1855,6 +1856,12 @@ var ITEMS = [
 				if(itemID == 152166 || itemID == 152168 || itemID == 152169 || itemID == 152170 || itemID == 152171 || itemID == 152167) pV.t21_2p_gearCount++;
 			}
 		],
+		afterParse: function() {
+			rV.t21_2p_AmountNoFeed = rV.t21_2p_Amount;
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[252154]) rV.t21_2p_Amount += rV.feed[ sSpellsKeys[k] ].spells[252154][0];
+			}			
+		},
 		obj: {
 			type: "spell",
 			name: "T21 2 set Bonus",
@@ -1865,12 +1872,14 @@ var ITEMS = [
 			gear: "t21_2p_Amount",
 			gearFunc: function() { return pV.t21_2p_gearCount >= 2 },
 			icon: "ability_shaman_ascendance.jpg",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.t21_2p_AmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(252154)+"</span></em>" },
 		},
 	},
 	{	//4t21
 		init: function() {
 			rV.t21_4p_PredictionAmount = 0;
 			rV.t21_4p_Amount = 0;
+			rV.t21_4p_AmountNoFeed = 0;
 			pV.t21_4p_HRLast = 0;
 			pV.t21_4p_gearCount = 0;
 		},
@@ -1891,6 +1900,12 @@ var ITEMS = [
 				if(itemID == 152166 || itemID == 152168 || itemID == 152169 || itemID == 152170 || itemID == 152171 || itemID == 152167) pV.t21_4p_gearCount++;
 			}
 		],
+		afterParse: function() {
+			rV.t21_4p_AmountNoFeed = rV.t21_4p_Amount;
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[252159]) rV.t21_4p_Amount += rV.feed[ sSpellsKeys[k] ].spells[252159][0];
+			}			
+		},
 		obj: {
 			type: "spell",
 			name: "T21 4 set Bonus",
@@ -1901,6 +1916,7 @@ var ITEMS = [
 			gear: "t21_4p_Amount",
 			gearFunc: function() { return pV.t21_4p_gearCount >= 4 },
 			icon: "ability_shaman_ascendance.jpg",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.t21_4p_AmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(252159)+"</span></em>" },
 		},
 	},
 	{	//Sephuz
@@ -3252,8 +3268,8 @@ var GEAR = [
 	{slot:14,item:151956,ilvl:930,type:4,name:"Garothi Feedback Conduit",int:2728,icon:"inv_misc_enggizmos_06",special:function(ilvl){ return ScaleStat(855*1.5*1.1,930,ilvl) * healPerStat.haste.amount * 8 / 60 * 10; }},
 	{slot:14,item:151960,ilvl:930,type:4,name:"Carafe of Searing Light",int:2728,wicon:"inv_offhand_pvealliance_d_01_gold",special:function(ilvl){ return ScaleStat(4991,930,ilvl) * 10 / rV.manaUsage * rV.healFromMana * (GetFightLenFactor(60) + 0.5); }},
 	{slot:14,item:151958,ilvl:930,type:4,name:"Tarratus Keystone",int:2728,icon:"inv_datacrystal06",special:function(ilvl){ return ScaleStat(1633313,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * (GetFightLenFactor(90) + 1) * 0.9 * GetFeedFactor(); }},
-	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.9 * GetFeedFactor(); }},
-	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination [rare proc]",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.5 * GetFeedFactor(); }},
+	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.3 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * GetFeedFactor(); }},
+	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination [rare proc]",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.3 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.5 * GetFeedFactor(); }},
 	{slot:14,item:151957,ilvl:930,type:4,name:"Ishkar's Felshield Emitter",vers:1320,wicon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(2416491,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * (GetFightLenFactor(60) + 0.5) * 0.9; }},
 	{slot:14,item:154175,ilvl:940,type:4,name:"Eonar's Compassion",int:2994,wicon:"inv_antorus_green",special:function(ilvl){ return ScaleStat(127273,940,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 7 * 1.2 * GetFightLenFactor(60) * 0.8 * GetFeedFactor() + ScaleStat(250782,940,ilvl,1) * GetVersFactor() * 4 * 1 * GetFightLenFactor(60) * GetFeedFactor(); },max:1000},
 	{slot:14,item:151970,ilvl:930,type:4,name:"Vitality Resonator",vers:1320,icon:"inv_7_0raid_trinket_08d",special:function(ilvl){ return ScaleStat(9705*1.1,930,ilvl,1) * healPerStat.int.amount * 1.05 * 15 / 60 * 0.75; }},
@@ -4658,6 +4674,9 @@ function BuildReportMinor(){
 	$("#main").html(HTML);
 }
 
+function GetIconUrl(icon){
+	return "//wow.zamimg.com/images/wow/icons/large/"+icon;
+}
 
 function BuildReport(){
 	if(!cV.combantantInfo){
@@ -4871,7 +4890,7 @@ function BuildReport(){
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 			
 			HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-			HTML += "<a href=\"//www.wowhead.com/"+obj.type+"="+itemID+((cV.gearInfo[itemID] && cV.gearInfo[itemID].bonusIDs) ? "&bonus="+cV.gearInfo[itemID].bonusIDs.join(":") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+(obj.icon || cV.gearInfo[itemID].icon)+"\" alt=\""+obj.name+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/"+obj.type+"="+itemID+((cV.gearInfo[itemID] && cV.gearInfo[itemID].bonusIDs) ? "&bonus="+cV.gearInfo[itemID].bonusIDs.join(":") : "")+"\" target=\"_blank\"><img src=\""+GetIconUrl(obj.icon || cV.gearInfo[itemID].icon)+"\" alt=\""+obj.name+"\"></a></div>";
 	
 			HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[obj.quality]+";\">"+obj.name+"</header>";
 		
@@ -4910,7 +4929,7 @@ function BuildReport(){
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 			
 			HTML += "<div class=\"row w33\" id=\"gear-"+itemID+"\"><div class=\"col w70p\">";
-			HTML += "<a href=\"//www.wowhead.com/item="+itemID+(gearData ? (gearData.bonusIDs ? "&bonus="+gearData.bonusIDs.join(":") : "") : "")+"\" target=\"_blank\"><img src=\"http://media.blizzard.com/wow/icons/56/"+gearData.icon.replace(/\-/,"")+"\" alt=\""+gearData.icon+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/item="+itemID+(gearData ? (gearData.bonusIDs ? "&bonus="+gearData.bonusIDs.join(":") : "") : "")+"\" target=\"_blank\"><img src=\""+GetIconUrl(gearData.icon.replace(/\-/,""))+"\" alt=\""+gearData.icon+"\"></a></div>";
 
 			HTML += "<div class=\"col div_more_1 w80\"><header style=\"color: #"+qualityColors[gearData.quality]+";\" id=\"gear-"+itemID+"-name\" data-ilvl=\""+gearData.itemLevel+"\">"+gearData.itemLevel+"</header>";
 		
