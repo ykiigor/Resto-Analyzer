@@ -1936,6 +1936,110 @@ var ITEMS = [
 			gear: "insigniaringAmount",
 		},
 	},
+	{	//Highfather's Machination
+		init: function() {
+			rV.highfatherAmount = 0;			
+			rV.highfatherAmountNoFeed = 0;			
+		},
+		afterParse: function() {
+			if(healingData[253288]) rV.highfatherAmount += healingData[253288][0];
+			rV.highfatherAmountNoFeed = rV.highfatherAmount;
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[253288]) rV.highfatherAmount += rV.feed[ sSpellsKeys[k] ].spells[253288][0];
+			}			
+		},
+		obj: {
+			type: "item",
+			name: "Highfather's Machination",
+			quality: 4,
+			id: 152289,
+			gear: "highfatherAmount",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.highfatherAmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(253288)+"</span></em>" },
+		},
+	},	
+	{	//Eonar's Compassion
+		init: function() {
+			rV.eonarsAmount = 0;			
+			rV.eonarsAmountNoFeed = 0;			
+		},
+		afterParse: function() {
+			if(healingData[257442]) rV.eonarsAmount += healingData[257442][0];
+			if(healingData[257444]) rV.eonarsAmount += healingData[257444][0];
+			rV.eonarsAmountNoFeed = rV.eonarsAmount;
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[257442]) rV.eonarsAmount += rV.feed[ sSpellsKeys[k] ].spells[257442][0];
+			}			
+		},
+		obj: {
+			type: "item",
+			name: "Eonar's Compassion",
+			quality: 4,
+			id: 154175,
+			gear: "eonarsAmount",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.eonarsAmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(257442)+"</span></em>" },
+		},
+	},	
+	{	//Ishkar's Felshield Emitter
+		init: function() {
+			rV.ishkarsAmount = 0;			
+		},
+		afterParse: function() {
+			if(healingData[253277]) rV.ishkarsAmount += healingData[253277][0];
+		},
+		obj: {
+			type: "item",
+			name: "Ishkar's Felshield Emitter",
+			quality: 4,
+			id: 151957,
+			gear: "ishkarsAmount",
+		},
+	},		
+	{	//Tarratus Keystone
+		init: function() {
+			rV.tarratusAmount = 0;			
+			rV.tarratusAmountNoFeed = 0;			
+		},
+		afterParse: function() {
+			if(healingData[253282]) rV.tarratusAmount += healingData[253282][0];
+			rV.tarratusAmountNoFeed = rV.tarratusAmount;
+			for (var k = 0, k_len = sSpellsKeys.length; k < k_len; k++) {
+				if(rV.feed[ sSpellsKeys[k] ].spells[253282]) rV.tarratusAmount += rV.feed[ sSpellsKeys[k] ].spells[253282][0];
+			}			
+		},
+		obj: {
+			type: "item",
+			name: "Tarratus Keystone",
+			quality: 4,
+			id: 151958,
+			gear: "tarratusAmount",
+			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.tarratusAmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(253282)+"</span></em>" },
+		},
+	},	
+	{	//Carafe of Searing Light
+		init: function() {
+			rV.carafeAmount = 0;
+			rV.carafeMana = 0;
+		},
+		parse: [
+			"energize", function(event,spellID){
+				if(spellID == 255981){
+					rV.manaGain += event.resourceChange;
+					rV.carafeMana += event.resourceChange;
+				}
+			},
+		],
+		afterParse: function() {
+			rV.carafeAmount = rV.carafeMana / rV.manaUsage * rV.healFromMana;
+		},
+		obj: {
+			type: "item",
+			name: "Carafe of Searing Light",
+			quality: 4,
+			id: 151960,
+			gear: "carafeAmount",
+			gearAdditionalText: function() { return "Mana gain: "+NumberToFormattedNumber(rV.carafeMana,0,2); },
+		},
+	},
 ];
 
 var TRAITS = [
@@ -3145,13 +3249,14 @@ var GEAR = [
 	{slot:14,item:147005,ilvl:900,type:3,name:"Chalice of Moonlight: Night",int:2063,icon:"inv_offhand_pvealliance_d_01",special:function(ilvl){ return ScaleStat(3619,900,ilvl) * healPerStat.haste.amount * 12 / 60 * 1.5; },wilvl:890},
 	{slot:14,item:147003,ilvl:900,type:3,name:"Barbaric Mindslaver",int:2063,icon:"spell_priest_psyfiend",special:function(ilvl){ return ScaleStat(181467,900,ilvl,1) * 6 * GetFightLenFactor(60) * GetVersFactor() * GetCritFactor() * 0.6 * GetFeedFactor(); },wilvl:890},
 
-	{slot:14,item:151956,ilvl:930,type:4,name:"Garothi Feedback Conduit",int:2728,icon:"inv_misc_enggizmos_06",special:function(ilvl){ return ScaleStat(855*1.5,930,ilvl) * healPerStat.haste.amount * 8 / 60 * 10; }},
+	{slot:14,item:151956,ilvl:930,type:4,name:"Garothi Feedback Conduit",int:2728,icon:"inv_misc_enggizmos_06",special:function(ilvl){ return ScaleStat(855*1.5*1.1,930,ilvl) * healPerStat.haste.amount * 8 / 60 * 10; }},
 	{slot:14,item:151960,ilvl:930,type:4,name:"Carafe of Searing Light",int:2728,wicon:"inv_offhand_pvealliance_d_01_gold",special:function(ilvl){ return ScaleStat(4991,930,ilvl) * 10 / rV.manaUsage * rV.healFromMana * (GetFightLenFactor(60) + 0.5); }},
-	{slot:14,item:151958,ilvl:930,type:4,name:"Tarratus Keystone",int:2728,icon:"inv_datacrystal06",special:function(ilvl){ return ScaleStat(1633313,930,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * (GetFightLenFactor(90) + 1) * 0.9 * GetFeedFactor(); }},
-	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.8 * GetFeedFactor(); }},
-	{slot:14,item:151957,ilvl:930,type:4,name:"Ishkar's Felshield Emitter",vers:1320,wicon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(2416491,930,ilvl,1) * GetVersFactor() * GetCritFactor() * (GetFightLenFactor(60) + 0.5) * 0.9; }},
+	{slot:14,item:151958,ilvl:930,type:4,name:"Tarratus Keystone",int:2728,icon:"inv_datacrystal06",special:function(ilvl){ return ScaleStat(1633313,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * (GetFightLenFactor(90) + 1) * 0.9 * GetFeedFactor(); }},
+	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.9 * GetFeedFactor(); }},
+	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination [rare proc]",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.5 * GetFeedFactor(); }},
+	{slot:14,item:151957,ilvl:930,type:4,name:"Ishkar's Felshield Emitter",vers:1320,wicon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(2416491,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * (GetFightLenFactor(60) + 0.5) * 0.9; }},
 	{slot:14,item:154175,ilvl:940,type:4,name:"Eonar's Compassion",int:2994,wicon:"inv_antorus_green",special:function(ilvl){ return ScaleStat(127273,940,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 7 * 1.2 * GetFightLenFactor(60) * 0.8 * GetFeedFactor() + ScaleStat(250782,940,ilvl,1) * GetVersFactor() * 4 * 1 * GetFightLenFactor(60) * GetFeedFactor(); },max:1000},
-	{slot:14,item:151970,ilvl:930,type:4,name:"Vitality Resonator",vers:1320,icon:"inv_7_0raid_trinket_08d",special:function(ilvl){ return ScaleStat(9705,930,ilvl,1) * healPerStat.int.amount * 1.05 * 15 / 60 * 0.75; }},
+	{slot:14,item:151970,ilvl:930,type:4,name:"Vitality Resonator",vers:1320,icon:"inv_7_0raid_trinket_08d",special:function(ilvl){ return ScaleStat(9705*1.1,930,ilvl,1) * healPerStat.int.amount * 1.05 * 15 / 60 * 0.75; }},
 
 	{slot:14,item:144258,ilvl:940,type:5,name:"Velen's Future Sight",int:2994,crit:456,mastery:456,haste:456,icon:"spell_holy_healingfocus",scale:970,special:function(ilvl){ return rV.total * 10 / 75 * 0.15 + rV.totalOver * 10 / 75 * 0.5 * 0.65 * GetAftifactFactor(); },wilvl:910},
 	{slot:14,item:154172,ilvl:1000,type:5,name:"Aman'Thul's Vision",int:2345,crit:1429,mastery:1429,haste:1429,vers:1429,wicon:"inv_antorus_turquoise",scale:1000,wilvl:940},
