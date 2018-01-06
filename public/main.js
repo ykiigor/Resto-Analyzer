@@ -5224,7 +5224,7 @@ function BuildReport(){
 			var spellID = sSpells[keyName][2];
 			HTML += "<li class=\"item clearfix\"><div class=\"row full\"><div class=\"col w70p\">";
 			
-			HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"http://media.blizzard.com/wow/icons/56/"+cV.spellInfo[spellID].icon+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"http://media.blizzard.com/wow/icons/56/"+(cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "unk.jpg")+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
 		
 			HTML += "<div class=\"col half\">";
 			HTML += "<header class=\"cd_header\">"+cV.spellInfo[spellID].name+"</header>";
