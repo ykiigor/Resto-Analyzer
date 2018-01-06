@@ -368,7 +368,6 @@ var spellScaleMastery = {
 	209069: true,	//tidal
 	114942: true,	//htt
 	73685: true,	//ul [fixed in 7.2.5]
-	253228: true,	//abt machination 152289	???
 };
 var spellNotScaleHaste = {
 	208899: true,	//qd
@@ -5224,10 +5223,10 @@ function BuildReport(){
 			var spellID = sSpells[keyName][2];
 			HTML += "<li class=\"item clearfix\"><div class=\"row full\"><div class=\"col w70p\">";
 			
-			HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"http://media.blizzard.com/wow/icons/56/"+(cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "unk.jpg")+"\" alt=\""+cV.spellInfo[spellID].name+"\"></a></div>";
+			HTML += "<a href=\"//www.wowhead.com/spell="+spellID+"\"><img src=\"http://media.blizzard.com/wow/icons/56/"+(cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "unk.jpg")+"\" alt=\""+(cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "unk")+"\"></a></div>";
 		
 			HTML += "<div class=\"col half\">";
-			HTML += "<header class=\"cd_header\">"+cV.spellInfo[spellID].name+"</header>";
+			HTML += "<header class=\"cd_header\">"+(cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : ("Spell "+spellID))+"</header>";
 	
 			HTML += "<div class=\"col full div_more_3\">";
 
