@@ -575,6 +575,15 @@ var statsBuffs = {
 	},
 };
 
+var foodBuffs = {	//downscale stats if food buff went down; only top food, lazy for anotherone
+	185736: ["vers",475],
+	225603: ["haste",375],
+	225604: ["mastery",375],
+	225602: ["crit",375],
+	225605: ["vers",375],
+	201640: ["int",500],
+};
+
 var diffIdToName = {
 	3: 'Normal',
 	4: 'Heroic',
@@ -3218,6 +3227,33 @@ var OTHER = [
 			},
 		],
 	},
+	{	//DR: Totem; Ghost in the Mists
+		init: function() {
+			rV.dr[207527] = 0;
+			pV.dr207527active = 0;
+		},
+		parse: [
+			"damage", function(event,spellID){
+				if(event.targetID == currFightData.actor && pV.dr207527active > 0){
+					var amount = event.amount;
+					if(event.absorbed) event.amount += event.absorbed;
+					
+					var currDr = 1 - (GetTraitRank(1110) * 0.01 * pV.dr207527active);
+				
+					rV.dr[207527] += (amount / currDr) - amount;
+				}
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 207527) pV.dr207527active = 0;
+			},
+			"applybuff", function(event,spellID){
+				if(spellID == 207527) pV.dr207527active = 1;
+			},
+			"applybuffstack", function(event,spellID){
+				if(spellID == 207527) pV.dr207527active = event.stack;
+			},
+		],
+	},
 	{	//DR: Astral Shift
 		init: function() {
 			rV.dr[108271] = 0;
@@ -4084,6 +4120,11 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 							cooldownsTracking[j].opened = false;
 						}
 					}
+				}
+				
+				if(foodBuffs[spellID]){
+					statsBuffs[ foodBuffs[spellID][0] ][spellID] = foodBuffs[spellID][1] * (-1);
+					buffStatus[spellID] = true;
 				}
 
 				for (var j = 0, j_len = parsePlugins.removebuff.length; j < j_len; j++) {
@@ -5299,7 +5340,7 @@ function BuildReport(){
 	var procsData = [];
 	Object.keys(rV.buffs).forEach(function (statName) {
 		Object.keys(rV.buffs[statName]).forEach(function (spellID) {
-			if(spellID > 0){
+			if(spellID > 0 && rV.buffs[statName][spellID] >= 0){
 				var key = -1;
 				for (var i = 0, len = procsData.length; i < len; i++){
 					if(procsData[i][0] == spellID){
