@@ -3379,7 +3379,7 @@ var gear_charts_colors = {
 	1: ["Mage","World drop"],
 	2: ["Rogue","Dungeons"],
 	3: ["Hunter","Tomb of Sargeras"],
-	4: ["Shaman","Antorus <sup class=\"tooltip\">[!]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only simis used for trinkets, more accurate data will be after ABT release and logs</span></sup>"],
+	4: ["Shaman","Antorus"],
 	5: ["Druid","Legendary"],
 	6: ["DemonHunter","Other"],
 	10: ["DeathKnight","Equipped items"],
@@ -4887,6 +4887,12 @@ function BuildReport(){
 			rV.totalOver += healingData[spellID][1];
 		}
 	});
+	
+	if(healingData[255227] && healingData[207778]){		//GotQ fix
+		healingData[207778][0] += healingData[255227][0];
+		healingData[207778][1] += healingData[255227][1];
+		delete healingData[255227];
+	}
 
 	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 		var pluginData = pluginsList[k];
