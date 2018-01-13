@@ -930,3 +930,10 @@ em.wipe {
 .ct-area, .ct-line {
 	pointer-events: none; 
 }
+
+.footer-last-update {
+	float:right;
+	padding-top:10px;
+	margin-right:15px;
+	color:rgb(170,170,170);
+}
