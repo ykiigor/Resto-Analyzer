@@ -937,3 +937,20 @@ em.wipe {
 	margin-right:15px;
 	color:rgb(170,170,170);
 }
+
+.talents li {
+	padding: 0;
+}
+
+.talents .w33 div:first-of-type {
+	padding: 1em;
+}
+
+.talents li .row {
+	margin-top: 0;
+}
+
+
+.yellow-back {
+	background: rgba(255,150,0,.2);
+}
