@@ -4,7 +4,7 @@
 ///
 ///
 
-var LAST_UPDATE = "13.01.2018";
+var LAST_UPDATE = "26.01.2018";
 
 var itemsStats = {
 	140803:{ilvl:875,int:1634},
@@ -581,7 +581,7 @@ var foodBuffs = {	//downscale stats if food buff went down; only top food, lazy 
 	225604: ["mastery",375],
 	225602: ["crit",375],
 	225605: ["vers",375],
-	201640: ["int",500],
+	//201640: ["int",500],	//autoupdated stat
 };
 
 var diffIdToName = {
@@ -1882,7 +1882,7 @@ var ITEMS = [
 			predictionСondition: function() { return pV.t21_2p_gearCount < 2 },
 			gear: "t21_2p_Amount",
 			gearFunc: function() { return pV.t21_2p_gearCount >= 2 },
-			icon: "spell_shaman_blessingoftheeternals.jpg",
+			icon: "spell_nature_giftofthewaterspirit.jpg",
 			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.t21_2p_AmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(252154)+"</span></em>" },
 		},
 	},
@@ -1926,7 +1926,7 @@ var ITEMS = [
 			predictionСondition: function() { return pV.t21_4p_gearCount < 4 },
 			gear: "t21_4p_Amount",
 			gearFunc: function() { return pV.t21_4p_gearCount >= 4 },
-			icon: "spell_nature_giftofthewaterspirit.jpg",
+			icon: "spell_shaman_blessingoftheeternals.jpg",
 			gearAdditionalText: function() { return "<em class=\"tooltip\">Feed info<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">\"Clear\" amount - "+NumberToFormattedNumber(rV.t21_4p_AmountNoFeed,0,2)+"<br>This trinket also feed your CBT, AG and ASC."+GetFeedTooltip(252159)+"</span></em>" },
 		},
 	},
@@ -2775,6 +2775,13 @@ NETHERLIGHT = [
 	},
 ];
 
+function GetTargetMissingHealth(event){
+	if( (event.resourceActor == 2 || event.targetID == currFightData.actor) && event.hitPoints && event.maxHitPoints ){
+		return event.maxHitPoints - event.hitPoints;
+	}
+	return 999999999;	//999mil, cant be reached
+}
+
 var TALENTS = [
 	{	//CBT
 		init: function() {
@@ -2788,46 +2795,84 @@ var TALENTS = [
 		obj: {
 			name: "Cloudburst Totem",
 			id: 157153,
+			tier: 6,
+			col: 2,
+			icon: "ability_shaman_condensationtotem.jpg",
 		},
 	},
 	{	//Torrent
 		init: function() {
 			rV.talents[200072] = 0;
+			rV.talents_prediction[200072] = 0;
 		},
 		parse: [
 			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 61295 && !event.tick){
-					//rV.talents[200072] += amount * (1 - 1 / 1.3);
 					rV.talents[200072] += Math.max((amount + overheal) * (1 - 1 / 1.3) - overheal,0);
+					rV.talents_prediction[200072] += Math.min((amount + overheal) * 0.3,GetTargetMissingHealth(event));
 				}
 			},
 		],
 		obj: {
 			name: "Torrent",
 			id: 200072,
+			tier: 1,
+			col: 3,
+			icon: "spell_nature_riptide.jpg",
 		},
 	},
 	{	//UL
 		init: function() {
 			rV.talents[73685] = 0;
+			rV.talents_prediction[73685] = 0;
 			pV.ulLossTime = 0;
+			pV.ulPredLast = 0;
+			pV.ulPredStatus = 0;
+			pV.ulPredStatusCH = 0;
+			pV.ulPredRiptideTarget = {};
 		},
 		parse: [
 			"heal", function(event,spellID,amount,overheal){
 				if((event.timestamp - pV.ulLossTime) <= 300 && ((spellID == 61295 && !event.tick) || spellID == 77472 || spellID == 8004 || spellID == 1064)){
-					//rV.talents[73685] += amount * (1 - 1 / 1.45);
 					rV.talents[73685] += Math.max((amount + overheal) * (1 - 1 / 1.45) - overheal,0);
 				} else if(spellID == 73685){
 					rV.talents[73685] += amount;
+				} else if(spellID == 61295 && pV.ulPredRiptideTarget[event.targetID] && event.timestamp <= pV.ulPredRiptideTarget[event.targetID]){
+					rV.talents_prediction[73685] -= amount * 0.5;
+				}
+				if(event.timestamp <= pV.ulPredStatus && ((spellID == 61295 && !event.tick) || spellID == 77472 || spellID == 8004 || spellID == 1064)){
+					pV.ulPredStatus = 0;
+					rV.talents_prediction[73685] += Math.min((amount + overheal) * 0.45,GetTargetMissingHealth(event));
+					if(spellID == 1064) pV.ulPredStatusCH = event.timestamp + 500;
+				} else if(event.timestamp <= pV.ulPredStatusCH){
+					rV.talents_prediction[73685] += Math.min((amount + overheal) * 0.45,GetTargetMissingHealth(event));
+				}
+			},
+			"cast", function(event,spellID){
+				if(spellID == 61295 && (event.timestamp - pV.ulPredLast) > 15000) {
+					pV.ulPredLast = event.timestamp;
+					pV.ulPredRiptideTarget[event.targetID] = event.timestamp + 18500;
+					pV.ulPredStatus = event.timestamp + 10000;
+					
+					rV.talents_prediction[73685] += 3.5 * cV.intellect * (pV.critNow / 40000 + 1) * (pV.versNow / 47500 + 1) * 1.2 * 1.06 * 1.05 * 1.1;
 				}
 			},
 			"removebuff", function(event,spellID){
-				if(spellID == 73685) pV.ulLossTime = event.timestamp;
+				if(spellID == 73685) pV.ulLossTime = event.timestamp; 
+			},
+			"removebuffany", function(event,spellID){
+				if(spellID == 61295 && event.sourceID == currFightData.actor) {
+					delete pV.ulPredRiptideTarget[event.targetID];
+				} 
 			},
 		],
 		obj: {
 			name: "Unleash Life",
 			id: 73685,
+			tier: 1,
+			col: 2,
+			icon: "spell_shaman_unleashweapon_life.jpg",
+			predictionTooltip: function(){ return "Some riptide casts replaced with UL<br>Can be better with timing for CH" },
 		},
 	},
 	{	//AG
@@ -2842,6 +2887,9 @@ var TALENTS = [
 		obj: {
 			name: "Ancestral Guidance",
 			id: 108281,
+			tier: 4,
+			col: 2,
+			icon: "ability_shaman_ancestralguidance.jpg",
 		},
 	},
 	{	//EST
@@ -2856,6 +2904,9 @@ var TALENTS = [
 		obj: {
 			name: "Earthen Shield Totem",
 			id: 198838,
+			tier: 5,
+			col: 2,
+			icon: "spell_nature_stoneskintotem.jpg",
 		},
 	},
 	{	//Ascendance
@@ -2870,6 +2921,9 @@ var TALENTS = [
 		obj: {
 			name: "Ascendance",
 			id: 114052,
+			tier: 7,
+			col: 1,
+			icon: "spell_fire_elementaldevastation.jpg",
 		},
 	},
 	{	//Wellspring
@@ -2884,6 +2938,9 @@ var TALENTS = [
 		obj: {
 			name: "Wellspring",
 			id: 197995,
+			tier: 7,
+			col: 2,
+			icon: "ability_shawaterelemental_split.jpg",
 		},
 	},
 	{	//highTide
@@ -2908,18 +2965,28 @@ var TALENTS = [
 		obj: {
 			name: "High Tide",
 			id: 157154,
+			tier: 7,
+			col: 3,
+			icon: "spell_shaman_hightide.jpg",
 		},
 	},
 	{	//undulation
 		init: function() {
 			rV.talents[200071] = 0;
+			rV.talents_prediction[200071] = 0;
 			pV.undulationLossTime = 0;
+			pV.undulationPredCount = 0;
 		},
 		parse: [
 			"heal", function(event,spellID,amount,overheal){
 				if((spellID == 77472 || spellID == 8004) && ((event.timestamp - pV.undulationLossTime) <= 300)){
-					//rV.talents[200071] += amount * (1 - 1 / 1.5);
 					rV.talents[200071] += Math.max((amount + overheal) * (1 - 1 / 1.5) - overheal,0);
+				}
+				if(spellID == 77472 || spellID == 8004){
+					pV.undulationPredCount++;
+					if(pV.undulationPredCount % 3 == 0){
+						rV.talents_prediction[200071] += Math.min((amount + overheal) * 0.5,GetTargetMissingHealth(event));
+					}
 				}
 			},
 			"removebuff", function(event,spellID){
@@ -2929,8 +2996,131 @@ var TALENTS = [
 		obj: {
 			name: "Undulation",
 			id: 200071,
+			tier: 1,
+			col: 1,
+			icon: "spell_nature_healingwavelesser.jpg",
 		},
 	},	
+	{
+		obj: {
+			name: "Gust of Wind",
+			id: 192063,
+			tier: 2,
+			col: 1,
+			icon: "ability_skyreach_four_wind.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Graceful Spirit",
+			id: 192088,
+			tier: 2,
+			col: 2,
+			icon: "spell_shaman_spectraltransformation.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Wind Rush Totem",
+			id: 192077,
+			tier: 2,
+			col: 3,
+			icon: "ability_shaman_windwalktotem.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Lightning Surge Totem",
+			id: 192058,
+			tier: 3,
+			col: 1,
+			icon: "spell_nature_brilliance.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Earthgrab Totem",
+			id: 51485,
+			tier: 3,
+			col: 2,
+			icon: "spell_nature_stranglevines.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Voodoo Totem",
+			id: 196932,
+			tier: 3,
+			col: 3,
+			icon: "spell_totem_wardofdraining.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Crashing Waves",
+			id: 197464,
+			tier: 4,
+			col: 1,
+			icon: "spell_frost_summonwaterelemental.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Deluge",
+			id: 200076,
+			tier: 4,
+			col: 3,
+			icon: "ability_shawaterelemental_reform.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Ancestral Protection Totem",
+			id: 207399,
+			tier: 5,
+			col: 1,
+			icon: "spell_nature_reincarnation.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Ancestral Vigor",
+			id: 207401,
+			tier: 5,
+			col: 3,
+			icon: "spell_shaman_blessingoftheeternals.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Echo of the Elements",
+			id: 108283,
+			tier: 6,
+			col: 3,
+			icon: "ability_shaman_echooftheelements.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Bottomless Depths",
+			id: 197467,
+			tier: 6,
+			col: 1,
+			icon: "ability_shawaterelemental_swirl.jpg",
+			none: true,
+		},
+	},
 ];
 
 var RESURGENCE = [
@@ -3214,7 +3404,6 @@ var OTHER = [
 					
 					var currDr = GetTraitRank(1111);
 					currDr = 1 - (currDr % 3 == 0 ? currDr / 3 * 0.1 : Math.floor(currDr/3)*0.1 + 0.03 * (currDr % 3));
-					console.log(currDr);
 				
 					rV.dr[209950] += (amount / currDr) - amount;
 				}
@@ -5260,28 +5449,52 @@ function BuildReport(){
 	/// Talents
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">TALENTS</header><div class=\"list-top-line\"> </div><ul class=\"list talents\">";
 	counter = 0;
-	var talentsData = [];
-	for (var i = 0, len = TALENTS.length; i < len; i++) if(cV.talentInfo[ TALENTS[i].obj.id ]) talentsData.push([ TALENTS[i].obj.id,TALENTS[i],cV.talentInfo[ TALENTS[i].obj.id ].row ]);
-	talentsData.sort(function(a,b){ return a[2] < b[2] ? - 1 : 1 });
-	for (var i = 0, len = talentsData.length; i < len; i++) {
-		var talentData = talentsData[i][1].obj
-
-		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
+	var talentsData = [[],[],[],[],[],[],[],[]];
+	for (var i = 0, len = TALENTS.length; i < len; i++) talentsData[ TALENTS[i].obj.tier ][ TALENTS[i].obj.col ] = [ TALENTS[i].obj.id,TALENTS[i] ];
+	for (var i = 1; i <= 7; i++) {
+		for (var j = 1; j <= 3; j++) {
+			var talentData = talentsData[i][j];
+	
+			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
+			
+			if(talentData){
+				talentData = talentData[1].obj;
+				
+				var talentSelected = cV.talentInfo[ talentData.id ];
+			
+				HTML += "<div class=\"row w33"+(talentSelected ? " yellow-back" : "")+"\"><div class=\"clearfix\"><div class=\"col w70p\">";
+				HTML += "<a href=\"//www.wowhead.com/spell="+talentData.id+"\" target=\"_blank\"><img src=\""+GetIconUrl(talentData.icon)+"\" alt=\""+talentData.name+"\"></a></div>";
 		
-		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-		HTML += "<a href=\"//www.wowhead.com/spell="+talentData.id+"\" target=\"_blank\"><img src=\""+GetIconUrl(cV.talentInfo[ talentData.id ].icon)+"\" alt=\""+talentData.name+"\"></a></div>";
-
-		HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+talentData.id+"\" target=\"_blank\">"+talentData.name+"</a></header>";
-	
-		var amount = rV.talents[talentData.id]
-		HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
-		HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
-
-		if(talentData.additionalText) HTML += "<br>"+talentData.additionalText();
-	
-		HTML += "</div></div>";
-		counter++;
+				HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+talentData.id+"\" target=\"_blank\">"+talentData.name+"</a>";
+			
+				var amount = rV.talents[talentData.id];
+				var prediction = rV.talents_prediction[talentData.id];
+				if(amount && amount != 0 && talentSelected){
+					HTML += "</header><em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+					HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
+			
+					if(talentData.additionalText) HTML += "<br>"+talentData.additionalText();
+				} else if(prediction && prediction != 0 && !talentSelected){
+					if(talentData.predictionTooltip){
+						HTML += " <em class=\"tooltip\">prediction<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">"+talentData.predictionTooltip()+"</span></em></header>";
+					} else {
+						HTML += " prediction</header>";
+					}
+					HTML += "<em class=\"result\">"+NumberToFormattedNumber(prediction,2)+"</em> ("+(prediction/rV.total*100).toFixed(2)+"%)<br>";
+					HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(prediction / fightLen * 1000,1)+"</em>";
+				} else {
+					HTML += "</header>"
+				}
+			
+				HTML += "</div></div></div>";
+			} else {
+				HTML += "<div class=\"row w33 clearfix\"></div>";
+			}
+			
+			counter++;
+		}
 	}	
+	console.log(talentsData);
 	HTML += "</ul></div></div></div>";
 		
 	
@@ -5732,6 +5945,7 @@ function PrepParse(fightID,actorID){
 	pV = {},
 	rV = {
 		talents: [],
+		talents_prediction: [],
 		traits: [],
 		resurgence: [],
 		potions: [],
@@ -5802,7 +6016,21 @@ function BuildMainPage(){
 	
 	$("#mainpage-btn").click(function(){
 		reportFightCode = $("#mainpage-input").val();
+		reportFightCode = reportFightCode.split('#')[0];
+		var allSubs = reportFightCode.split('/');
+		reportFightCode = allSubs[allSubs.length-1];
 		ParseHeader(reportFightCode,true);
+	});
+	
+	$('#mainpage-form').on('input',function(e){
+		var text = $("#mainpage-input").val();
+		text = text.split('#')[0];
+		var allSubs = text.split('/');
+		text = allSubs[allSubs.length-1];
+		if (text.length >= 16) {
+			reportFightCode = text;
+			ParseHeader(reportFightCode,true);
+		}
 	});
 	
 	var HTML = "";
