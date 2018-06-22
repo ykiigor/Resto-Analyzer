@@ -4,7 +4,7 @@
 ///
 ///
 
-var LAST_UPDATE = "26.01.2018";
+var LAST_UPDATE = "23.06.2018";
 
 var itemsStats = {
 	140803:{ilvl:875,int:1634},
@@ -426,7 +426,7 @@ var sSpells = {		// specialSpellSpellID, blacklist of spells that not feed speci
 		{
 			157503: true,	//cbt
 			52042: true,	//hst
-			209069: true,	//tidal
+			//209069: true,	//tidal
 			114942: true,	//htt
 			98021: true,	//slt
 			206985: true, 	//guldan absorb
@@ -3485,9 +3485,9 @@ var OTHER = [
 		init: function() {
 			pV.critTidalLoss = 0;
 			rV.feed = {
-				CBT: {spells:{},total:0,heal:0},
-				AG: {spells:{},total:0,heal:0},
-				ASC: {spells:{},total:0,heal:0},
+				CBT: {spells:{},total:0,heal:0,totalwo:0},
+				AG: {spells:{},total:0,heal:0,totalwo:0},
+				ASC: {spells:{},total:0,heal:0,totalwo:0},
 			};
 			pV.savedTime = 0;
 			pV.savedTimeTotal = 0;
@@ -4190,6 +4190,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 							if(!rV.feed[sName].spells[spellID]) rV.feed[sName].spells[spellID] = [0,0];
 							rV.feed[sName].spells[spellID][1] += amount + overheal;
 							rV.feed[sName].total += amount + overheal;
+							rV.feed[sName].totalwo += amount;
 						}
 					}
 				}
@@ -4967,9 +4968,10 @@ var IsWowheadResponceRewritten = false;
 function GetItemDataFromWowhead(itemID)
 {
 	if(!IsWowheadResponceRewritten){
-		if(!$WowheadPower || !$WowheadPower.registerItem) return false;
-		$WowheadPower.registerItem = function(id,locale,json){
-			if(json && json.tooltip_enus){
+		if(!$WowheadPower || !$WowheadPower.register) return false;
+		var oldRegister = $WowheadPower.register;
+		$WowheadPower.register = function(arr,id,locale,json){
+			if(arr == 3 && json && json.tooltip_enus){
 				var itemID = id.match(/^(\d+)/)[1];
 				
 				var itemStatus = $("#gear-"+itemID+"-text").attr("data-status");
@@ -5015,7 +5017,7 @@ function GetItemDataFromWowhead(itemID)
 				}
 				
 			}
-			$WowheadPower.register(3,id,locale,json);
+			oldRegister(arr,id,locale,json);
 		}
 		IsWowheadResponceRewritten = true;
 	}
