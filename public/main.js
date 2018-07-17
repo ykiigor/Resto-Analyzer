@@ -2116,17 +2116,20 @@ var TALENTS = [
 	{	//es
 		init: function() {
 			rV.talents[974] = 0;
+			pV.esTalentAmount = 0;
 		},
 		parse: [
 			"heal", function(event,spellID,amount,overheal){
 				if( event.targetID && event.targetID == pV.talent974target && !OverallBlacklist[spellID] ){
-					rV.talents[974] += Math.max((amount + overheal) * (1 - 1 / 1.1) - overheal,0);
+					var v = Math.max((amount + overheal) * (1 - 1 / 1.1) - overheal,0);
+					rV.talents[974] += v;
+					pV.esTalentAmount += v;
 				}
 			},
-			"applybuff", function(event,spellID){
+			"applybuffany", function(event,spellID){
 				if(spellID == 974) pV.talent974target = event.targetID;
 			},
-			"removebuff", function(event,spellID){
+			"removebuffany", function(event,spellID){
 				if(spellID == 974) delete pV.talent974target;
 			},
 		],
@@ -2141,6 +2144,7 @@ var TALENTS = [
 			tier: 2,
 			col: 3,
 			icon: "spell_nature_skinofearth.jpg",
+			additionalText: function() { return "Bonus healing: "+NumberToFormattedNumber(pV.esTalentAmount,0,2,2); }
 		},
 	},
 	{	//Nature's Guardian
@@ -2523,7 +2527,7 @@ var OTHER = [
 	},
 	{	//DR: Totem; Ghost in the Mists
 		init: function() {
-			rV.dr[207527] = 0;
+			rV.dr[260878] = 0;
 			pV.dr207527active = 0;
 		},
 		parse: [
@@ -2534,7 +2538,7 @@ var OTHER = [
 					
 					var currDr = 1 - (0.05 * pV.dr207527active);
 				
-					rV.dr[207527] += (amount / currDr) - amount;
+					rV.dr[260878] += (amount / currDr) - amount;
 				}
 			},
 			"removebuff", function(event,spellID){
@@ -2547,6 +2551,15 @@ var OTHER = [
 				if(spellID == 260881) pV.dr207527active = event.stack;
 			},
 		],
+		afterParse: function() {
+			if(!cV.spellInfo[260878]){
+				cV.spellInfo[260878] = {
+					icon: "spell_hunter_lonewolf.jpg",
+					name: "Spirit Wolf",
+				};
+			}
+		
+		},		
 	},
 	{	//DR: Astral Shift
 		init: function() {
