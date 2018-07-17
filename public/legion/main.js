@@ -1,28 +1,270 @@
 ///
 ///
 ///   Resto Shaman Analyzer by Afiya
-///	BFA
 ///
 ///
 
-var LAST_UPDATE = "16.07.2018 [quick BfA-prepatch update]";
+var LAST_UPDATE = "23.06.2018";
 
-var itemsStats = {};
-
-var STATS = {
-	crit: 17.62282985,
-	mastery: 17.62282985 / 3,
-	haste: 16.52140298,
-	vers: 20.92711045,
+var itemsStats = {
+	140803:{ilvl:875,int:1634},
+	140793:{ilvl:870,mastery:1055},
+	142507:{ilvl:865,int:1489,passive:1036},
+	139076:{ilvl:865,int:1489,passive:1036},
+	134336:{ilvl:865,int:1489,passive:1036},
+	134204:{ilvl:865,int:1489,passive:1036},
+	139114:{ilvl:865,int:1489,passive:1036},
+	121311:{ilvl:865,int:1489,passive:1036},
+	136750:{ilvl:865,int:1489,passive:1036},
+	134292:{ilvl:865,int:1489,passive:1036},
+	147276:{ilvl:865,int:1489,passive:1036},
+	134160:{ilvl:865,int:1489,passive:1036},
+	134380:{ilvl:865,int:1489,passive:1036},
+	134248:{ilvl:865,int:1489,passive:1036},
+	145231:{ilvl:865,int:1489,passive:1036},
+	145230:{ilvl:865,int:1489,passive:1036},
+	144258:{ilvl:940,int:2994,crit:456,mastery:456,haste:456},
+	134526:{ilvl:825,crit:1062,mastery:797},
+	141482:{ilvl:860,crit:847,mastery:847,vers:847,haste:847},
+	137051:{ilvl:940,crit:2404,haste:1335},
+	128911:{ilvl:825,int:6339,crit:271,mastery:260},
+	128934:{ilvl:825,int:606,crit:356,mastery:342},
+	132466:{ilvl:940,int:3150,crit:658,mastery:685,haste:1234},
+	132452:{ilvl:940,crit:2671,haste:1818},
+	
+	142428:{ilvl:855,vers:1404,mastery:829,},
+	142412:{ilvl:855,int:803,crit:544,vers:241,},
+	142540:{ilvl:855,int:803,haste:325,vers:460,},
+	142521:{ilvl:855,int:803,haste:510,mastery:275,},
+	142432:{ilvl:855,int:1427,haste:579,vers:818,},
+	142410:{ilvl:855,int:1427,crit:579,haste:818,},
+	142431:{ilvl:855,int:1427,haste:579,vers:818,},
+	142433:{ilvl:855,int:1427,haste:459,mastery:938,},
+	142423:{ilvl:855,int:803,haste:325,mastery:460,},
+	142419:{ilvl:855,int:803,crit:527,vers:258,},
+	142415:{ilvl:855,int:803,vers:309,mastery:477,},
+	142427:{ilvl:855,int:803,haste:510,vers:275,},
+	142435:{ilvl:855,int:1070,crit:658,mastery:389,},
+	142434:{ilvl:855,int:1070,crit:434,haste:613,},
+	142430:{ilvl:855,int:1070,crit:411,mastery:635,},
+	142429:{ilvl:855,int:1070,crit:680,vers:366,},
+	142411:{ilvl:855,int:1070,haste:299,mastery:748,},
+	142420:{ilvl:855,int:1070,crit:680,vers:366,},
+	142416:{ilvl:855,int:1070,haste:613,mastery:434,},
+	142424:{ilvl:855,int:1070,haste:411,mastery:635,},
+	142421:{ilvl:855,int:1427,crit:968,haste:428,},
+	142413:{ilvl:855,int:1427,crit:968,haste:428,},
+	142425:{ilvl:855,int:1427,crit:459,mastery:938,},
+	142418:{ilvl:855,int:1427,vers:518,mastery:878,},
+	142422:{ilvl:855,int:1070,vers:658,mastery:389,},
+	142417:{ilvl:855,int:1070,crit:680,haste:366,},
+	142426:{ilvl:855,int:1070,crit:321,haste:725,},
+	142414:{ilvl:855,int:1070,haste:725,mastery:321,},
+	142520:{ilvl:855,crit:1021,haste:1212,},
+	
+	140870:{ilvl:875,int:1719,crit:1042,mastery:462,},
+	138357:{ilvl:875,haste:1075,mastery:430,},
+	138314:{ilvl:875,int:1719,haste:978,vers:527,},
+	138330:{ilvl:875,int:1719,crit:914,mastery:591,},
+	140866:{ilvl:875,int:1719,vers:849,mastery:656,},
+	138312:{ilvl:875,int:1719,haste:1042,mastery:462,},
+	138331:{ilvl:875,int:1719,crit:1042,vers:462,},
+	140851:{ilvl:870,int:1641,crit:865,haste:612,},
+	140903:{ilvl:870,int:1641,haste:897,vers:580,},
+	140881:{ilvl:875,int:1719,crit:914,mastery:591,},
+	138342:{ilvl:875,haste:623,mastery:881,},
+	138332:{ilvl:875,crit:559,mastery:946,},
+	138355:{ilvl:875,vers:527,mastery:978,},
+	138378:{ilvl:875,int:1719,crit:527,haste:978,},
+	138356:{ilvl:875,int:1719,crit:462,haste:1042,},
+	140901:{ilvl:870,int:1641,haste:485,mastery:991,},
+	138313:{ilvl:875,int:1719,crit:527,mastery:978,},
+	138343:{ilvl:875,int:1719,crit:527,haste:978,},
+	140900:{ilvl:875,haste:1151,vers:1368,},
+	140899:{ilvl:875,crit:1440,mastery:1080,},
+	140894:{ilvl:870,vers:908,mastery:1537,},
+	140898:{ilvl:870,crit:768,haste:1677,},
+	140853:{ilvl:870,int:1231,crit:744,mastery:364,},
+	138347:{ilvl:875,crit:443,vers:685,},
+	138363:{ilvl:875,vers:492,mastery:636,},
+	140883:{ilvl:875,int:1289,crit:733,mastery:394,},
+	138361:{ilvl:875,crit:346,haste:782,},
+	138380:{ilvl:875,int:1289,haste:346,vers:782,},
+	138323:{ilvl:875,int:1289,vers:443,mastery:685,},
+	138362:{ilvl:875,int:1289,haste:443,vers:685,},
+	140872:{ilvl:870,int:1231,crit:673,mastery:435,},
+	138337:{ilvl:875,int:1289,vers:419,mastery:709,},
+	138338:{ilvl:875,crit:758,haste:371,},
+	138348:{ilvl:875,int:1289,haste:636,vers:492,},
+	138336:{ilvl:875,int:1289,haste:733,mastery:394,},
+	138321:{ilvl:875,int:1289,haste:782,vers:346,},
+	138322:{ilvl:875,int:1289,haste:733,mastery:394,},
+	140911:{ilvl:875,int:1289,crit:443,vers:685,},
+	140864:{ilvl:875,int:1289,crit:492,mastery:636,},
+	140917:{ilvl:880,int:1351,haste:328,mastery:822,},
+	140855:{ilvl:875,int:967,crit:459,vers:386,},
+	138375:{ilvl:875,int:967,crit:550,mastery:296,},
+	138370:{ilvl:875,int:967,vers:550,mastery:296,},
+	138373:{ilvl:875,int:967,haste:314,vers:532,},
+	138366:{ilvl:875,int:967,haste:242,vers:604,},
+	138369:{ilvl:875,int:967,haste:604,mastery:242,},
+	138365:{ilvl:875,int:967,crit:513,mastery:332,},
+	138367:{ilvl:875,int:967,crit:550,haste:296,},
+	138368:{ilvl:875,int:967,vers:259,mastery:586,},
+	138372:{ilvl:875,int:967,haste:314,mastery:532,},
+	140910:{ilvl:875,int:967,haste:278,mastery:568,},
+	138371:{ilvl:875,int:967,vers:568,mastery:278,},
+	140909:{ilvl:875,int:967,haste:604,vers:242,},
+	138374:{ilvl:875,int:967,haste:278,vers:568,},
+	138364:{ilvl:875,int:967,vers:278,mastery:568,},
+	138351:{ilvl:875,crit:1042,vers:462,},
+	140877:{ilvl:875,int:1719,haste:623,vers:881,},
+	138350:{ilvl:875,int:1719,crit:591,mastery:914,},
+	140913:{ilvl:880,int:1801,haste:997,mastery:536,},
+	138349:{ilvl:875,crit:430,haste:1075,},
+	140865:{ilvl:870,int:1641,crit:644,haste:833,},
+	138325:{ilvl:875,int:1719,haste:1075,mastery:430,},
+	138339:{ilvl:875,haste:1075,vers:430,},
+	138326:{ilvl:875,haste:623,mastery:881,},
+	138376:{ilvl:875,int:1719,crit:978,vers:527,},
+	138346:{ilvl:875,int:1719,crit:1042,mastery:462,},
+	138324:{ilvl:875,int:1719,vers:462,mastery:1042,},
+	138318:{ilvl:875,int:1719,vers:559,mastery:946,},
+	140848:{ilvl:870,int:1641,haste:1023,mastery:454,},
+	138319:{ilvl:875,int:1719,crit:914,haste:591,},
+	138320:{ilvl:875,int:1719,crit:559,mastery:946,},
+	140875:{ilvl:870,int:1641,haste:516,mastery:960,},
+	140874:{ilvl:875,int:967,crit:568,mastery:278,},
+	140878:{ilvl:875,int:967,crit:568,mastery:278,},
+	140893:{ilvl:875,int:967,crit:314,haste:532,},
+	140876:{ilvl:870,int:923,vers:487,mastery:344,},
+	140886:{ilvl:875,int:967,haste:586,vers:259,},
+	140889:{ilvl:875,int:967,crit:604,mastery:242,},
+	140850:{ilvl:875,int:967,crit:314,mastery:532,},
+	140902:{ilvl:870,int:923,vers:344,mastery:487,},
+	140857:{ilvl:875,int:967,haste:550,mastery:296,},
+	140869:{ilvl:870,int:1231,haste:720,mastery:387,},
+	140863:{ilvl:870,int:1231,haste:411,mastery:696,},
+	138327:{ilvl:875,int:1289,crit:758,vers:371,},
+	138309:{ilvl:875,int:1289,crit:467,vers:661,},
+	140905:{ilvl:875,int:1289,crit:467,mastery:661,},
+	138328:{ilvl:875,int:1289,haste:443,vers:685,},
+	138310:{ilvl:875,int:1289,crit:782,vers:346,},
+	140888:{ilvl:870,int:1231,haste:387,mastery:720,},
+	138377:{ilvl:875,int:1289,haste:782,mastery:346,},
+	138353:{ilvl:875,int:1289,vers:394,mastery:733,},
+	138354:{ilvl:875,crit:467,mastery:661,},
+	138340:{ilvl:875,crit:685,haste:443,},
+	140907:{ilvl:875,int:1289,crit:346,haste:782,},
+	140879:{ilvl:870,int:1231,haste:506,mastery:601,},
+	138329:{ilvl:875,haste:806,vers:322,},
+	138341:{ilvl:875,int:1289,crit:492,vers:636,},
+	138352:{ilvl:875,vers:709,mastery:419,},
+	138311:{ilvl:875,int:1289,crit:782,mastery:346,},
+	140880:{ilvl:870,int:1231,crit:459,mastery:648,},
+	140887:{ilvl:875,int:1289,haste:636,mastery:492,},
+	140912:{ilvl:875,int:1289,crit:733,vers:394,},
+	140919:{ilvl:880,int:1351,crit:501,mastery:649,},
+	140892:{ilvl:875,int:1289,haste:346,vers:782,},
+	140890:{ilvl:875,int:1289,crit:515,vers:612,},
+	140858:{ilvl:870,int:1231,crit:696,haste:411,},
+	140868:{ilvl:875,int:1289,haste:661,mastery:467,},
+	140859:{ilvl:875,int:1289,haste:733,vers:394,},
+	140849:{ilvl:870,int:1231,haste:364,vers:744,},
+	138379:{ilvl:875,int:1719,vers:591,mastery:914,},
+	140908:{ilvl:875,int:1719,haste:656,vers:849,},
+	140882:{ilvl:870,int:1641,haste:454,mastery:1023,},
+	140871:{ilvl:870,int:1641,crit:454,haste:1023,},
+	138359:{ilvl:875,int:1719,crit:978,vers:527,},
+	138360:{ilvl:875,crit:623,haste:881,},
+	138358:{ilvl:875,crit:914,haste:591,},
+	140862:{ilvl:870,int:1641,haste:929,mastery:548,},
+	138317:{ilvl:875,int:1719,crit:849,haste:656,},
+	138333:{ilvl:875,int:1719,crit:494,haste:1010,},
+	138315:{ilvl:875,int:1719,crit:978,haste:527,},
+	138334:{ilvl:875,int:1719,crit:462,mastery:1042,},
+	140852:{ilvl:875,int:1719,haste:688,mastery:817,},
+	138344:{ilvl:875,crit:946,mastery:559,},
+	138316:{ilvl:875,int:1719,haste:946,vers:559,},
+	138345:{ilvl:875,int:1719,vers:623,mastery:881,},
+	138335:{ilvl:875,crit:1042,vers:462,},
+	140891:{ilvl:875,int:1289,haste:782,mastery:346,},
+	140867:{ilvl:875,int:1289,vers:443,mastery:685,},
+	140904:{ilvl:870,int:1231,crit:387,vers:720,},
+	140885:{ilvl:875,int:1289,crit:419,vers:709,},
+	140860:{ilvl:870,int:1231,haste:744,vers:364,},
+	140854:{ilvl:870,int:1231,haste:506,mastery:601,},
+	140861:{ilvl:875,int:1289,crit:492,mastery:636,},
+	140914:{ilvl:880,int:1351,crit:772,mastery:378,},
+	140884:{ilvl:870,int:1231,crit:673,haste:435,},
+	140873:{ilvl:875,int:1289,crit:515,haste:612,},
+	140895:{ilvl:875,crit:1728,mastery:792,},
+	140896:{ilvl:875,haste:1512,vers:1008,},
+	140906:{ilvl:875,crit:864,vers:1656,},
+	140897:{ilvl:880,haste:742,mastery:1856,},
+	140800:{ilvl:875,haste:1075,},
+	140804:{ilvl:875,int:1634,},
+	140795:{ilvl:875,haste:1075,},
+	140798:{ilvl:875,crit:1075,},
+	140793:{ilvl:870,mastery:1055,},
+	140807:{ilvl:880,mastery:1095,},
+	140808:{ilvl:880,haste:1095,},
+	140792:{ilvl:870,int:1560,},
+	140791:{ilvl:870,crit:1055,},
+	140809:{ilvl:880,int:1712,},
+	140805:{ilvl:875,int:1634,},
+	140801:{ilvl:875,mastery:1075,},
+	144406:{ilvl:870,int:1231,crit:340,mastery:767,},
+	
+	152169:{ilvl:930,int:2870,haste:1043,vers:805},
+	152001:{ilvl:930,int:2870,crit:1162,haste:686},
+	152000:{ilvl:930,int:2870,crit:752,mastery:1096},
+	152423:{ilvl:940,int:3150,haste:1042,mastery:877},
+	151966:{ilvl:930,haste:2112,mastery:1408},
+	151965:{ilvl:930,crit:1609,vers:1911},
+	151973:{ilvl:930,vers:1509,mastery:2011},
+	152283:{ilvl:940,crit:2457,haste:1281},
+	152005:{ilvl:940,int:2362,crit:575,mastery:863},
+	152171:{ilvl:930,int:2153,crit:564,vers:822},
+	152004:{ilvl:930,int:2153,haste:861,mastery:525},
+	152062:{ilvl:930,int:1615,crit:475,haste:564},
+	151938:{ilvl:930,int:1615,haste:438,mastery:601},
+	152167:{ilvl:930,int:1615,vers:401,mastery:639},
+	151937:{ilvl:930,int:1615,crit:557,mastery:483},
+	151995:{ilvl:930,int:2870,haste:805,mastery:1043},
+	152166:{ilvl:930,int:2870,crit:1162,haste:686},
+	151994:{ilvl:930,int:2870,crit:1056,mastery:792},
+	152008:{ilvl:930,int:1615,haste:669,vers:371},
+	152280:{ilvl:930,int:1615,haste:386,mastery:654},
+	151999:{ilvl:930,int:2153,crit:832,haste:554},
+	152168:{ilvl:930,int:2153,crit:525,mastery:861},
+	151998:{ilvl:930,int:2153,vers:594,mastery:792},
+	152683:{ilvl:930,int:2153,crit:495,haste:891},
+	152007:{ilvl:930,int:2153,vers:802,mastery:584},
+	152006:{ilvl:930,int:2153,haste:604,mastery:782},
+	152002:{ilvl:930,int:2870,crit:752,haste:1096},
+	152170:{ilvl:930,int:2870,haste:1004,mastery:845},
+	152003:{ilvl:930,int:2870,crit:1162,vers:686},
+	151996:{ilvl:930,int:2153,crit:634,haste:752},
+	152684:{ilvl:930,int:2153,haste:534,mastery:852},
+	151997:{ilvl:930,int:2153,crit:802,vers:584},
+	152284:{ilvl:930,crit:1408,haste:2112},
+	152064:{ilvl:930,crit:1861,mastery:1659},
+	152688:{ilvl:930,haste:1207,mastery:2313},
+	152063:{ilvl:930,haste:1307,vers:2212},
+	151972:{ilvl:940,vers:1602,mastery:2137},
+	154172:{ilvl:1000,crit:1430,haste:1430,vers:1430,mastery:1430},
+	151957:{ilvl:930,vers:1320},
+	151960:{ilvl:930,int:2728},
+	152289:{ilvl:930,mastery:1320},
+	151958:{ilvl:930,int:2728},
+	151956:{ilvl:930,int:2728},
+	151970:{ilvl:930,vers:1320},
+	154175:{ilvl:940,int:2994},
 };
-var STATS120 = {
-	crit: 72,
-	mastery: 72 / 3,
-	haste: 68,
-	vers: 85,
-};
 
-var baseMana = 20000 / 5;	//lvl 110
+
+var baseMana = 1100000 / 5;
 var spellManaCost = {
 	77472: 9 / 100 * baseMana,	//hw
 	1064: 25 / 100 * baseMana,	//ch
@@ -43,9 +285,6 @@ var spellManaCost = {
 	197995: 20 / 100 * baseMana,	//wellspring
 	2825: 21.5 / 100 * baseMana,	//bl
 	32182: 21.5 / 100 * baseMana,	//heroism
-	974: 10 / 100 * baseMana,	//es
-	8143: 2.3 / 100 * baseMana,	//tremor
-	207778: 15 / 100 * baseMana,	//downpour
 };
 
 var spellCastTime = {
@@ -65,7 +304,6 @@ var spellCastTime = {
 	197995: 1.5,	//wellspring
 	207778: 2,	//gotq
 	2645: 1.5,	//wolf
-	207778: 1.5,	//downpour
 };
 
 var spellCastTimeNoCD = {	//only spells without cd
@@ -99,7 +337,6 @@ var OverallBlacklist = {
 	207472: true,	//prydaz
 	242621: true,	//tos(fa) trink
 	242623: true,	//tos(kj) trink
-	30884: true,	//Nature's Guardian
 };
 
 var spellScaleInt = {
@@ -117,8 +354,6 @@ var spellScaleInt = {
 	228401: true,	//Mark of the Ancient Priestess
 	209069: true,	//tidal
 	114942: true,	//htt
-	379: true,	//es
-	207778: true,	//downpour
 };
 var spellScaleMastery = {
 	1064: true,	//ch
@@ -135,8 +370,6 @@ var spellScaleMastery = {
 	209069: true,	//tidal
 	114942: true,	//htt
 	73685: true,	//ul [fixed in 7.2.5]
-	379: true,	//es
-	207778: true,	//downpour
 };
 var spellNotScaleHaste = {
 	208899: true,	//qd
@@ -167,8 +400,6 @@ var spellScaleVers = {
 	209069: true,	//tidal
 	114942: true,	//htt
 	73685: true,	//ul
-	379: true,	//es
-	207778: true,	//downpour
 	242327: true,	//tos(di) trink
 	242622: true,	//tos(kj) trink
 	242623: true,	//tos(kj) trink
@@ -189,7 +420,7 @@ function CreateSpecialSpellCurrentData(){
 	}
 }
 
-var sSpellsKeys = ["CBT","ASC"];
+var sSpellsKeys = ["CBT","AG","ASC"];
 var sSpells = {		// specialSpellSpellID, blacklist of spells that not feed special spell, SpellID for icon
 	CBT: [157503,
 		{
@@ -204,6 +435,19 @@ var sSpells = {		// specialSpellSpellID, blacklist of spells that not feed speci
 			201633: true,	//est
 		},	
 	157503],
+	AG: [114911, 
+		{
+			114911: true,	//ag
+			52042: true,	//hst
+			209069: true,	//tidal
+			114942: true,	//htt
+			98021: true,	//slt
+			206985: true, 	//guldan absorb
+			143924: true, 	//leech
+			235967: true,	//velens
+			201633: true,	//est
+		},
+	114911],
 	ASC: [114083, 
 		{
 			114083: true,	//asc
@@ -252,8 +496,6 @@ var healingFromMana = {
 	114083: 0.75,	//asc
 	8004: 1,	//surge
 	197997: 1,	//wellspring
-	379: 1,		//es
-	207778: 1,	//downpour
 };
 
 var vantusRunes = {
@@ -293,13 +535,22 @@ var vantusRunes = {
 
 var statsBuffs = {
 	vers: {
-
+		240670: 600,	//Stat Buff: Feral
+		253901: 2000,	//Argus
 	},
 	crit: {
-
+		240671: 800,	//Stat Buff: Fire
+		190909: 1000, 	//Mark of the Claw
+		224151: 3000,	//Traitor's Oath [suramar 5ppl set]
+		253903: 2000,	//Argus
 	},
 	haste: {
-
+		240673: 800,	//Stat Buff: spriest
+		224347: 400,	//Flask of the Solemn Night
+		214128: 6008,	//Chrono Shard
+		190909: 1000, 	//Mark of the Claw
+		253269: 855,	//abt trinket
+		253901: 2000,	//Argus
 	},
 	haste_mod: {
 		80353: 1.3,	//BL
@@ -314,19 +565,22 @@ var statsBuffs = {
 		202842: 1.1,	//Innervate moonkin
 	},
 	mastery: {
-
+		240672: 600,	//Stat Buff: Rouge
+		215198: 430,	//Thrumming Gossamer
+		253903: 2000,	//Argus
 	},
 	int: {
-
+		33697: 2137,	//orc racial
+		253258: 9000,	//abt trink
 	},
 };
 
 var foodBuffs = {	//downscale stats if food buff went down; only top food, lazy for anotherone
-	185736: ["vers",11],
-	225603: ["haste",19],
-	225604: ["mastery",19],
-	225602: ["crit",19],
-	225605: ["vers",19],
+	185736: ["vers",475],
+	225603: ["haste",375],
+	225604: ["mastery",375],
+	225602: ["crit",375],
+	225605: ["vers",375],
 	//201640: ["int",500],	//autoupdated stat
 };
 
@@ -376,43 +630,24 @@ var jewelSlots = {
 };
 
 var gemToStat = {
-	130222: ["mastery",9],
-	130220: ["haste",9],
-	130219: ["crit",9],
-	130221: ["vers",9],
-	130248: ["int",9],
-	151584: ["mastery",11],
-	151583: ["haste",11],
-	151580: ["crit",11],
-	151585: ["vers",11],
-	153710: ["crit",30],
-	153711: ["haste",30],
-	153712: ["vers",30],
-	153713: ["mastery",30],
-	153709: ["int",40],
-	154128: ["vers",40],
-	154129: ["mastery",40],
-	154126: ["crit",40],
-	154127: ["haste",40],
+	130222: ["mastery",150],
+	130220: ["haste",150],
+	130219: ["crit",150],
+	130221: ["vers",150],
+	130248: ["int",200],
+	151584: ["mastery",200],
+	151583: ["haste",200],
+	151580: ["crit",200],
+	151585: ["vers",200],
 };
 var enchToStat = {
-	5436: ["int",9],
-	5469: ["int",9],
-	5890: ["mastery",27],
-	5429: ["mastery",9],
-	5427: ["crit",9],
-	5428: ["haste",9],
-	5430: ["vers",9],
-	
-	5938: ["crit",27],
-	5939: ["haste",27],
-	5940: ["mastery",27],
-	5941: ["vers",27],
-
-	5942: ["crit",37],
-	5943: ["haste",37],
-	5944: ["mastery",37],
-	5945: ["vers",37],	
+	5436: ["int",200],
+	5469: ["int",200],
+	5890: ["mastery",600],
+	5429: ["mastery",150],
+	5427: ["crit",150],
+	5428: ["haste",150],
+	5430: ["vers",150],
 };
 
 var WCL_API_KEY = "c715943c916421282ae9451912918422";
@@ -469,18 +704,11 @@ function GetTraitRank(traitID)
 		return 0;
 }
 
-var ScaleStatData = {
-161:[0.994435486,0.996754034],162:[0.992604783,0.99956382],163:[0.994487319,1.008480671],164:[0.99265652,1.011323514],165:[0.994539154,1.020345271],166:[0.99270826,1.02322156],167:[0.994590992,1.032349456],168:[0.992760002,1.035259583],169:[0.994642833,1.044494867],170:[0.992811747,1.047439232],171:[0.994694676,1.056783168],172:[0.992863495,1.059762172],173:[0.994746522,1.069216038],174:[0.992915246,1.07223009],175:[0.994798371,1.081795178],176:[0.992966999,1.08484469],177:[0.994850222,1.09452231],178:[0.993018755,1.097607699],179:[0.994902077,1.107399175],180:[0.993070514,1.110520863],181:[0.994953934,1.120427534],182:[0.993122276,1.123585948],183:[0.995005793,1.133609169],184:[0.99317404,1.136804741],185:[0.995057655,1.146945883],186:[0.993225807,1.150179051],187:[0.99510952,1.160439502],188:[0.993277576,1.163710707],189:[0.995161388,1.174091871],190:[0.993329348,1.177401561],191:[0.995213259,1.187904857],192:[0.993381123,1.191253486],193:[0.995265132,1.201880351],194:[0.993432901,1.205268376],195:[0.991604043,1.208665951],196:[0.986086249,1.204742662],197:[0.980599158,1.200832108],198:[0.9751426,1.196934247],199:[0.969716406,1.193049039],200:[0.964320406,1.189176441],201:[0.958954431,1.185316415],202:[0.953618316,1.181468917],203:[0.948311894,1.177633909],204:[0.943034999,1.173811349],205:[0.937787468,1.170001197],206:[0.932569136,1.166203412],207:[0.927379842,1.162417955],208:[0.922219425,1.158644785],209:[0.917087722,1.154883863],210:[0.911984574,1.151135149],211:[0.906909824,1.147398603],212:[0.901863311,1.143674186],213:[0.89684488,1.139961858],214:[0.891854375,1.13626158],215:[0.886891639,1.132573313],216:[0.881956518,1.128897018],217:[0.877048859,1.125232656],218:[0.872168508,1.121580189],219:[0.867315314,1.117939577],220:[0.862489126,1.114310783],221:[0.857689793,1.110693767],222:[0.852917167,1.107088493],223:[0.848171097,1.10349492],224:[0.843451437,1.099913013],225:[0.83875804,1.096342732],226:[0.83409076,1.092784041],227:[0.82944945,1.0892369],228:[0.824833967,1.085701274],229:[0.820244167,1.082177124],230:[0.815679907,1.078664413],231:[0.811141045,1.075163105],232:[0.806627439,1.071673162],233:[0.80213895,1.068194547],234:[0.797675436,1.064727223],235:[0.79323676,1.061271154],236:[0.788822783,1.057826304],237:[0.784433368,1.054392635],238:[0.780068378,1.050970112],239:[0.775727676,1.047558698],240:[0.771411129,1.044158358],241:[0.767118601,1.040769055],242:[0.762849959,1.037390753],243:[0.75860507,1.034023418],244:[0.754383801,1.030667013],245:[0.750186022,1.027321502],246:[0.746011602,1.023986851],247:[0.74186041,1.020663024],248:[0.737732317,1.017349986],249:[0.733627196,1.014047702],250:[0.729544917,1.010756137],251:[0.725485354,1.007475257],252:[0.721448381,1.004205026],253:[0.717433871,1.00094541],254:[0.7134417,0.997696375],255:[0.709471744,0.994457886],256:[0.705523879,0.991229909],257:[0.701597981,0.98801241],258:[0.69769393,0.984805355],259:[0.693811602,0.98160871],260:[0.689950878,0.978422441],261:[0.686111637,0.975246515],262:[0.682293759,0.972080897],263:[0.678497126,0.968925555],264:[0.674721619,0.965780456],265:[0.670967121,0.962645565],266:[0.674618275,0.964080124],267:[0.678289297,0.96551682],268:[0.681980296,0.966955658],269:[0.685691379,0.96839664],270:[0.689422657,0.969839769],271:[0.693174239,0.971285049],272:[0.696946235,0.972732483],273:[0.700738758,0.974182074],274:[0.704551918,0.975633825],275:[0.708385827,0.977087739],
-276:[0.7122406,0.97854382],277:[0.716116349,0.980002071],278:[0.720013188,0.981462495],279:[0.723931232,0.982925096],280:[0.727870597,0.984389876],281:[0.731831398,0.985856838],282:[0.735813753,0.987325987],283:[0.739817778,0.988797326],284:[0.743843591,0.990270857],285:[0.747891312,0.991746584],286:[0.751961058,0.99322451],287:[0.756052951,0.994704638],288:[0.76016711,0.996186972],289:[0.764303657,0.997671515],290:[0.768462714,0.999158271],291:[0.772644402,1.000647242],292:[0.776848846,1.002138432],293:[0.781076169,1.003631844],294:[0.785326495,1.005127482],295:[0.78959995,1.006625349],296:[0.793896659,1.008125447],297:[0.79821675,1.009627782],298:[0.802560349,1.011132355],299:[0.806927584,1.01263917],300:[0.811318584,1.01414823],301:[0.808817976,1.01102247],302:[0.806293968,1.00786746],303:[0.803747209,1.004684011],304:[0.801178339,1.001472923],305:[0.798587986,0.998234982],306:[0.79597677,0.994970963],307:[0.793345301,0.991681626],308:[0.790694179,0.988367724],309:[0.788023995,0.985029994],310:[0.785335331,0.981669164],311:[0.782628758,0.978285948],312:[0.779904841,0.974881051],313:[0.777164134,0.971455167],314:[0.774407182,0.968008978],315:[0.771634523,0.964543154],316:[0.768846685,0.961058357],317:[0.766044188,0.957555236],318:[0.763227544,0.954034431],319:[0.760397257,0.950496571],320:[0.757553821,0.946942276],321:[0.754697723,0.943372154],322:[0.751829445,0.939786806],323:[0.748949456,0.936186819],324:[0.74605822,0.932572776],325:[0.743156195,0.928945244],326:[0.740243829,0.925304787],327:[0.737321564,0.921651955],328:[0.734389832,0.917987291],329:[0.731449063,0.914311328],330:[0.728499674,0.910624593],331:[0.725542079,0.906927599],332:[0.722576685,0.903220856],333:[0.719603889,0.899504861],334:[0.716624085,0.895780106],335:[0.713637657,0.892047071],336:[0.710644986,0.888306232],337:[0.707646443,0.884558054],338:[0.704642396,0.880802995],339:[0.701633203,0.877041504],340:[0.69861922,0.873274025],341:[0.695600793,0.869500992],342:[0.692578265,0.865722831],343:[0.68955197,0.861939963],344:[0.68652224,0.8581528],345:[0.683489397,0.854361746],346:[0.68045376,0.8505672],347:[0.677415642,0.846769552],348:[0.67437535,0.842969187],349:[0.671333185,0.839166482],350:[0.668289445,0.835361806],351:[0.665244419,0.831555523],352:[0.662198393,0.827747991],353:[0.659151648,0.82393956],354:[0.656104459,0.820130574],355:[0.653057097,0.816321371],356:[0.650009826,0.812512283],357:[0.646962908,0.808703635],358:[0.643916597,0.804895746],359:[0.640871144,0.80108893],360:[0.637826796,0.797283496],361:[0.634783795,0.793479743],362:[0.631742376,0.78967797],363:[0.628702772,0.785878465],364:[0.625665211,0.782081514],365:[0.622629917,0.778287397],366:[0.61959711,0.774496387],367:[0.616567003,0.770708753],368:[0.613539807,0.766924759],369:[0.61051573,0.763144663],370:[0.607494974,0.759368718],371:[0.604477737,0.755597171],372:[0.601464214,0.751830268],373:[0.598454595,0.748068244],374:[0.595449068,0.744311335],375:[0.592447815,0.740559769],376:[0.589451015,0.736813769],377:[0.586458845,0.733073556],378:[0.583471475,0.729339343],379:[0.580489074,0.725611343],380:[0.577511808,0.721889759],381:[0.574539836,0.718174795],382:[0.571573318,0.714466647],383:[0.568612407,0.710765509],384:[0.565657255,0.707071569],385:[0.56270801,0.703385012],386:[0.559764816,0.69970602],387:[0.556827814,0.696034768],388:[0.553897144,0.69237143],389:[0.550972939,0.688716174],390:[0.548055333,0.685069166],
-391:[0.545144454,0.681430568],392:[0.542240429,0.677800536],393:[0.53934338,0.674179225],394:[0.536453429,0.670566786],395:[0.533570692,0.666963365],396:[0.530695284,0.663369105],397:[0.527827318,0.659784148],398:[0.524966903,0.656208629],399:[0.522114145,0.652642681],400:[0.519269148,0.649086436],401:[0.516432015,0.645540018],402:[0.513602842,0.642003553],403:[0.510781728,0.63847716],404:[0.507968765,0.634960957],405:[0.505164046,0.631455058],406:[0.502367659,0.627959574],407:[0.499579691,0.624474614],408:[0.496800226,0.621000283],409:[0.494029347,0.617536684],410:[0.491267133,0.614083916],411:[0.488513662,0.610642077],412:[0.485769009,0.607211261],413:[0.483033248,0.603791559],414:[0.480306449,0.600383061],415:[0.477588682,0.596985852],416:[0.474880013,0.593600017],417:[0.472180509,0.590225636],418:[0.469490231,0.586862789],419:[0.466809241,0.583511551],420:[0.464137598,0.580171997],421:[0.461475359,0.576844198],422:[0.458822579,0.573528224],423:[0.456179312,0.57022414],424:[0.45354561,0.566932013],425:[0.450921523,0.563651904],426:[0.448307099,0.560383873],427:[0.445702384,0.557127979],428:[0.443107422,0.553884278],429:[0.440522259,0.550652823],430:[0.437946933,0.547433667],431:[0.435381487,0.544226858],432:[0.432825957,0.541032446],433:[0.430280381,0.537850476],434:[0.427744793,0.534680991],435:[0.425219228,0.531524035],436:[0.422703717,0.528379646],437:[0.420198292,0.525247864],438:[0.417702981,0.522128726],439:[0.415217812,0.519022265],440:[0.412742813,0.515928516],441:[0.410278008,0.512847509],442:[0.40782342,0.509779275],443:[0.405379073,0.506723841],444:[0.402944988,0.503681234],445:[0.400521184,0.500651479],446:[0.39810768,0.497634599],447:[0.395704493,0.494630616],448:[0.39331164,0.49163955],449:[0.390929136,0.488661421],450:[0.388556995,0.485696244],451:[0.386195229,0.482744036],452:[0.38384385,0.479804812],453:[0.381502868,0.476878585],454:[0.379172293,0.473965367],455:[0.376852134,0.471065167],456:[0.374542396,0.468177995],457:[0.372243087,0.465303859],458:[0.369954212,0.462442765],459:[0.367675775,0.459594719],460:[0.36540778,0.456759725],461:[0.363150228,0.453937785],462:[0.360903121,0.451128901],463:[0.358666459,0.448333074],464:[0.356440243,0.445550303],465:[0.35422447,0.442780587],466:[0.352019138,0.440023922],467:[0.349824245,0.437280306],468:[0.347639786,0.434549732],469:[0.345465756,0.431832195],470:[0.343302151,0.429127688],471:[0.341148963,0.426436204],472:[0.339006186,0.423757732],473:[0.336873811,0.421092264],474:[0.33475183,0.418439788],475:[0.332640234,0.415800293],476:[0.330539013,0.413173766],477:[0.328448155,0.410560193],478:[0.326367649,0.407959561],479:[0.324297483,0.405371854],480:[0.322237645,0.402797056],481:[0.32018812,0.400235149],482:[0.318148894,0.397686118],483:[0.316119953,0.395149942],484:[0.314101282,0.392626603],485:[0.312092864,0.39011608],486:[0.310094683,0.387618354],487:[0.308106722,0.385133402],488:[0.306128963,0.382661203],489:[0.304161387,0.380201734],490:[0.302203977,0.377754971],491:[0.300256712,0.37532089],492:[0.298319573,0.372899466],493:[0.296392539,0.370490674],494:[0.294475591,0.368094488],495:[0.292568705,0.365710882],496:[0.290671862,0.363339827],497:[0.288785037,0.360981297],498:[0.28690821,0.358635262],499:[0.285041356,0.356301694],500:[0.283184451,0.353980564],501:[0.281608668,0.352831555],502:[0.280041652,0.351686276],503:[0.278483357,0.350544714],504:[0.276933732,0.349406858],
-505:[0.275392731,0.348272695],506:[0.273860304,0.347142213],507:[0.272336404,0.346015401],508:[0.270820985,0.344892247],509:[0.269313998,0.343772738],510:[0.267815396,0.342656864],511:[0.266325134,0.341544611],512:[0.264843164,0.340435969],513:[0.26336944,0.339330925],514:[0.261903917,0.338229468],515:[0.260446549,0.337131587],516:[0.258997291,0.336037269],517:[0.257556097,0.334946503],518:[0.256122922,0.333859278],519:[0.254697723,0.332775582],520:[0.253280454,0.331695404],521:[0.251871071,0.330618731],522:[0.250469531,0.329545554],523:[0.24907579,0.32847586],524:[0.247689804,0.327409639],525:[0.246311531,0.326346878],526:[0.244940927,0.325287567],527:[0.24357795,0.324231694],528:[0.242222557,0.323179249],529:[0.240874706,0.32213022],
-};
-
 function ScaleStat(stat,fromIlvl,toIlvl,isLinear)
 {
 	//	linear == 1 for int, linear == nil for secondaries, linear == 2 for jewel slots
-	var scalingFrom = (fromIlvl <= 160 || isLinear == 1) ? 1 : (isLinear == 2 ? ScaleStatData[fromIlvl][1] : ScaleStatData[fromIlvl][0]);
-	var scalingTo = (toIlvl <= 160 || isLinear == 1) ? 1 : (isLinear == 2 ? ScaleStatData[fromIlvl][1] : ScaleStatData[fromIlvl][0]);
+	var scalingFrom = (fromIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,fromIlvl - 800) : Math.pow(0.994435486,fromIlvl - 800));
+	var scalingTo = (toIlvl <= 800 || isLinear == 1) ? 1 : (isLinear == 2 ? Math.pow(0.996754034,toIlvl - 800) : Math.pow(0.994435486,toIlvl - 800));
 	
 	stat = stat / scalingFrom;
 	var newValue = stat * Math.pow(1.00936,toIlvl - fromIlvl);
@@ -1096,7 +1324,7 @@ var ITEMS = [
 			"cast", function(event,spellID){
 				if(spellID == 8004) {
 					if(pV.nobundosLast){
-						rV.nobundosPredictionMana += spellManaCost[8004] / 2;
+						rV.nobundosPredictionMana += 22000;
 						rV.nobundosPredictionCount++;
 					}
 					pV.nobundosLast = false;
@@ -1108,11 +1336,11 @@ var ITEMS = [
 			},		
 			"removebuff", function(event,spellID){
 				if(spellID == 208764 && (event.timestamp <= pV.nobundosLastCast)){
-					rV.nobundosMana += spellManaCost[8004] / 2;
+					rV.nobundosMana += 22000;
 					rV.nobundosCount++;
-					rV.manaGain += spellManaCost[8004] / 2;
-					rV.manaUsage -= spellManaCost[8004] / 2;
-					if(rV.manaUsageBySpell[8004]) rV.manaUsageBySpell[8004] -= spellManaCost[8004] / 2;
+					rV.manaGain += 22000;
+					rV.manaUsage -= 22000;
+					if(rV.manaUsageBySpell[8004]) rV.manaUsageBySpell[8004] -= 22000;
 				}			
 			},
 		],
@@ -1883,9 +2111,669 @@ var ITEMS = [
 	},
 ];
 
-var TRAITS = [];
+var TRAITS = [
+	{	//Grace [+6%]
+		init: function() {
+			rV.traits[1352] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(!OverallBlacklist[spellID]){
+					//rV.traits[1352] += amount * (1 - 1 / 1.06);
+					rV.traits[1352] += Math.max((amount + overheal) * (1 - 1 / 1.06) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Grace of the Sea",
+			id: 1352,
+			spellID: 224841,
+			icon: "inv_elemental_crystal_water.jpg",
+		},
+	},
+	{	//Echo [+10%]
+		init: function() {
+			rV.traits[1693] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(!OverallBlacklist[spellID]){
+					//rV.traits[1693] += amount * (1 - 1 / 1.1);
+					rV.traits[1693] += Math.max((amount + overheal) * (1 - 1 / 1.1) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Echo of the Earthen Ring",
+			id: 1693,
+			spellID: 241205,
+			icon: "misc_legionfall_shaman.jpg",
+		},
+	},
+	{	//+5%
+		init: function() {
+			rV.traits[1389] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(!OverallBlacklist[spellID]){
+					rV.traits[1389] += Math.max((amount + overheal) * (1 - 1 / 1.05) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Flow of the Tides",
+			id: 1389,
+			spellID: 214933,
+			icon: "inv_mace_1h_artifactazshara_d_02.jpg",
+		},
+	},
+	{	//Paragon
+		init: function() {
+			rV.traits[1600] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if(spellScaleInt[spellID]){
+					if(pV.paragonTraitActive && GetTraitRank(1600) > 0){
+						rV.traits[1600] += amount / cV.intellect * ((4000 + (GetTraitRank(1600) - 1) * 300) * 1.05);
+					}
+				}
+			},
+			"applybuff", function(event,spellID){
+				if(spellID == 242586) pV.paragonTraitActive = true;
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 242586) pV.paragonTraitActive = false;
+			},
+		],
+		obj: {
+			name: "Concordance of the Legionfall",
+			id: 1600,
+			spellID: 239042,
+			icon: "trade_archaeology_sharkjaws.jpg",
+			additionalText: function(){
+				var rank = GetTraitRank(1600);
+				if(rank == 1){
+					return "";
+				} else {
+					var amount = ((rank * 300) / (rank*300  + 4000)) * rV.traits[1600];
+					rank--;
+					return "Per rank: "+NumberToFormattedNumber(amount / rank,0,2)+" ("+(amount / rank/rV.total*100).toFixed(2)+"%)";
+				}	
+			},
+		},
+	},
+	{	//BL trait
+		init: function() {
+			rV.traits[1112] = 0;
+			pV.trait1112Temp = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(!OverallBlacklist[spellID]){
+					if(pV.blTraitActive){
+						//rV.traits[1112] += amount * (1 - 1 / 1.25);
+						rV.traits[1112] += Math.max((amount + overheal) * (1 - 1 / 1.25) - overheal,0);
+					} else {
+						pV.trait1112Temp += Math.max((amount + overheal) * (1 - 1 / 1.25) - overheal,0);
+					}
+				}
+			},
+			"applybuff", function(event,spellID){
+				if(spellID == 208416) pV.blTraitActive = true;
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 208416) {
+					if(!pV.blTraitActive){
+						rV.traits[1112] += pV.trait1112Temp;
+						pV.trait1112Temp = 0;
+					}
+					pV.blTraitActive = false;
+				}
+			},
+		],
+		obj: {
+			name: "Sense of Urgency",
+			id: 1112,
+			spellID: 207355,
+			icon: "inv_misc_pocketwatch_02.jpg",
+		},
+	},
+	{	//CH crit trait
+		init: function() {
+			rV.traits[1109] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if(spellID == 1064 && event.hitType == 2){
+					rV.traits[1109] += pV.critAmount * ((GetTraitRank(1109) * 4 * 400) / pV.critNow);
+				}
+			},
+		],
+		obj: {
+			name: "Floodwaters",
+			id: 1109,
+			spellID: 207348,
+			icon: "spell_nature_healingwavegreater.jpg",
+		},
+	},
+	{	//HR heal+crit trait
+		init: function() {
+			rV.traits[1107] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 73921){
+					if(event.hitType == 2) rV.traits[1107] += pV.critAmount * ((GetTraitRank(1107) * 2 * 400) / pV.critNow);
+					//rV.traits[1107] += amount * (1 - 1 / (1 + 0.02 * GetTraitRank(1107)));
+					rV.traits[1107] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.02 * GetTraitRank(1107))) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Empowered Droplets",
+			id: 1107,
+			spellID: 207255,
+			icon: "spell_nature_giftofthewaterspirit.jpg",
+		},
+	},
+	{	//CH mana
+		init: function() {
+			rV.traits[1113] = 0;
+		},
+		afterParse: function() {
+			rV.trait_1113 = rV.traits[1113];
+			rV.traits[1113] = rV.traits[1113] / rV.manaUsage * rV.healFromMana;
+		},
+		parse: [
+			"energize", function(event,spellID){
+				if(spellID == 101033 && event.resourceChange == 4125){
+					rV.traits[1113] += 1325;
+				}
+			},
+		],
+		obj: {
+			name: "Refreshing Currents",
+			id: 1113,
+			spellID: 207356,
+			icon: "ability_monk_cracklingjadelightning.jpg",
+			additionalText: function(){
+				return "Total mana gained: "+NumberToFormattedNumber(rV.trait_1113,0,2);
+			},
+		},
+	},
+	{	//HTT
+		init: function() {
+			rV.traits[1117] = 0;
+			pV.httTraitLast = 0;
+			pV.httTraitCount = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 114942){
+					if((event["timestamp"] - pV.httTraitLast) > 15000){
+						pV.httTraitCount = 0;
+					} else if((event["timestamp"] - pV.httTraitLast) >= 300){
+						pV.httTraitCount = Math.min(pV.httTraitCount + 1,7);
+					}
+					pV.httTraitLast = event["timestamp"];
+					
+					//rV.traits[1117] += amount * (1 - 1 / (1 + 0.1 * pV.httTraitCount));
+					rV.traits[1117] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.1 * pV.httTraitCount)) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Cumulative Upkeep",
+			id: 1117,
+			spellID: 207362,
+			icon: "ability_shaman_healingtide.jpg",
+		},
+	},
+	{	//HR +30
+		init: function() {
+			rV.traits[1598] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 73921){
+					//rV.traits[1598] += amount * (1 - 1 / 1.3);
+					rV.traits[1598] += Math.max((amount + overheal) * (1 - 1 / 1.3) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Pitter-Patter",
+			id: 1598,
+			spellID: 242652,
+			icon: "spell_nature_giftofthewaterspirit.jpg",
+		},
+	},
+	{	//GotQ
+		init: function() {
+			rV.traits[1599] = 0;
+			pV.gotqLast = 0;
+			pV.gotqDisableOldDetect = false;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if(spellID == 207778 && !pV.gotqDisableOldDetect){
+					if((event["timestamp"] - pV.gotqLast) > 2000 && (event["timestamp"] - pV.gotqLast) < 4000){
+						rV.traits[1599] += amount;
+					}
+				} else if (spellID == 255227){	//7.3 update
+					rV.traits[1599] += amount;
+					pV.gotqDisableOldDetect = true;
+				}
+			},
+			"cast", function(event,spellID){
+				if(spellID == 207778) pV.gotqLast = event["timestamp"];
+			},
+		],
+		obj: {
+			name: "Deep Waters",
+			id: 1599,
+			spellID: 238143,
+			icon: "inv_mace_1h_artifactazshara_d_02.jpg",
+		},
+	},
+	{	//QD [hst]
+		init: function() {
+			rV.traits[1116] = 0;
+		},
+		afterParse: function() {
+			if(healingData[208899]) {
+				rV.traits[1116] = healingData[208899][0];
+			}
+		},
+		obj: {
+			name: "Queen's Decree",
+			id: 1116,
+			spellID: 207360,
+			icon: "inv_misc_volatilewater.jpg",
+		},
+	},
+	{	//riptide totem
+		init: function() {
+			rV.traits[1115] = 0;
+		},
+		afterParse: function() {
+			if(healingData[209069]) {
+				rV.traits[1115] = healingData[209069][0];
+			}
+		},
+		obj: {
+			name: "Tidal Pools",
+			id: 1115,
+			spellID: 207358,
+			icon: "achievement_dungeon_throneofthetides.jpg",
+		},
+	},
+	{	//riptide
+		init: function() {
+			rV.traits[1105] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 61295){
+					//rV.traits[1105] += amount * (1 - 1 / (1 + 0.05 * GetTraitRank(1105)));
+					rV.traits[1105] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.05 * GetTraitRank(1105))) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Pull of the Sea",
+			id: 1105,
+			spellID: 210031,
+			icon: "inv_tradeskillitem_sorcererswater.jpg",
+		},
+	},
+	{	//hst speed
+		init: function() {
+			rV.traits[1106] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if(spellID == 52042){
+					rV.traits[1106] += amount * (1 - 1 / (1 + 0.1 * GetTraitRank(1106)));
+				}
+			},
+		],
+		obj: {
+			name: "Wavecrash",
+			id: 1106,
+			spellID: 207206,
+			icon: "inv_spear_04.jpg",
+		},
+	},
+	{	//hw & surge
+		init: function() {
+			rV.traits[1104] = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 77472 || spellID == 8004){
+					//rV.traits[1104] += amount * (1 - 1 / (1 + 0.05 * GetTraitRank(1104)));
+					rV.traits[1104] += Math.max((amount + overheal) * (1 - 1 / (1 + 0.05 * GetTraitRank(1104))) - overheal,0);
+				}
+			},
+		],
+		obj: {
+			name: "Buffeting Waves",
+			id: 1104,
+			spellID: 207092,
+			icon: "ability_skyreach_four_wind.jpg",
+		},
+	},
+	{	//tidal buff
+		init: function() {
+			rV.traits[1103] = 0;
+			rV.traits1103_CastTime = 0;
+			rV.traits1103_Crit = 0;
+			pV.traits1103_TidalLoss = 0;
+			pV.traits1103_HRStartCast = 0;
+			pV.traits1103_HRCastTime = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+				if((spellID == 77472 || spellID == 8004) && (event.timestamp <= pV.hwWithoutTidalLoss)){
+					if(spellID == 8004 && event.hitType == 2){
+						rV.traits1103_Crit += ( GetTraitRank(1103) * 4 * 400 ) / pV.critNow * pV.critAmount;;
+					} else if(spellID == 77472) {
+						var tidal = (GetTraitRank(1103) * 0.03);
+						rV.traits1103_CastTime += pV.traits1103_HRCastTime / (1 - tidal) * tidal;
+					}
+				}
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 53390) pV.traits1103_TidalLoss = event.timestamp + 500;
+			},
+			"removebuffstack", function(event,spellID){
+				if(spellID == 53390) pV.traits1103_TidalLoss = event.timestamp + 500;
+			},
+			"begincast", function(event,spellID){
+				if(spellID == 77472) pV.traits1103_HRStartCast = event.timestamp;
+			},
+			"cast", function(event,spellID){
+				if(spellID == 77472) {
+					pV.traits1103_HRCastTime = event.timestamp - pV.traits1103_HRStartCast;
+				}
+			},			
+		],
+		afterParse: function() {
+			var hps = rV.total / (currFightData.end_time - currFightData.start_time);
+			
+			//rV.traits[1103] = rV.traits1103_Crit + hps * rV.traits1103_CastTime;
+			rV.traits[1103] = rV.traits1103_Crit + (rV.buffs.haste[-53390] || 0);
+		},		
+		obj: {
+			name: "Tidal Chains",
+			id: 1103,
+			spellID: 207088,
+			icon: "spell_frost_chainsofice.jpg",
+			tip: function() { return "From surge crit: "+NumberToFormattedNumber(rV.traits1103_Crit,0,2)+"<br>Reduced HW cast time: "+(rV.traits1103_CastTime/1000).toFixed(1)+"s" },
+		},
+	},
+	{	//QA
+		init: function() {
+			rV.traits[1108] = 0;
+			rV.traits1108_CastTime = 0;
+			pV.traits1108_LastCast = 0;
+			pV.traits1108_QALoss = 0;
+		},
+		parse: [
+			"applybuff", function(event,spellID){
+				if(spellID == 207288) pV.traits1108_QAActive = true;
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 207288) pV.traits1108_QAActive = false;
+			},
+			"begincast", function(event,spellID){
+				if(spellID == 77472 || spellID == 8004 || spellID == 1064) pV.traits1108_LastCast = event.timestamp;
+			},
+			"cast", function(event,spellID){
+				if(pV.traits1108_QAActive && (spellID == 77472 || spellID == 8004 || spellID == 1064)) {
+					var castTime = event.timestamp - pV.traits1108_LastCast;
+					
+					var trait = (GetTraitRank(1108) * 0.05);
+					
+					rV.traits1108_CastTime += castTime / (1 - trait) * trait;
+				}
+			},			
+		],
+		afterParse: function() {
+			var hps = rV.total / (currFightData.end_time - currFightData.start_time);
+			
+			//rV.traits[1108] = hps * rV.traits1108_CastTime;
+			rV.traits[1108] = rV.buffs.haste[-207288] || 0;
+		},		
+		obj: {
+			name: "Queen Ascendant",
+			id: 1108,
+			spellID: 207288,
+			icon: "ability_shaman_watershield.jpg",
+			//tip: function() { return "Reduced cast time: "+(rV.traits1108_CastTime/1000).toFixed(1)+"s<br>To value heal number used HPS*Reduced time" },
+			tip: function() { return "Reduced cast time: "+(rV.traits1108_CastTime/1000).toFixed(1)+"s" },
+		},
+	},	
+];
 
-NETHERLIGHT = [];
+NETHERLIGHT = [
+	{	//Infusion of Light
+		init: function() {
+			rV.netherlight[253093] = 0;
+		},
+		afterParse: function() {
+			if(healingData[253099]) {
+				rV.netherlight[253093] = healingData[253099][0];
+			}
+		},		
+		obj: {
+			name: "Infusion of Light",
+			spellID: 253093,
+			icon: "ability_malkorok_blightofyshaarj_yellow.jpg",
+		},
+	},	
+	{	//Secure in the Light
+		init: function() {
+			rV.netherlight[253070] = 0;
+		},
+		afterParse: function() {
+			if(healingData[253072]) {
+				rV.netherlight[253070] = healingData[253072][0];
+			}
+		},		
+		obj: {
+			name: "Secure in the Light",
+			spellID: 253070,
+			icon: "ability_paladin_toweroflight.jpg",
+		},
+	},
+	{	//Light Speed
+		init: function() {
+			rV.netherlight[252088] = 0;
+		},
+		afterParse: function() {
+			var rank = 1;
+			var perRankBonus = cV.gearInfo[152626] ? 750 : 500;
+			if(cV.traitBySpell[252088]) rank = cV.traitBySpell[252088].rank || 1;
+			rV.netherlight[252088] = healPerStat["haste"].amount * perRankBonus * rank;
+		},		
+		obj: {
+			name: "Light Speed",
+			spellID: 252088,
+			icon: "ability_rogue_sprint.jpg",
+		},
+	},
+	{	//Master of Shadows
+		init: function() {
+			rV.netherlight[252091] = 0;
+		},
+		afterParse: function() {
+			var rank = 1;
+			var perRankBonus = cV.gearInfo[152626] ? 750 : 500;
+			if(cV.traitBySpell[252091]) rank = cV.traitBySpell[252091].rank || 1;
+			rV.netherlight[252091] = healPerStat["mastery"].amount * perRankBonus * rank;
+		},		
+		obj: {
+			name: "Master of Shadows",
+			spellID: 252091,
+			icon: "spell_shadow_shadesofdarkness.jpg",
+		},
+	},
+	{	//Shocklight
+		init: function() {
+			rV.netherlight[252799] = 0;
+		},
+		parse: [
+			"combantantInfo", function(event){
+				var perRankBonus = cV.gearInfo[152626] ? 2250 : 1500;
+				for (var k = 0, k_len = event.artifact.length; k < k_len; k++) {
+					var traitData = event.artifact[k];
+					if( traitData.spellID == 252799 ){
+						statsBuffs.crit[242586] = perRankBonus * (traitData.rank || 1);
+					}
+				}
+			}
+		],		
+		afterParse: function() {
+			if(rV.buffs.crit[242586]) {
+				rV.netherlight[252799] = rV.buffs.crit[242586];
+			}
+			
+			delete statsBuffs.crit[242586];
+		},		
+		obj: {
+			name: "Shocklight",
+			spellID: 252799,
+			icon: "paladin_icon_speedoflight.jpg",
+		},
+	},
+	{	//Murderous Intent
+		init: function() {
+			rV.netherlight[252191] = 0;
+		},
+		parse: [
+			"combantantInfo", function(event){
+				var perRankBonus = cV.gearInfo[152626] ? 2250 : 1500;
+				for (var k = 0, k_len = event.artifact.length; k < k_len; k++) {
+					var traitData = event.artifact[k];
+					if( traitData.spellID == 252191 ){
+						statsBuffs.vers[242586] = perRankBonus * (traitData.rank || 1);
+					}
+				}
+			}
+		],	
+		afterParse: function() {
+			if(rV.buffs.vers[242586]) {
+				rV.netherlight[252191] = rV.buffs.vers[242586];
+			}
+			
+			delete statsBuffs.vers[242586];
+		},		
+		obj: {
+			name: "Murderous Intent",
+			spellID: 252191,
+			icon: "spell_shadow_charm.jpg",
+		},
+	},
+	{	//Refractive Shell
+		init: function() {
+			rV.netherlight[252207] = 0;
+		},
+		afterParse: function() {
+			if(healingData[252208]) {
+				rV.netherlight[252207] = healingData[252208][0];
+			}
+		},		
+		obj: {
+			name: "Refractive Shell",
+			spellID: 252207,
+			icon: "ability_priest_reflectiveshield.jpg",
+		},
+	},
+	{	//Light's Embrace
+		init: function() {
+			rV.netherlight[253111] = 0;
+		},
+		afterParse: function() {
+			if(healingData[253216]) {
+				rV.netherlight[253111] = healingData[253216][0];
+			}
+		},		
+		obj: {
+			name: "Light's Embrace",
+			spellID: 253111,
+			icon: "achievement_reputation_07.jpg",
+		},
+	},
+	{	//Chaotic Darkness
+		init: function() {
+			rV.netherlight[252888] = 0;
+		},
+		afterParse: function() {
+			if(healingData[252897]) {
+				rV.netherlight[252888] = healingData[252897][0];
+			}
+		},		
+		obj: {
+			name: "Chaotic Darkness",
+			spellID: 252888,
+			icon: "inv_artifact_powerofthedarkside.jpg",
+		},
+	},
+	{	//Shadowbind
+		init: function() {
+			rV.netherlight[252875] = 0;
+		},
+		afterParse: function() {
+			if(healingData[252879]) {
+				rV.netherlight[252875] = healingData[252879][0];
+			}
+		},		
+		obj: {
+			name: "Shadowbind",
+			spellID: 252875,
+			icon: "spell_shadow_deathpact.jpg",
+		},
+	},
+	{	//+1 ilvl
+		init: function() {
+			rV.netherlight[-1] = 0;
+			
+			pV.netherlightIlvlCurrWeapon = 750;
+		},
+		parse: [
+			"gear", function(itemData,itemID){
+				if(itemID == 128911) pV.netherlightIlvlCurrWeapon = itemData.itemLevel;
+			}
+		],
+		afterStats: function() {
+			var items = [128911, 128934];
+			var stats = ["int","crit","mastery"];
+			for (var i = 0, len = items.length; i < len; i++) {
+				var itemData = itemsStats[ items[i] ];
+				for (var j = 0, j_len = stats.length; j < j_len; j++) {
+					var statName = stats[j];
+					
+					var valDef = ScaleStat(itemData[statName],itemData.ilvl,pV.netherlightIlvlCurrWeapon,statName == "int" ? 1 : 0);
+					var valBuffed = ScaleStat(itemData[statName],itemData.ilvl,pV.netherlightIlvlCurrWeapon + 1,statName == "int" ? 1 : 0)
+					
+					rV.netherlight[-1] += (valBuffed - valDef) * healPerStat[statName].amount * (statName == "int" ? 1.05 : 1);
+				}
+			}
+			
+		},		
+		obj: {
+			name: "+1 weapon item level",
+			spellID: -1,
+			icon: "inv_mace_1h_artifactazshara_d_02.jpg",
+			tip: function() { return "Not real trait. Just for compare numbers" },
+			fakeTrait: true,
+		},
+	},
+];
 
 function GetTargetMissingHealth(event){
 	if( (event.resourceActor == 2 || event.targetID == currFightData.actor) && event.hitPoints && event.maxHitPoints ){
@@ -1908,7 +2796,7 @@ var TALENTS = [
 			name: "Cloudburst Totem",
 			id: 157153,
 			tier: 6,
-			col: 3,
+			col: 2,
 			icon: "ability_shaman_condensationtotem.jpg",
 		},
 	},
@@ -1929,7 +2817,7 @@ var TALENTS = [
 			name: "Torrent",
 			id: 200072,
 			tier: 1,
-			col: 1,
+			col: 3,
 			icon: "spell_nature_riptide.jpg",
 		},
 	},
@@ -1982,9 +2870,26 @@ var TALENTS = [
 			name: "Unleash Life",
 			id: 73685,
 			tier: 1,
-			col: 3,
+			col: 2,
 			icon: "spell_shaman_unleashweapon_life.jpg",
 			predictionTooltip: function(){ return "Some riptide casts replaced with UL<br>Can be better with timing for CH" },
+		},
+	},
+	{	//AG
+		init: function() {
+			rV.talents[108281] = 0;
+		},
+		afterParse: function() {
+			if(healingData[114911]) {
+				rV.talents[108281] = healingData[114911][0];
+			}
+		},
+		obj: {
+			name: "Ancestral Guidance",
+			id: 108281,
+			tier: 4,
+			col: 2,
+			icon: "ability_shaman_ancestralguidance.jpg",
 		},
 	},
 	{	//EST
@@ -1999,7 +2904,7 @@ var TALENTS = [
 		obj: {
 			name: "Earthen Shield Totem",
 			id: 198838,
-			tier: 4,
+			tier: 5,
 			col: 2,
 			icon: "spell_nature_stoneskintotem.jpg",
 		},
@@ -2017,7 +2922,7 @@ var TALENTS = [
 			name: "Ascendance",
 			id: 114052,
 			tier: 7,
-			col: 3,
+			col: 1,
 			icon: "spell_fire_elementaldevastation.jpg",
 		},
 	},
@@ -2061,7 +2966,7 @@ var TALENTS = [
 			name: "High Tide",
 			id: 157154,
 			tier: 7,
-			col: 1,
+			col: 3,
 			icon: "spell_shaman_hightide.jpg",
 		},
 	},
@@ -2092,79 +2997,25 @@ var TALENTS = [
 			name: "Undulation",
 			id: 200071,
 			tier: 1,
-			col: 2,
+			col: 1,
 			icon: "spell_nature_healingwavelesser.jpg",
 		},
 	},	
-	{	//Downpour
-		init: function() {
-			rV.talents[207778] = 0;
-		},
-		afterParse: function() {
-			if(healingData[207778]) {
-				rV.talents[207778] = healingData[207778][0];
-			}
-		},
+	{
 		obj: {
-			name: "Downpour",
-			id: 207778,
-			tier: 6,
-			col: 2,
-			icon: "ability_mage_waterjet.jpg",
-		},
-	},
-	{	//es
-		init: function() {
-			rV.talents[974] = 0;
-		},
-		parse: [
-			"heal", function(event,spellID,amount,overheal){
-				if( event.targetID && event.targetID == pV.talent974target && !OverallBlacklist[spellID] ){
-					rV.talents[974] += Math.max((amount + overheal) * (1 - 1 / 1.1) - overheal,0);
-				}
-			},
-			"applybuff", function(event,spellID){
-				if(spellID == 974) pV.talent974target = event.targetID;
-			},
-			"removebuff", function(event,spellID){
-				if(spellID == 974) delete pV.talent974target;
-			},
-		],
-		afterParse: function() {
-			if(healingData[379]) {
-				rV.talents[974] += healingData[379][0];
-			}
-		},
-		obj: {
-			name: "Earth Shield",
-			id: 974,
+			name: "Gust of Wind",
+			id: 192063,
 			tier: 2,
-			col: 3,
-			icon: "spell_nature_skinofearth.jpg",
-		},
-	},
-	{	//Nature's Guardian
-		init: function() {
-			rV.talents[30884] = 0;
-		},
-		afterParse: function() {
-			if(healingData[30884]) {
-				rV.talents[30884] = healingData[30884][0];
-			}
-		},
-		obj: {
-			name: "Nature's Guardian",
-			id: 30884,
-			tier: 5,
 			col: 1,
-			icon: "spell_nature_natureguardian.jpg",
+			icon: "ability_skyreach_four_wind.jpg",
+			none: true,
 		},
 	},
 	{
 		obj: {
 			name: "Graceful Spirit",
 			id: 192088,
-			tier: 5,
+			tier: 2,
 			col: 2,
 			icon: "spell_shaman_spectraltransformation.jpg",
 			none: true,
@@ -2174,7 +3025,7 @@ var TALENTS = [
 		obj: {
 			name: "Wind Rush Totem",
 			id: 192077,
-			tier: 5,
+			tier: 2,
 			col: 3,
 			icon: "ability_shaman_windwalktotem.jpg",
 			none: true,
@@ -2182,10 +3033,10 @@ var TALENTS = [
 	},
 	{
 		obj: {
-			name: "Static Charge",
-			id: 265046,
+			name: "Lightning Surge Totem",
+			id: 192058,
 			tier: 3,
-			col: 3,
+			col: 1,
 			icon: "spell_nature_brilliance.jpg",
 			none: true,
 		},
@@ -2202,10 +3053,30 @@ var TALENTS = [
 	},
 	{
 		obj: {
+			name: "Voodoo Totem",
+			id: 196932,
+			tier: 3,
+			col: 3,
+			icon: "spell_totem_wardofdraining.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
+			name: "Crashing Waves",
+			id: 197464,
+			tier: 4,
+			col: 1,
+			icon: "spell_frost_summonwaterelemental.jpg",
+			none: true,
+		},
+	},
+	{
+		obj: {
 			name: "Deluge",
 			id: 200076,
-			tier: 2,
-			col: 2,
+			tier: 4,
+			col: 3,
 			icon: "ability_shawaterelemental_reform.jpg",
 			none: true,
 		},
@@ -2214,8 +3085,8 @@ var TALENTS = [
 		obj: {
 			name: "Ancestral Protection Totem",
 			id: 207399,
-			tier: 4,
-			col: 3,
+			tier: 5,
+			col: 1,
 			icon: "spell_nature_reincarnation.jpg",
 			none: true,
 		},
@@ -2224,8 +3095,8 @@ var TALENTS = [
 		obj: {
 			name: "Ancestral Vigor",
 			id: 207401,
-			tier: 4,
-			col: 1,
+			tier: 5,
+			col: 3,
 			icon: "spell_shaman_blessingoftheeternals.jpg",
 			none: true,
 		},
@@ -2234,19 +3105,19 @@ var TALENTS = [
 		obj: {
 			name: "Echo of the Elements",
 			id: 108283,
-			tier: 2,
-			col: 1,
+			tier: 6,
+			col: 3,
 			icon: "ability_shaman_echooftheelements.jpg",
 			none: true,
 		},
 	},
 	{
 		obj: {
-			name: "Spirit Wolf",
-			id: 260878,
-			tier: 3,
+			name: "Bottomless Depths",
+			id: 197467,
+			tier: 6,
 			col: 1,
-			icon: "spell_hunter_lonewolf.jpg",
+			icon: "ability_shawaterelemental_swirl.jpg",
 			none: true,
 		},
 	},
@@ -2262,7 +3133,7 @@ var RESURGENCE = [
 				if(spellID == 8004) pV.resurgenceLast6600 = 8004;
 			},
 			"energize", function(event,spellID){
-				if((event.resourceChange == 120 || (cV.gearInfo[134488] && event.resourceChange == 126)) && spellID == 101033 && pV.resurgenceLast6600 == 8004) {
+				if((event.resourceChange == 6600 || (cV.gearInfo[134488] && event.resourceChange == 6930)) && spellID == 101033 && pV.resurgenceLast6600 == 8004) {
 					rV.resurgence[8004][0] += event.resourceChange;
 					rV.resurgence[8004][1] ++;
 				}
@@ -2283,7 +3154,7 @@ var RESURGENCE = [
 				if(spellID == 61295) pV.resurgenceLast6600 = 61295;
 			},
 			"energize", function(event,spellID){
-				if((event.resourceChange == 120 || (cV.gearInfo[134488] && event.resourceChange == 126)) && spellID == 101033 && pV.resurgenceLast6600 == 61295) {
+				if((event.resourceChange == 6600 || (cV.gearInfo[134488] && event.resourceChange == 6930)) && spellID == 101033 && pV.resurgenceLast6600 == 61295) {
 					rV.resurgence[61295][0] += event.resourceChange;
 					rV.resurgence[61295][1] ++;
 				}
@@ -2304,7 +3175,7 @@ var RESURGENCE = [
 				if(spellID == 73685) pV.resurgenceLast6600 = 73685;
 			},
 			"energize", function(event,spellID){
-				if((event.resourceChange == 120 || (cV.gearInfo[134488] && event.resourceChange == 126)) && spellID == 101033 && pV.resurgenceLast6600 == 73685) {
+				if((event.resourceChange == 6600 || (cV.gearInfo[134488] && event.resourceChange == 6930)) && spellID == 101033 && pV.resurgenceLast6600 == 73685) {
 					rV.resurgence[73685][0] += event.resourceChange;
 					rV.resurgence[73685][1] ++;
 				}
@@ -2322,7 +3193,7 @@ var RESURGENCE = [
 		},
 		parse: [
 			"energize", function(event,spellID){
-				if((event.resourceChange == 50 || (cV.gearInfo[134488] && event.resourceChange >= 52 && event.resourceChange <= 53)) && spellID == 101033) {
+				if((event.resourceChange == 4125 || event.resourceChange == 2750 || (cV.gearInfo[134488] && event.resourceChange >= 4330 && event.resourceChange <= 4333) || (cV.gearInfo[134488] && event.resourceChange >= 2886 && event.resourceChange <= 2889)) && spellID == 101033) {
 					rV.resurgence[1064][0] += event.resourceChange;
 					rV.resurgence[1064][1] ++;
 				}
@@ -2340,7 +3211,7 @@ var RESURGENCE = [
 		},
 		parse: [
 			"energize", function(event,spellID){
-				if((event.resourceChange == 200 || (cV.gearInfo[134488] && event.resourceChange == 210)) && spellID == 101033) {
+				if((event.resourceChange == 11000 || (cV.gearInfo[134488] && event.resourceChange == 11550)) && spellID == 101033) {
 					rV.resurgence[77472][0] += event.resourceChange;
 					rV.resurgence[77472][1] ++;
 				}
@@ -2380,9 +3251,9 @@ var POTIONS = [
 			"heal", function(event,spellID,amount){
 				if(spellScaleInt[spellID]){
 					if(pV.prolongedActive){
-						rV.potions[229206] += amount / cV.intellect * 113 * 1.05;
+						rV.potions[229206] += amount / cV.intellect * 2500 * 1.05;
 					} else {
-						rV.prolongedTemp += amount / cV.intellect * 113 * 1.05;
+						rV.prolongedTemp += amount / cV.intellect * 2500 * 1.05;
 					}
 				}
 			},
@@ -2521,6 +3392,30 @@ var OTHER = [
 			rV.resurgenceCritAmount = pV.resurgenceCritAvg / pV.resurgenceCritCount;
 		},
 	},
+	{	//DR: Totem; Caress of the Tidemother
+		init: function() {
+			rV.dr[209950] = 0;
+		},
+		parse: [
+			"damage", function(event,spellID){
+				if(event.targetID == currFightData.actor && pV.dr209950active){
+					var amount = event.amount;
+					if(event.absorbed) event.amount += event.absorbed;
+					
+					var currDr = GetTraitRank(1111);
+					currDr = 1 - (currDr % 3 == 0 ? currDr / 3 * 0.1 : Math.floor(currDr/3)*0.1 + 0.03 * (currDr % 3));
+				
+					rV.dr[209950] += (amount / currDr) - amount;
+				}
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 209950) pV.dr209950active = false;
+			},
+			"applybuff", function(event,spellID){
+				if(spellID == 209950) pV.dr209950active = true;
+			},
+		],
+	},
 	{	//DR: Totem; Ghost in the Mists
 		init: function() {
 			rV.dr[207527] = 0;
@@ -2532,19 +3427,19 @@ var OTHER = [
 					var amount = event.amount;
 					if(event.absorbed) event.amount += event.absorbed;
 					
-					var currDr = 1 - (0.05 * pV.dr207527active);
+					var currDr = 1 - (GetTraitRank(1110) * 0.01 * pV.dr207527active);
 				
 					rV.dr[207527] += (amount / currDr) - amount;
 				}
 			},
 			"removebuff", function(event,spellID){
-				if(spellID == 260881) pV.dr207527active = 0;
+				if(spellID == 207527) pV.dr207527active = 0;
 			},
 			"applybuff", function(event,spellID){
-				if(spellID == 260881) pV.dr207527active = 1;
+				if(spellID == 207527) pV.dr207527active = 1;
 			},
 			"applybuffstack", function(event,spellID){
-				if(spellID == 260881) pV.dr207527active = event.stack;
+				if(spellID == 207527) pV.dr207527active = event.stack;
 			},
 		],
 	},
@@ -2579,7 +3474,7 @@ var OTHER = [
 					var amount = event.amount;
 					if(event.absorbed) event.amount += event.absorbed;				
 				
-					var currVersDr = 1 - pV.versNow / (STATS.vers * 2) / 100;	//used last known vers from healing event
+					var currVersDr = 1 - pV.versNow / 950 / 100;	//used last known vers from healing event
 				
 					rV.dr["Versatility"] += (amount / currVersDr) - amount;
 				}
@@ -2646,10 +3541,10 @@ var OTHER = [
 	},
 ];
 
-function GetVersFactor(){ return healPerStat.vers.avgStat / STATS.vers / 100 + 1; }
-function GetCritFactor(){ return cV.combantantInfo.critSpell / STATS.crit / 100 + 1; }
+function GetVersFactor(){ return healPerStat.vers.avgStat / 475 / 100 + 1; }
+function GetCritFactor(){ return cV.combantantInfo.critSpell / 400 / 100 + 1; }
 function GetFightLenFactor(cd){ return (currFightData.end_time - currFightData.start_time) / cd / 1000; }
-function GetHasteFactor(){ return healPerStat.haste.avgStat / STATS.haste / 100 + 1; }
+function GetHasteFactor(){ return healPerStat.haste.avgStat / 375 / 100 + 1; }
 function GetAftifactFactor(){ return 1.06 * 1.05 * 1.1; }
 function GetFeedFactor(){ 
 	var factor = 1; 
@@ -2662,10 +3557,10 @@ function GetFeedFactor(){
 	return factor;
 }
 function GetSocketFactor(){ 
-	var haste_amount = healPerStat.haste.amount * 11;
-	var crit_amount = healPerStat.crit.amount * 11;
-	var vers_amount = healPerStat.vers.amount * 11;
-	var mastery_amount = healPerStat.mastery.amount * 11;
+	var haste_amount = healPerStat.haste.amount * 200;
+	var crit_amount = healPerStat.crit.amount * 200;
+	var vers_amount = healPerStat.vers.amount * 200;
+	var mastery_amount = healPerStat.mastery.amount * 200;
 	return Math.max(haste_amount,crit_amount,vers_amount,mastery_amount);
 }
 
@@ -2680,6 +3575,227 @@ var gear_charts_colors = {
 };
 
 var GEAR = [
+	//Trinkets
+	{slot:14,item:141482,ilvl:860,type:1,name:"Unstable Arcanocrystal",haste:847,vers:847,crit:847,mastery:847,icon:"inv_datacrystal04"},
+	{slot:14,item:134160,ilvl:865,type:1,name:"Stat Stick: Crit",int:1489,crit:1036,icon:"inv_misc_gem_bloodstone_01",wilvl:810},
+	{slot:14,item:134336,ilvl:865,type:1,name:"Stat Stick: Vers",int:1489,vers:1036,icon:"inv_misc_gem_crystalcut_01",wilvl:810},
+	{slot:14,item:134204,ilvl:865,type:1,name:"Stat Stick: Haste",int:1489,haste:1036,icon:"inv_weapon_crossbow_22",wilvl:810},
+	{slot:14,item:121311,ilvl:865,type:1,name:"Stat Stick: Mastery",int:1489,mastery:1036,icon:"inv_misc_herb_mana_thistle_leaf",wilvl:810},
+
+	{slot:14,item:137419,ilvl:845,type:2,name:"Chrono Shard",int:1236,icon:"inv_7_0raid_trinket_05a",special:function(ilvl){ return ScaleStat(5269,845,ilvl) * healPerStat.haste.amount * 10 / 60 * 1; },wilvl:820},
+	{slot:14,item:144480,ilvl:885,type:2,name:"Dreadstone of Endless Shadows",int:1794,icon:"inv_jewelcrafting_shadowsongamethyst_01",special:function(ilvl){ return ScaleStat(4040,885,ilvl) * healPerStat.haste.amount * 8 / 60 * 0.75 + ScaleStat(4040,885,ilvl) * healPerStat.crit.amount * 8 / 60 * 0.75 + ScaleStat(4040,885,ilvl) * healPerStat.mastery.amount * 8 / 60 * 0.75; },wilvl:820},
+	{slot:14,item:136714,ilvl:865,type:2,name:"Amalgam's Seventh Spine",int:1489,icon:"spell_priest_mindspike",special:function(ilvl){ return ScaleStat(4138,865,ilvl) * ((pV.castNum[77472] || 0) + (pV.castNum[8004] || 0)) / rV.manaUsage * rV.healFromMana * 0.8; },wilvl:820},
+	{slot:14,item:142162,ilvl:865,type:2,name:"Fluctuating Energy",int:1489,icon:"inv_elemental_primal_mana",special:function(ilvl){ return ScaleStat(19704,865,ilvl) * GetFightLenFactor(60) * 2 / rV.manaUsage * rV.healFromMana * 0.75; },wilvl:860},
+	{slot:14,item:137452,ilvl:825,type:2,name:"Thrumming Gossamer",int:1026,icon:"inv_misc_web_02",special:function(ilvl){ return ScaleStat(350,825,ilvl) * 10.5 * 20 / 60 * 0.75 * healPerStat.mastery.amount; },wilvl:820},
+	{slot:14,item:133642,ilvl:825,type:2,name:"Horn of Valor",vers:892,icon:"inv_misc_horn_03",special:function(ilvl){ return ScaleStat(2461,825,ilvl,1) * 30 / 120 * healPerStat.int.amount * 1.05; },wilvl:820},
+
+	{slot:14,item:147002,ilvl:900,type:3,name:"Charm of the Rising Tide",int:2063,icon:"inv_7_0raid_trinket_04a",special:function(ilvl){ return ScaleStat(576,900,ilvl) * 7.75 * healPerStat.haste.amount * 20 / 90; },wilvl:890},
+	{slot:14,item:147004,ilvl:900,type:3,name:"Sea Star of the Depthmothe",vers:1180,icon:"inv_jewelcrafting_starofelune_02",special:function(ilvl){ return ScaleStat(29716,900,ilvl,1) * 32 * (pV.castNum[1064] || 0) * 0.4 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 0.7 * GetFeedFactor(); },wilvl:890,tip:"Rare using CH in the current fight can devalue real power of this trinket"},
+	{slot:14,item:147007,ilvl:910,type:3,name:"The Deceiver's Grand Design",mastery:1225,icon:"inv_offhand_1h_pvpcataclysms3_c_01",special:function(ilvl){ return ScaleStat(96098,910,ilvl,1) * 40 * GetHasteFactor() * GetAftifactFactor() * (GetFightLenFactor(120) + 1.5) * GetVersFactor() * GetCritFactor() * 0.5 * GetFeedFactor() + ScaleStat(1680000,910,ilvl,1)* (GetFightLenFactor(120) + 2) * GetVersFactor() * 0.5; },wilvl:890},
+	{slot:14,item:147006,ilvl:900,type:3,name:"Archive of Faith",crit:1180,icon:"inv__wod_arakoa4",special:function(ilvl){ return ScaleStat(1776330,900,ilvl,1) * (GetFightLenFactor(60) + 0.5) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 0.5 * GetFeedFactor() + ScaleStat(647633,900,ilvl,1) * (GetFightLenFactor(60) + 1) * GetVersFactor() * 0.7; },wilvl:890},
+	{slot:14,item:147005,ilvl:900,type:3,name:"Chalice of Moonlight: Day",int:2063,icon:"inv_offhand_pvealliance_d_01",special:function(ilvl){ return ScaleStat(3619,900,ilvl) * healPerStat.crit.amount * 12 / 60 * 1.5; },wilvl:890},
+	{slot:14,item:147005,ilvl:900,type:3,name:"Chalice of Moonlight: Night",int:2063,icon:"inv_offhand_pvealliance_d_01",special:function(ilvl){ return ScaleStat(3619,900,ilvl) * healPerStat.haste.amount * 12 / 60 * 1.5; },wilvl:890},
+	{slot:14,item:147003,ilvl:900,type:3,name:"Barbaric Mindslaver",int:2063,icon:"spell_priest_psyfiend",special:function(ilvl){ return ScaleStat(181467,900,ilvl,1) * 6 * GetFightLenFactor(60) * GetVersFactor() * GetCritFactor() * 0.6 * GetFeedFactor(); },wilvl:890},
+
+	{slot:14,item:151956,ilvl:930,type:4,name:"Garothi Feedback Conduit",int:2728,icon:"inv_misc_enggizmos_06",special:function(ilvl){ return ScaleStat(855*1.5*1.1,930,ilvl) * healPerStat.haste.amount * 8 / 60 * 10; }},
+	{slot:14,item:151960,ilvl:930,type:4,name:"Carafe of Searing Light",int:2728,icon:"inv_offhand_pvealliance_d_01_gold",special:function(ilvl){ return ScaleStat(4991,930,ilvl) * 10 / rV.manaUsage * rV.healFromMana * (GetFightLenFactor(60) + 0.5); }},
+	{slot:14,item:151958,ilvl:930,type:4,name:"Tarratus Keystone",int:2728,icon:"inv_datacrystal06",special:function(ilvl){ return ScaleStat(1633313,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * (GetFightLenFactor(90) + 1) * 0.9 * GetFeedFactor(); }},
+	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.3 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * GetFeedFactor(); }},
+	{slot:14,item:152289,ilvl:930,type:4,name:"Highfather's Machination [rare proc]",mastery:1320,icon:"spell_nature_astralrecalgroup",special:function(ilvl){ return ScaleStat(216140,930,ilvl,1) * 1.3 * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 10 * GetFightLenFactor(60) * 0.5 * GetFeedFactor(); },hideonrealitem:true},
+	{slot:14,item:151957,ilvl:930,type:4,name:"Ishkar's Felshield Emitter",vers:1320,icon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(2416491,930,ilvl,1) * 1.1 * GetVersFactor() * GetCritFactor() * (GetFightLenFactor(60) + 0.5) * 0.9; }},
+	{slot:14,item:154175,ilvl:940,type:4,name:"Eonar's Compassion",int:2994,icon:"inv_antorus_green",special:function(ilvl){ return ScaleStat(127273,940,ilvl,1) * GetVersFactor() * GetCritFactor() * GetAftifactFactor() * 7 * 1.2 * GetFightLenFactor(60) * 0.8 * GetFeedFactor() + ScaleStat(250782,940,ilvl,1) * GetVersFactor() * 4 * 1 * GetFightLenFactor(60) * GetFeedFactor(); },max:1000},
+	{slot:14,item:151970,ilvl:930,type:4,name:"Vitality Resonator",vers:1320,icon:"inv_7_0raid_trinket_08d",special:function(ilvl){ return ScaleStat(9705*1.1,930,ilvl,1) * healPerStat.int.amount * 1.05 * 15 / 60 * 0.75; }},
+
+	{slot:14,item:144258,ilvl:940,type:5,name:"Velen's Future Sight",int:2994,crit:456,mastery:456,haste:456,icon:"spell_holy_healingfocus",scale:970,special:function(ilvl){ return rV.total * 10 / 75 * 0.15 + rV.totalOver * 10 / 75 * 0.5 * 0.65 * GetAftifactFactor(); },wilvl:910},
+	{slot:14,item:154172,ilvl:1000,type:5,name:"Aman'Thul's Vision",int:2345,crit:1429,mastery:1429,haste:1429,vers:1429,icon:"inv_antorus_turquoise",scale:1000,wilvl:940},
+
+	{slot:14,item:128710,ilvl:900,type:6,name:"Darkmoon Deck: Promises",int:2063,icon:"70_inscription_deck_promises",scale:900,special:function(ilvl){ return 0.05 * rV.healFromMana; },wilvl:835},
+	{slot:14,item:140805,ilvl:875,type:6,name:"Ephemeral Paradox",int:1634,icon:"inv_7_0raid_trinket_07c",special:function(ilvl){ return (ScaleStat(3457,875,ilvl) + 19800) * GetFightLenFactor(60) * 1.2 / rV.manaUsage * rV.healFromMana; }},
+	{slot:14,item:140793,ilvl:870,type:6,name:"Perfectly Preserved Cake",mastery:1055,icon:"inv_misc_celebrationcake_01",special:function(ilvl){ return ScaleStat(547872,870,ilvl,1) * 5 * (GetFightLenFactor(120) + 0.5); },wilvl:875},
+	{slot:14,item:139322,ilvl:850,type:6,name:"Cocoon of Enforced Solitude",int:1295,icon:"inv_misc_web_01",special:function(ilvl){ return ScaleStat(7043,850,ilvl) * 10 * (GetFightLenFactor(120) + 0.5) / rV.manaUsage * rV.healFromMana * 0.5; }},
+
+	//Legendaries
+	{slot:-1,item:144258,ilvl:940,type:5,name:"Velen's Future Sight",int:2994,crit:456,mastery:456,haste:456,icon:"spell_holy_healingfocus",scale:970,special:function(ilvl){ return rV.total * 10 / 75 * 0.15 + rV.totalOver * 10 / 75 * 0.5 * 0.65 * GetAftifactFactor(); },wilvl:910},
+	{slot:-1,item:137058,ilvl:910,type:5,name:"Praetorian's Tidecallers",int:1786,mastery:551,haste:735,icon:"inv_gauntlets_plate_raidpaladin_i_01",scale:970,special:function(ilvl){ return rV.tidecallersPredictionAmount; },wilvl:910},	
+	{slot:-1,item:137051,ilvl:910,type:5,name:"Focuser of Jonat, the Elder",crit:2004,haste:1114,icon:"inv_jewelry_ring_96",scale:970,special:function(ilvl){ return rV.jonatPredictionAmount * GetFeedFactor() + GetSocketFactor(); },wilvl:910},	
+	{slot:-1,item:132444,ilvl:910,type:5,name:"Prydaz, Xavaric's Magnum Opus",crit:1247,haste:1247,mastery:1247,icon:"inv_misc_necklace15",scale:970,special:function(ilvl){ return rV.prydazPredictionAmount + GetSocketFactor(); },wilvl:910},	
+	{slot:-1,item:143732,ilvl:910,type:5,name:"Uncertain Reminder",int:2382,crit:612,mastery:1103,icon:"inv_helm_mail_korkronshaman_d_01",scale:970,special:function(ilvl){ return rV.uncertainPredictionAmount; },wilvl:910},	
+	{slot:-1,item:137036,ilvl:910,type:5,name:"Elemental Rebalancers",int:1786,haste:459,mastery:827,icon:"inv_boots_mail_raidshaman_j_01",scale:970,special:function(ilvl){ return rV.bootsPredictionAmount * GetFeedFactor(); },wilvl:910},	
+	{slot:-1,item:137104,ilvl:910,type:5,name:"Nobundo's Redemption",int:1340,crit:551,mastery:413,icon:"inv_bracer_leather_cataclysm_b_01",scale:970,special:function(ilvl){ return rV.nobundosPredictionAmount; },wilvl:910},	
+	{slot:-1,item:137085,ilvl:910,type:5,name:"Intact Nazjatar Molting",int:1786,crit:827,haste:459,icon:"inv_leather_raiddruid_m_01belt",scale:970,special:function(ilvl){ return rV.beltAmount * GetFeedFactor(); },wilvl:910},	
+	{slot:-1,item:152626,ilvl:910,type:5,name:"Insignia of the Grand Army",mastery:1067,crit:1011,haste:1039,icon:"inv_jewelry_ring_60",scale:970,special:function(ilvl){ return rV.insigniaringPredictionAmount + GetSocketFactor(); },wilvl:910},	
+	{slot:-1,item:132466,ilvl:970,type:5,name:"Roots of Shaladrassil",int:4166,mastery:767,crit:736,haste:1380,icon:"inv_robe_pants_pvpwarlock_c_02",scale:970,special:function(ilvl){ return rV.rootsPredictionAmount; },wilvl:910},	
+	{slot:-1,item:151785,ilvl:970,type:5,name:"Fire in the Deep",int:4166,mastery:997,crit:1150,icon:"inv_chest_mail_raidshaman_m_01",scale:970,special:function(ilvl){ return (rV.total + rV.totalOver) * 6 / ((currFightData.end_time - currFightData.start_time) / 1000) * (pV.castNum[114052] || 0) * 0.15 * 0.5; },wilvl:910},	
+	{slot:-1,item:151647,ilvl:970,type:5,name:"Soul of the Farseer",mastery:1486,crit:1230,haste:974,icon:"inv_70_quest_ring2b",scale:970,special:function(ilvl){ return GetSocketFactor(); },wilvl:910},	
+	{slot:-1,item:132452,ilvl:970,type:5,name:"Sephuz's Secret",crit:3204,haste:1281,icon:"inv_jewelry_ring_149",scale:970,special:function(ilvl){ return 375 * 2 * healPerStat.haste.amount + GetSocketFactor(); },wilvl:910},	
+
+	//Neck
+	{slot:2,item:132444,ilvl:910,type:5,name:"Prydaz, Xavaric's Magnum Opus",crit:1247,haste:1247,mastery:1247,icon:"inv_misc_necklace15",scale:970,special:function(ilvl){ return rV.prydazPredictionAmount + GetSocketFactor(); },wilvl:910},	
+	{slot:2,item:142207,ilvl:885,haste:1913,vers:765,name:"Amulet of the Last Guardian",icon:"inv_jewelry_necklace_95",type:2,wilvl:860},
+	{slot:2,item:142174,ilvl:885,crit:1607,mastery:1071,name:"Choker of Barbed Reins",icon:"inv_jewelry_necklace_22",type:2,wilvl:855},
+	{slot:2,item:137536,ilvl:885,crit:918,haste:1760,name:"Pendant of the Watchful Eye",icon:"inv_7_0raid_necklace_11c",type:2,wilvl:820},
+	{slot:2,item:137535,ilvl:885,haste:1071,mastery:1607,name:"Lavadrip Pendant",icon:"inv_neck_firelands_03",type:2,wilvl:820},
+	{slot:2,item:134488,ilvl:885,crit:1530,vers:1148,name:"Stabilized Energy Pendant",icon:"inv_7_0raid_necklace_14d",special:function(ilvl){ var a=0;for(var i = 0, len = RESURGENCE.length; i < len; i++) a+=rV.resurgence[ RESURGENCE[i].obj.id ][0]; return (a * 0.05 + 55000 * 0.85) / rV.manaUsage * rV.healFromMana; },type:2,wilvl:820},
+	{slot:2,item:137418,ilvl:885,crit:1224,mastery:1454,name:"Erratically Ticking Talisman",icon:"inv_7_0raid_necklace_10d",type:2,wilvl:820},
+	{slot:2,item:134529,ilvl:885,haste:1760,vers:918,name:"Chain of Scorched Bones",icon:"inv_7_0raid_necklace_13d",type:2,wilvl:820},
+	{slot:2,item:137487,ilvl:885,vers:1454,mastery:1224,name:"Strand of the Stars",icon:"inv_7_0raid_necklace_12b",type:2,wilvl:820},
+	{slot:2,item:134499,ilvl:885,vers:1683,mastery:995,name:"Raven Filigree Pendant",icon:"inv_7_0raid_necklace_08c",type:2,wilvl:820},
+	{slot:2,item:134491,ilvl:885,crit:1760,vers:918,name:"Understone Gorget",icon:"inv_7_0raid_necklace_13c",type:2,wilvl:820},
+	{slot:2,item:134495,ilvl:885,crit:1607,mastery:1071,name:"Chain of the Underking",icon:"inv_7_0raid_necklace_11d",type:2,wilvl:820},
+	{slot:2,item:134492,ilvl:885,haste:1607,mastery:1071,name:"Hatecoil Commander's Amulet",icon:"inv_7_0raid_necklace_11b",type:2,wilvl:820},
+	{slot:2,item:134497,ilvl:885,crit:1837,mastery:841,name:"Stormcharged Choker",icon:"inv_7_0raid_necklace_01d",type:2,wilvl:820},
+	{slot:2,item:151309,ilvl:885,haste:1500,vers:1178,name:"Necklace of the Twisting Void",icon:"inv_7_0raid_necklace_06d",type:2,wilvl:820},
+	{slot:2,item:144479,ilvl:885,crit:841,haste:1837,name:"Master Thrasher's Lockcollar",icon:"inv_7_0raid_necklace_04c",type:2,wilvl:820},
+	{slot:2,item:133636,ilvl:885,vers:765,mastery:1913,name:"Brysngamen, Torc of Helheim",icon:"inv_7_0raid_necklace_13a",type:2,wilvl:820},
+	{slot:2,item:137311,ilvl:885,crit:841,mastery:1837,name:"Chain of the Green Flight",icon:"inv_7_0raid_necklace_12c",type:2,wilvl:820},
+	{slot:2,item:133633,ilvl:885,haste:765,mastery:1913,name:"Wolfstride Pendant",icon:"inv_7_0raid_necklace_01b",type:2,wilvl:820},
+	{slot:2,item:133767,ilvl:885,crit:1683,haste:995,name:"Pendant of the Stormforger",icon:"inv_7_0raid_necklace_14a",type:2,wilvl:820},
+	{slot:2,item:137461,ilvl:885,crit:1913,haste:765,name:"Breathless Choker",icon:"inv_7_0raid_necklace_12d",type:2,wilvl:820},
+	{slot:2,item:134541,ilvl:885,crit:1148,haste:1530,name:"Tightweb Choker",icon:"inv_7_0raid_necklace_02c",type:2,wilvl:820},
+	{slot:2,item:137458,ilvl:885,vers:1224,mastery:1454,name:"Chaos-Forged Necklace",icon:"inv_7_0raid_necklace_01c",type:2,wilvl:820},
+	{slot:2,item:134498,ilvl:885,haste:1913,mastery:765,name:"Chain of a Hundred Maws",icon:"inv_jewelry_necklace_ahnqiraj_02",type:2,wilvl:820},
+	{slot:2,item:139332,ilvl:850,crit:1422,haste:742,name:"Blackened Portalstone Necklace",icon:"inv_7_0raid_necklace_07d",type:6,wilvl:850},
+	{slot:2,item:139239,ilvl:850,haste:990,mastery:1175,name:"Cursed Beartooth Necklace",icon:"inv_7_0raid_necklace_13b",type:6,wilvl:850},
+	{slot:2,item:142428,ilvl:865,vers:1490,mastery:880,name:"Sea Fan Pendant",icon:"inv_7_0raid_necklace_13b",type:6,wilvl:855},
+	{slot:2,item:140900,ilvl:875,haste:1151,vers:1368,name:"Brooch of the Astral Scryer",icon:"inv_7_0raid_necklace_17b",type:6,wilvl:875},
+	{slot:2,item:140899,ilvl:875,crit:1440,mastery:1080,name:"Beleron's Choker of Misery",icon:"inv_7_0raid_necklace_04d",type:6,wilvl:875},
+	{slot:2,item:140894,ilvl:870,vers:908,mastery:1537,name:"Zealous Timestone Pendant",icon:"inv_7_0raid_necklace_09a",type:6,wilvl:875},
+	{slot:2,item:140898,ilvl:870,crit:768,haste:1677,name:"Radiant String of Scorpid Eyes",icon:"inv_7_0raid_necklace_16c",type:6,wilvl:875},
+	{slot:2,item:147014,ilvl:900,crit:1341,mastery:1592,name:"Locket of Splintered Souls",icon:"inv_jewelry_necklace_46",type:3,wilvl:890},
+	{slot:2,item:147013,ilvl:900,haste:1760,vers:1173,name:"String of Extracted Incisors",icon:"inv_misc_necklace_bone04",type:3,wilvl:890},
+	{slot:2,item:151966,ilvl:930,haste:2112,mastery:1408,name:"Riveted Choker of Delirium",icon:"inv_7_0raid_necklace_04b",type:4,wilvl:930},
+	{slot:2,item:151965,ilvl:930,crit:1609,vers:1911,name:"Vulcanarcore Pendant",icon:"inv_7_0raid_necklace_14b",type:4,wilvl:930},
+	{slot:2,item:151973,ilvl:930,vers:1509,mastery:2011,name:"Collar of Null-Flame",icon:"inv_7_0raid_necklace_07b",type:4,wilvl:930},
+	{slot:2,item:152283,ilvl:940,crit:2457,haste:1281,name:"Chain of the Unmaker",icon:"inv_7_0raid_necklace_18a",type:4,wilvl:940},
+	{slot:2,item:121284,ilvl:845,crit:1261,haste:840,name:"Nightmare Pendant",icon:"inv_7_0raid_necklace_08d",type:1,wilvl:810},
+	
+	//Rings
+	{slot:11,item:137051,ilvl:910,type:5,name:"Focuser of Jonat, the Elder",crit:2004,haste:1114,icon:"inv_jewelry_ring_96",scale:970,special:function(ilvl){ return rV.jonatPredictionAmount * GetFeedFactor() + GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:152626,ilvl:910,type:5,name:"Insignia of the Grand Army",mastery:1067,crit:1011,haste:1039,icon:"inv_jewelry_ring_60",scale:1000,special:function(ilvl){ return rV.insigniaringPredictionAmount + GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:151647,ilvl:970,type:5,name:"Soul of the Farseer",mastery:1486,crit:1230,haste:974,icon:"inv_70_quest_ring2b",scale:970,special:function(ilvl){ return GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:132452,ilvl:970,type:5,name:"Sephuz's Secret",crit:3204,haste:1281,icon:"inv_jewelry_ring_149",scale:970,special:function(ilvl){ return 375 * 2 * healPerStat.haste.amount + GetSocketFactor(); },wilvl:910},	
+	{slot:11,item:142173,ilvl:885,haste:841,mastery:1837,name:"Ring of Collapsing Futures",icon:"inv_70_raid_ring3c",type:2,wilvl:860},
+	{slot:11,item:142172,ilvl:885,crit:1148,haste:1530,name:"Terestian's Signet Ring",icon:"inv_jewelry_ring_37",type:2,wilvl:860},
+	{slot:11,item:142171,ilvl:885,vers:1683,mastery:995,name:"Seal of Darkshire Nobility",icon:"inv_70_dungeon_ring4d",type:2,wilvl:855},
+	{slot:11,item:137533,ilvl:885,vers:1071,mastery:1607,name:"Ring of Minute Mirrors",icon:"inv_jewelry_ring_155",type:2,wilvl:820},
+	{slot:11,item:137532,ilvl:885,haste:1683,mastery:995,name:"Seal of Saltheril",icon:"inv_70_dungeon_ring2c",type:2,wilvl:820},
+	{slot:11,item:134540,ilvl:885,haste:995,mastery:1683,name:"Ring of Twisted Webbing",icon:"inv_jewelry_ring_62",type:2,wilvl:820},
+	{slot:11,item:134533,ilvl:885,haste:1607,vers:1071,name:"Ring of Looming Menace",icon:"inv_70_dungeon_ring8d",type:2,wilvl:820},
+	{slot:11,item:134526,ilvl:885,crit:1530,mastery:1148,name:"Gnawed Thumb Ring",icon:"inv_70_dungeon_ring6a",special:function(ilvl){ return rV.total * 0.05 * 12 / 180; },type:2,wilvl:820},
+	{slot:11,item:134542,ilvl:885,crit:1224,haste:1454,name:"Jeweled Signet of Melandrus",icon:"inv_70_dungeon_ring7d",type:2,wilvl:820},
+	{slot:11,item:134528,ilvl:885,crit:1913,haste:765,name:"Band of Callous Dominance",icon:"inv_70_dungeon_ring2d",type:2,wilvl:820},
+	{slot:11,item:134490,ilvl:885,haste:1837,vers:841,name:"Ring of Contempt",icon:"inv_70_dungeon_ring3b",type:2,wilvl:820},
+	{slot:11,item:134530,ilvl:885,haste:1837,mastery:841,name:"Loop of Vitriolic Intent",icon:"inv_70_dungeon_ring6b",type:2,wilvl:820},
+	{slot:11,item:134524,ilvl:885,crit:1683,vers:995,name:"Band of the Wyrm Matron",icon:"inv_70_dungeon_ring5c",type:2,wilvl:820},
+	{slot:11,item:134532,ilvl:885,crit:765,haste:1913,name:"Band of Fused Coral",icon:"inv_70_dungeon_ring6d",type:2,wilvl:820},
+	{slot:11,item:134525,ilvl:885,crit:1760,haste:918,name:"Seal of the Nazjatar Empire",icon:"inv_70_dungeon_ring4a",type:2,wilvl:820},
+	{slot:11,item:134539,ilvl:885,vers:1224,mastery:1454,name:"Braided Silver Ring",icon:"inv_jewelry_ring_118",type:2,wilvl:820},
+	{slot:11,item:151308,ilvl:885,crit:1040,vers:1637,name:"Mac'Aree Seal of Nobility",icon:"inv_70_dungeon_ring3c",type:2,wilvl:820},
+	{slot:11,item:151311,ilvl:885,haste:1530,vers:1148,name:"Band of the Triumvirate",icon:"inv_70_dungeon_ring2b",type:2,wilvl:820},
+	{slot:11,item:144481,ilvl:885,vers:1837,mastery:841,name:"Ring of Fel Domination",icon:"inv_70_dungeon_ring8b",type:2,wilvl:820},
+	{slot:11,item:144478,ilvl:885,crit:1913,vers:765,name:"Band of Dark Solitude",icon:"inv_70_dungeon_ring5b",type:2,wilvl:820},
+	{slot:11,item:133634,ilvl:885,haste:1148,mastery:1530,name:"Grasping Tentacle Loop",icon:"inv_misc_ring_6_0_013",type:2,wilvl:820},
+	{slot:11,item:133637,ilvl:885,crit:1837,vers:841,name:"Utgarde Royal Signet",icon:"inv_70_dungeon_ring4c",type:2,wilvl:820},
+	{slot:11,item:134531,ilvl:885,crit:1837,mastery:841,name:"Band of Twisted Bark",icon:"inv_70_dungeon_ring1d",type:2,wilvl:820},
+	{slot:11,item:134487,ilvl:885,haste:765,mastery:1913,name:"Arch-Druid's Tainted Seal",icon:"inv_70_dungeon_ring2a",type:2,wilvl:820},
+	{slot:11,item:134537,ilvl:885,crit:995,mastery:1683,name:"Signet of the Highborne Magi",icon:"inv_70_dungeon_ring7c",type:2,wilvl:820},
+	{slot:11,item:133638,ilvl:885,crit:1148,mastery:1530,name:"Woe-Bearer's Band",icon:"inv_70_dungeon_ring5a",type:2,wilvl:820},
+	{slot:11,item:133679,ilvl:885,crit:1607,mastery:1071,name:"Val'kyr Ascension Signet",icon:"inv_70_dungeon_ring8a",type:2,wilvl:820},
+	{slot:11,item:134527,ilvl:885,vers:841,mastery:1837,name:"Loop of Eightfold Eyes",icon:"inv_70_dungeon_ring1c",type:2,wilvl:820},
+	{slot:11,item:134493,ilvl:885,vers:1683,mastery:995,name:"Band of Crystalline Bone",icon:"inv_jewelry_ring_84",type:2,wilvl:820},
+	{slot:11,item:137438,ilvl:885,crit:1607,haste:1071,name:"Band of Decaying Rubies",icon:"item_icecrownringc",type:2,wilvl:820},
+	{slot:11,item:137432,ilvl:885,crit:918,mastery:1760,name:"Ring of Mind-Shielding",icon:"inv_70_dungeon_ring5d",type:2,wilvl:820},
+	{slot:11,item:134489,ilvl:885,crit:995,haste:1683,name:"Seal of Malicious Deceit",icon:"inv_70_dungeon_ring3a",type:2,wilvl:820},
+	{slot:11,item:134534,ilvl:885,haste:1454,mastery:1224,name:"Dingy Wedding Band",icon:"inv_70_dungeon_ring4b",type:2,wilvl:820},
+	{slot:11,item:141486,ilvl:860,crit:1644,haste:658,name:"Demonic Birthstone Ring",icon:"inv_70_quest_ring7d",type:1},
+	{slot:11,item:141545,ilvl:860,vers:854,mastery:1447,name:"Ring of Deep Sea Pearls",icon:"inv_70_dungeon_ring3d",type:1},
+	{slot:11,item:141533,ilvl:860,crit:920,haste:1381,name:"Ring of Frozen Magic",icon:"inv_70_raid_ring2d",type:1},
+	{slot:11,item:141534,ilvl:860,crit:1052,mastery:1249,name:"Loop of Polished Pebbles",icon:"inv_70_pvp_ring1a",type:1},
+	{slot:11,item:141488,ilvl:860,haste:1513,vers:789,name:"Mana-Dowsing Ring",icon:"inv_70_raid_ring6d",type:1},
+	{slot:11,item:141544,ilvl:860,haste:1644,mastery:658,name:"Marshstomper Oracle's Loop",icon:"inv_70_raid_ring7b",type:1},
+	{slot:11,item:147766,ilvl:900,haste:1844,vers:1090,name:"Band of Dark Millennia",icon:"inv_70_raid_ring6c",type:1},
+	{slot:11,item:147767,ilvl:900,crit:1928,mastery:1006,name:"Coral Band of the Abyss",icon:"inv_70_raid_ring4c",type:1},
+	{slot:11,item:141492,ilvl:860,crit:1644,vers:658,name:"Dingy Suramar Mercantile Signet",icon:"inv_70_raid_ring5c",type:1},
+	{slot:11,item:141546,ilvl:860,crit:1315,mastery:986,name:"Cursed Warden's Keepsake",icon:"inv_70_quest_ring8c",type:1},
+	{slot:11,item:139236,ilvl:850,crit:1237,vers:928,name:"Grubby Silver Ring",icon:"inv_70_raid_ring1b",type:6},
+	{slot:11,item:139238,ilvl:850,crit:1484,haste:680,name:"Twice-Warped Azsharan Signet",icon:"inv_70_raid_ring6b",type:6},
+	{slot:11,item:139237,ilvl:850,haste:1175,mastery:990,name:"Dreadful Cyclopean Signet",icon:"inv_70_raid_ring3b",type:6},
+	{slot:11,item:138220,ilvl:850,haste:804,mastery:1361,name:"Mindrend Band",icon:"inv_70_raid_ring8a",type:6},
+	{slot:11,item:142520,ilvl:860,crit:1052,haste:1249,name:"Ring of Ascended Glory",icon:"inv_70_dungeon_ring8c",type:6,wilvl:855},
+	{slot:11,item:140895,ilvl:875,crit:1728,mastery:792,name:"Spellblade's Gemmed Signet",icon:"inv_70_raid_ring4b",type:6},
+	{slot:11,item:140896,ilvl:875,haste:1512,vers:1008,name:"Ring of Braided Stems",icon:"inv_70_raid_ring1a",type:6},
+	{slot:11,item:140906,ilvl:875,crit:864,vers:1656,name:"Ring of Exclusive Servitude",icon:"inv_70_raid_ring5a",type:6},
+	{slot:11,item:140897,ilvl:880,haste:742,mastery:1856,name:"Ring of the Scoured Clan",icon:"inv_70_raid_ring2b",type:6},
+	{slot:11,item:147194,ilvl:900,vers:1844,mastery:1090,name:"Band of Rescinded Truths",icon:"inv_70_quest_ring7b",type:3,wilvl:890},
+	{slot:11,item:147021,ilvl:900,crit:2011,vers:922,name:"Yathae's Thumb Ring",icon:"inv_70_dungeon_ring1b",type:3,wilvl:890},
+	{slot:11,item:147195,ilvl:910,crit:1425,haste:1693,name:"Seal of the Second Duumvirate",icon:"inv_misc_ring_mop19",type:3,wilvl:890},
+	{slot:11,item:147020,ilvl:900,haste:1257,mastery:1676,name:"Scaled Band of Servitude",icon:"inv_70_raid_ring5b",type:3,wilvl:890},
+	{slot:11,item:152284,ilvl:930,crit:1408,haste:2112,name:"Zealous Tormentor's Ring",icon:"inv_70_quest_ring7a",type:4},
+	{slot:11,item:152064,ilvl:930,crit:1861,mastery:1659,name:"Band of the Sargerite Smith",icon:"inv_70_raid_ring4a",type:4},
+	{slot:11,item:152688,ilvl:930,haste:1207,mastery:2313,name:"Loop of the Life-Binder",icon:"inv_70_raid_ring7d",type:4},
+	{slot:11,item:152063,ilvl:930,haste:1307,vers:2212,name:"Seal of the Portalmaster",icon:"inv_70_raid_ring2c",type:4},
+	{slot:11,item:151972,ilvl:940,vers:1602,mastery:2137,name:"Sullied Seal of the Pantheon",icon:"inv_70_raid_ring3a",type:4},
+	{slot:11,item:134323,ilvl:925,crit:1463,mastery:1951,name:"Glinting Quartz Ring",icon:"inv_70_quest_ring3b",type:1,wilvl:810},
+	{slot:11,item:146767,ilvl:845,crit:780,vers:1320,name:"Portal Keeper's Seal",icon:"inv_70_quest_ring3b",type:1,wilvl:810},
+
+	// Netherlight
+	{slot:15,spell:253093,type:2,tier:2,name:"Infusion of Light",icon:"ability_malkorok_blightofyshaarj_yellow",special:function(){ return 101000 * GetCritFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 4 * 0.7 * GetFeedFactor(); }},
+	{slot:15,spell:253070,type:2,tier:2,name:"Secure in the Light",icon:"ability_paladin_toweroflight",special:function(){ return 135000 * GetVersFactor() * GetFightLenFactor(60) * 3 * 0.9; }},
+	{slot:15,spell:252088,type:2,tier:2,name:"Light Speed",icon:"ability_rogue_sprint",special:function(){ return healPerStat.haste.amount * 500; }},
+	{slot:15,spell:252091,type:6,tier:2,name:"Master of Shadows",icon:"spell_shadow_shadesofdarkness",special:function(){ return healPerStat.mastery.amount * 500; }},
+	{slot:15,spell:252799,type:2,tier:2,name:"Shocklight",icon:"paladin_icon_speedoflight",special:function(){ return healPerStat.crit.amount * 1500 * 0.3; }},
+	{slot:15,spell:252191,type:6,tier:2,name:"Murderous Intent",icon:"spell_shadow_charm",special:function(){ return healPerStat.vers.amount * 1500 * 0.3; }},
+	{slot:15,spell:252207,type:2,tier:2,name:"Refractive Shell",icon:"ability_priest_reflectiveshield",special:function(){ return 300000 * GetVersFactor() * GetFightLenFactor(60) * 2 * 0.9; }},
+	{slot:15,spell:253111,type:2,tier:2,name:"Light's Embrace",icon:"achievement_reputation_07",special:function(){ return 45500 * GetCritFactor() * GetHasteFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 8 * 0.6 * GetFeedFactor(); }},
+	{slot:15,spell:252888,type:6,tier:2,name:"Chaotic Darkness",icon:"inv_artifact_powerofthedarkside",special:function(){ return 180000 * GetCritFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 2  * 0.75 * GetFeedFactor(); }},
+	{slot:15,spell:252875,type:6,tier:2,name:"Shadowbind",icon:"spell_shadow_deathpact",special:function(){ return 200000 * GetCritFactor() * GetAftifactFactor() * GetVersFactor() * GetFightLenFactor(60) * 2 * 0.65 * GetFeedFactor(); }},
+
+	{slot:15,spell:-1,type:2,tier:1,name:"+1 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 1; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+2 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 2; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+3 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 3; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+4 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 4; }},
+	{slot:15,spell:-1,type:2,tier:1,name:"+5 weapon ilvl",icon:"inv_mace_1h_artifactazshara_d_02",special:function(){ return rV.netherlight[-1] * 5; }},
+
+	{slot:15,spell:207348,type:4,tier:3,name:"Floodwaters",icon:"spell_nature_healingwavegreater",special:function(){ return rV.traits[1109] / GetTraitRank(1109); }},
+	{slot:15,spell:207255,type:4,tier:3,name:"Empowered Droplets",icon:"spell_nature_giftofthewaterspirit",special:function(){ return rV.traits[1107] / GetTraitRank(1107); }},
+	{slot:15,spell:210031,type:4,tier:3,name:"Pull of the Sea",icon:"inv_tradeskillitem_sorcererswater",special:function(){ return rV.traits[1105] / GetTraitRank(1105); }},
+	{slot:15,spell:207206,type:4,tier:3,name:"Wavecrash",icon:"inv_spear_04",special:function(){ return rV.traits[1106] / GetTraitRank(1106); }},
+	{slot:15,spell:207092,type:4,tier:3,name:"Buffeting Waves",icon:"ability_skyreach_four_wind",special:function(){ return rV.traits[1104] / GetTraitRank(1104); }},
+	{slot:15,spell:207088,type:4,tier:3,name:"Tidal Chains",icon:"spell_frost_chainsofice",special:function(){ return rV.traits[1103] / GetTraitRank(1103); }},
+	{slot:15,spell:207288,type:4,tier:3,name:"Queen Ascendant",icon:"ability_shaman_watershield",special:function(){ return rV.traits[1108] / GetTraitRank(1108); }},
+
+	//Boots
+	{slot:8,item:137036,ilvl:910,type:5,name:"Elemental Rebalancers",int:1786,haste:459,mastery:827,icon:"inv_boots_mail_raidshaman_j_01",scale:970,special:function(ilvl){ return rV.bootsPredictionAmount * GetFeedFactor(); },wilvl:910},	
+	{slot:8,item:142132,ilvl:885,int:1415,haste:812,vers:360,name:"Doomstride Footguards",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:142204,ilvl:885,int:1415,crit:385,mastery:787,name:"Boots of False Promises",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134386,ilvl:885,int:1415,crit:787,vers:385,name:"Mardum Chain Boots",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:137517,ilvl:885,int:1415,crit:761,haste:410,name:"Striders of Furious Flight",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:134298,ilvl:885,int:1415,haste:376,mastery:795,name:"Ley Dragoon's Stompers",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134298,ilvl:885,int:1415,haste:376,mastery:795,name:"Ley Dragoon's Stompers",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134477,ilvl:885,int:1415,haste:787,mastery:385,name:"Ravencrest's Unerring Striders",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:134166,ilvl:885,int:1415,haste:736,vers:435,name:"Bitestone Boots",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134465,ilvl:885,int:1415,crit:485,haste:686,name:"Hydra Scale Sabatons",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:151320,ilvl:885,int:1415,crit:652,haste:519,name:"Void-Coated Stompers",icon:"inv_boot_mail_legiondungeon_c_03",type:2},
+	{slot:8,item:144490,ilvl:885,int:1415,haste:435,mastery:736,name:"Corruption-Fused Stompers",icon:"inv_boot_mail_legiondungeon_c_02",type:2},
+	{slot:8,item:134210,ilvl:885,int:1415,crit:686,mastery:485,name:"Tideskorn Sabatons",icon:"inv_boots_mail_legionendgame_c_01",type:2},
+	{slot:8,item:134464,ilvl:885,int:1415,haste:435,mastery:736,name:"Whelp Handler's Lined Boots",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:133623,ilvl:885,int:1415,crit:334,mastery:837,name:"Felstep Footguards",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:134466,ilvl:885,int:1415,crit:812,mastery:360,name:"Begrudging Trudgers",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:137444,ilvl:885,int:1415,haste:812,vers:360,name:"Plasma-Drilled Steel Toes",icon:"inv_boot_mail_legiondungeon_c_01",type:2},
+	{slot:8,item:147744,ilvl:900,int:1628,crit:433,haste:805,name:"Treads of Disorderly Retreat",icon:"inv_boot_mail_raidshaman_r_01",type:1},
+	{slot:8,item:141432,ilvl:860,int:1121,crit:648,haste:419,name:"Frostburned Sabatons",icon:"inv_boot_mail_raidhunter_q_01",type:1},
+	{slot:8,item:139219,ilvl:850,int:1021,haste:712,mastery:316,name:"Black Venom Sabatons",icon:"inv_boot_mail_raidshaman_q_01",type:6},
+	{slot:8,item:138211,ilvl:850,int:1021,crit:734,haste:293,name:"Malignant Sabatons",icon:"inv_boot_mail_raidhunter_q_01",type:6},
+	{slot:8,item:139220,ilvl:850,int:1021,crit:646,haste:382,name:"Scored Ironclaw Sabatons",icon:"inv_boot_mail_raidshaman_q_01",type:6},
+	{slot:8,item:142422,ilvl:860,int:1121,vers:671,mastery:396,name:"Radiant Soul Sabatons",icon:"inv_boot_mail_legionraid_d_01",type:6},
+	{slot:8,item:140867,ilvl:875,int:1289,vers:443,mastery:685,name:"Sabatons of Burning Steps",icon:"inv_boot_mail_raidshaman_q_01",type:6},
+	{slot:8,item:140873,ilvl:875,int:1289,crit:515,haste:612,name:"Shal'dorei Weedstompers",icon:"inv_boot_mail_raidhunter_q_01",type:6},
+	{slot:8,item:147046,ilvl:910,int:1786,crit:809,mastery:477,name:"Star-Stalker Treads",icon:"inv_boot_mail_raidhunter_r_01",type:3},
+	{slot:8,item:147045,ilvl:900,int:1628,haste:460,mastery:779,name:"Insulated Finpads",icon:"inv_boot_mail_raidshaman_r_01",type:3},
+	{slot:8,item:151996,ilvl:930,int:2153,crit:634,haste:752,name:"Deft Soulhunter's Sabatons",icon:"inv_boot_mail_raidhunter_s_01",type:4},
+	{slot:8,item:152684,ilvl:930,int:2153,haste:534,mastery:852,name:"Greatboots of the Searing Tempest",icon:"inv_boot_mail_raidshamanraid_s_01",type:4},
+	{slot:8,item:151997,ilvl:930,int:2153,crit:802,vers:584,name:"Nathrezim Shade-Walkers",icon:"inv_boot_mail_raidshamanraid_s_01",type:4},
+	{slot:8,item:152367,ilvl:930,int:2153,haste:832,vers:554,name:"Sabatons of Ceaseless Assault",icon:"inv_boot_mail_raidhunter_s_01",type:1},
 
 ];
 
@@ -2879,11 +3995,11 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					});
 					
 					if(spellID == 1064){	//chain
-						pV.critNow += GetTraitRank(1109) * 4 * STATS.crit;
+						pV.critNow += GetTraitRank(1109) * 4 * 400;
 					} else if(spellID == 73921){	//healing rain
-						pV.critNow += GetTraitRank(1107) * 2 * STATS.crit;
+						pV.critNow += GetTraitRank(1107) * 2 * 400;
 					} else if(spellID == 8004 && event.timestamp <= pV.critTidalLoss){	//surge
-						pV.critNow += (GetTraitRank(1103) * 4 + 40) * STATS.crit;
+						pV.critNow += (GetTraitRank(1103) * 4 + 40) * 400;
 					}
 					
 					AddStatAmount('crit',pV.critAmount,critAmountOh,pV.critNow,amount,spellID,event.timestamp,event);
@@ -2903,8 +4019,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						}
 					});
 
-					pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((pV.masteryNow / STATS.mastery) / 100) * (1 - targetHPbeforeHeal))) );
-					var currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((pV.masteryNow / STATS.mastery) / 100) * (1 - targetHPbeforeHeal))) );
+					pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
+					var currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((pV.masteryNow / 133.33) / 100) * (1 - targetHPbeforeHeal))) );
 				
 					AddStatAmount('mastery',pV.currHealFromMastery,currHealFromMasteryOh,pV.masteryNow,amount,spellID,event.timestamp,event);
 					
@@ -2934,8 +4050,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						if(buffStatus[buffSpellID]) pV.versNow += statsBuffs.vers[buffSpellID];
 					});
 					
-					pV.currHealFromVers = amount * ( 1 - (1 / ((pV.versNow / STATS.vers) / 100 + 1)) );
-					var currHealFromVersOh = (amount + overheal) * ( 1 - (1 / ((pV.versNow / STATS.vers) / 100 + 1)) );
+					pV.currHealFromVers = amount * ( 1 - (1 / ((pV.versNow / 475) / 100 + 1)) );
+					var currHealFromVersOh = (amount + overheal) * ( 1 - (1 / ((pV.versNow / 475) / 100 + 1)) );
 					
 					AddStatAmount('vers',pV.currHealFromVers,currHealFromVersOh,pV.versNow,amount,spellID,event.timestamp,event);
 				}
@@ -2951,7 +4067,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						}
 					});
 					
-					var hasteMod = (pV.hasteNow / STATS.haste / 100) + 1;
+					var hasteMod = (pV.hasteNow / 375 / 100) + 1;
 					Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
 						if(buffStatus[buffSpellID]) hasteMod *= statsBuffs.haste_mod[buffSpellID];
 					});
@@ -2959,14 +4075,14 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					pV.currHealFromHaste = (1 - (1 / hasteMod)) * amount;
 					var currHealFromHasteOh = (1 - (1 / hasteMod)) * (amount + overheal);
 					
-					pV.hasteNow = (hasteMod - 1) * 100 * STATS.haste;
+					pV.hasteNow = (hasteMod - 1) * 100 * 375;
 					
 					AddStatAmount('haste',pV.currHealFromHaste,currHealFromHasteOh,pV.hasteNow,amount,spellID,event.timestamp,event);
 
 					Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
 						if(buffStatus[buffSpellID]){
 							if(!rV.buffs.haste_mod[buffSpellID]) rV.buffs.haste_mod[buffSpellID] = 0;
-							rV.buffs.haste_mod[buffSpellID] += ((statsBuffs.haste_mod[buffSpellID] - 1) * 100 * STATS.haste) / pV.hasteNow * pV.currHealFromHaste;
+							rV.buffs.haste_mod[buffSpellID] += ((statsBuffs.haste_mod[buffSpellID] - 1) * 100 * 375) / pV.hasteNow * pV.currHealFromHaste;
 						}
 					});
 				}
@@ -3294,7 +4410,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 								hasteNow += statsBuffs.haste[buffSpellID];
 						}
 					});
-					var hasteMod = (hasteNow / STATS.haste / 100) + 1;
+					var hasteMod = (hasteNow / 375 / 100) + 1;
 					var hasteFromNumeric = hasteNow;
 					var hasteFromNumericMod = hasteMod;
 					Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
@@ -3304,7 +4420,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					if(spellCastAffectedQA[spellID]) hasteMod *= (1 + 0.05 * GetTraitRank(1108));
 					if(spellID == 77472 && pV.tidalwavesStatus) hasteMod *= 1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)));
 					
-					hasteNow = (hasteMod - 1) * 100 * STATS.haste;
+					hasteNow = (hasteMod - 1) * 100 * 375;
 					
 					var castTime = Math.min(spellCastTime[spellID]*1000,event.timestamp - pV.prevCastTime);
 					
@@ -3321,18 +4437,18 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						Object.keys(statsBuffs.haste).forEach(function (buffSpellID) {
 							if(buffStatus[buffSpellID]){
 								if(!pV.hasteCast[buffSpellID]) pV.hasteCast[buffSpellID] = 0;
-								pV.hasteCast[buffSpellID] += hasteMod / hasteFromNumericMod * (hasteFromNumericMod - 1) * 100 * STATS.haste / hasteNow * savedTime * (statsBuffs.haste[buffSpellID] * (typeof(buffStatus[buffSpellID]) == "number" ? buffStatus[buffSpellID] : 1) / hasteFromNumeric);
+								pV.hasteCast[buffSpellID] += hasteMod / hasteFromNumericMod * (hasteFromNumericMod - 1) * 100 * 375 / hasteNow * savedTime * (statsBuffs.haste[buffSpellID] * (typeof(buffStatus[buffSpellID]) == "number" ? buffStatus[buffSpellID] : 1) / hasteFromNumeric);
 							}
 						});						
-						pV.hasteCast[-1] = (pV.hasteCast[-1] || 0) + hasteMod / hasteFromNumericMod * (hasteFromNumericMod - 1) * 100 * STATS.haste / hasteNow * savedTime * (cV.haste / hasteFromNumeric);
+						pV.hasteCast[-1] = (pV.hasteCast[-1] || 0) + hasteMod / hasteFromNumericMod * (hasteFromNumericMod - 1) * 100 * 375 / hasteNow * savedTime * (cV.haste / hasteFromNumeric);
 						Object.keys(statsBuffs.haste_mod).forEach(function (buffSpellID) {
 							if(buffStatus[buffSpellID]){
 								if(!pV.hasteCast[buffSpellID]) pV.hasteCast[buffSpellID] = 0;
-								pV.hasteCast[buffSpellID] += hasteMod / statsBuffs.haste_mod[buffSpellID] * (statsBuffs.haste_mod[buffSpellID] - 1) * 100 * STATS.haste / hasteNow * savedTime;
+								pV.hasteCast[buffSpellID] += hasteMod / statsBuffs.haste_mod[buffSpellID] * (statsBuffs.haste_mod[buffSpellID] - 1) * 100 * 375 / hasteNow * savedTime;
 							}
 						});
-						if(spellCastAffectedQA[spellID]) pV.hasteCast[-207288] = (pV.hasteCast[-207288] || 0) + hasteMod / (0.05 * GetTraitRank(1108) + 1) * ((0.05 * GetTraitRank(1108) + 1) - 1) * 100 * STATS.haste / hasteNow * savedTime;
-						if(spellID == 77472 && pV.tidalwavesStatus) pV.hasteCast[-53390] = (pV.hasteCast[-53390] || 0) + hasteMod / (1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)))) * ((1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)))) - 1) * 100 * STATS.haste / hasteNow * savedTime;
+						if(spellCastAffectedQA[spellID]) pV.hasteCast[-207288] = (pV.hasteCast[-207288] || 0) + hasteMod / (0.05 * GetTraitRank(1108) + 1) * ((0.05 * GetTraitRank(1108) + 1) - 1) * 100 * 375 / hasteNow * savedTime;
+						if(spellID == 77472 && pV.tidalwavesStatus) pV.hasteCast[-53390] = (pV.hasteCast[-53390] || 0) + hasteMod / (1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)))) * ((1 / (1 - (0.3 + 0.03 * GetTraitRank(1103)))) - 1) * 100 * 375 / hasteNow * savedTime;
 					}
 					
 					if(spellCastTimeNoCD[spellID]) {
@@ -3469,7 +4585,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					var auraData = event.auras[k];
 					
 					if(vantusRunes[ auraData.ability ]){
-						vantusRune = 68;
+						vantusRune = 1500;
 					}
 
 					for (var j = 0, j_len = parsePlugins.applybuff.length; j < j_len; j++) {
@@ -3478,14 +4594,14 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 
 				}
 				
-				cV.critSpell = event["critSpell"] + 5 * STATS.crit;
+				cV.critSpell = event["critSpell"] + 2000;
 				cV.intellect = event["intellect"];
 				cV.intellect_min = cV.intellect;
 				cV.versatility = event["versatilityHealingDone"] + vantusRune;
-				cV.mastery = event["mastery"] + 24 * STATS.mastery;
+				cV.mastery = event["mastery"] + 3200;
 				cV.haste = event["hasteSpell"];
 				
-				cV.gcd = 1500 / (cV.haste / STATS.haste / 100 + 1);
+				cV.gcd = 1500 / (cV.haste / 375 / 100 + 1);
 				
 				cV.combantantInfo = event;
 				
@@ -3856,8 +4972,6 @@ function GetItemDataFromWowhead(itemID)
 		var oldRegister = $WowheadPower.register;
 		$WowheadPower.register = function(arr,id,locale,json){
 			if(arr == 3 && json && json.tooltip_enus){
-				//console.log(id,json);
-			
 				var itemID = id.match(/^(\d+)/)[1];
 				
 				var itemStatus = $("#gear-"+itemID+"-text").attr("data-status");
@@ -3993,8 +5107,8 @@ function BuildReport(){
 	
 	HTML += "<div class=\"panel\" style=\"margin-top:-10px;\"><div class=\"row full\" style=\"margin-bottom:5px;\">";
 	var hps = Math.round(rV.total / fightLen * 1000);
-	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingwavegreater.jpg\"></div><div class=\"col w75\">Healing Done: "+NumberToFormattedNumber(rV.total,2)+"<br>HPS: "+NumberToFormattedNumber(hps,0,3,3)+"</div></div></div></div>";
-	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingtouch.jpg\"></div><div class=\"col w75\">Mastery healing Done:<br>"+NumberToFormattedNumber(Math.round(healPerStat.mastery.total),2)+" ("+Math.round(healPerStat.mastery.total / healPerStat.mastery.all * 100)+"%)</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingwavegreater.jpg\"></div><div class=\"col w75\">Healing Done: "+NumberToFormattedNumber(rV.total)+"<br>HPS: "+NumberToFormattedNumber(hps,0,3)+"</div></div></div></div>";
+	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_healingtouch.jpg\"></div><div class=\"col w75\">Mastery healing Done:<br>"+NumberToFormattedNumber(Math.round(healPerStat.mastery.total),1)+" ("+Math.round(healPerStat.mastery.total / healPerStat.mastery.all * 100)+"%)</div></div></div></div>";
 	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img style=\"filter: grayscale(100%);-webkit-filter: grayscale(100%);\" src=\"http://media.blizzard.com/wow/icons/56/spell_shaman_tidalwaves.jpg\"></div><div class=\"col w75\">HW or Surge without tidal:<br>"+rV.hwWithoutTidal+" ("+Math.round(rV.hwWithoutTidal / rV.hwWithoutTidalTotal * 100)+"%)</div></div></div></div>";
 	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_shaman_spiritwalkersgrace.jpg\"></div><div class=\"col w75\">Spiritwalker's uptime:<br>"+Math.round(rV.spiritwalkerUptime/1000)+"s ("+Math.round(rV.spiritwalkerUptime / fightLen * 100)+"%)</div></div></div></div>";
 	HTML += "<div class=\"col\"><div class=\"box small-box clearfix\"><div class=\"row\"><div class=\"col w25\"><img src=\"http://media.blizzard.com/wow/icons/56/spell_nature_spiritwolf.jpg\"></div><div class=\"col w75\">Wolf uptime:<br>"+Math.round(rV.wolfUptime/1000)+"s ("+Math.round(rV.wolfUptime / fightLen * 100)+"%)</div></div></div></div>";
@@ -4010,7 +5124,7 @@ function BuildReport(){
 	for (var j = 0, j_len = spellslistKeys.length; j < j_len; j++) {
 		var spellID = spellslistKeys[j];
 		var spellInfo = cV.spellInfo[spellID];
-		HTML += "<div class=\"row full\"><div class=\"line half\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(spellInfo['icon'].replace(/\-/,""))+"\" alt=\""+spellInfo['name']+"\">"+spellInfo['name']+"</a></div><div class=\"line t-right w15\">"+NumberToFormattedNumber(healingData[spellID][0],1,2,2)+"</div><div class=\"line t-right t-grey w15\">"+NumberToFormattedNumber(healingData[spellID][1],1)+"</div></div>";
+		HTML += "<div class=\"row full\"><div class=\"line half\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(spellInfo['icon'].replace(/\-/,""))+"\" alt=\""+spellInfo['name']+"\">"+spellInfo['name']+"</a></div><div class=\"line t-right w15\">"+NumberToFormattedNumber(healingData[spellID][0],1)+"</div><div class=\"line t-right t-grey w15\">"+NumberToFormattedNumber(healingData[spellID][1],1)+"</div></div>";
 	}
 
 	HTML += "<div class=\"row full t-grey\"> Damage reductions</div>";
@@ -4034,8 +5148,8 @@ function BuildReport(){
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix statlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Stats</header>";
 	var allStatsList = [
 		["int","Int","From gear: "+cV.intellect_min],
-		["crit","Crit","From gear: "+(cV.critSpell-5*STATS.crit)+"<br>Base value: "+(STATS.crit*5).toFixed(0)+"<br>Avg number can be much higher due Floodwaters & Empowered Droplets traits and Tidal Waves buff"],
-		["mastery","Mastery","From gear: "+(cV.mastery-24*STATS.mastery)+"<br>Base value: "+(STATS.mastery*24).toFixed(0)+""],
+		["crit","Crit","From gear: "+(cV.critSpell-2000)+"<br>Base value: 2000<br>Avg number can be much higher due Floodwaters & Empowered Droplets traits and Tidal Waves buff"],
+		["mastery","Mastery","From gear: "+(cV.mastery-3200)+"<br>Base value: 3200"],
 		["vers","Vers","From gear: "+cV.versatility],
 		//["haste","<em class=\"tooltip\">Haste<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Cast time not counted here, only profit from ticks</span></em>","From gear: "+cV.haste],
 		["haste","Haste","From gear: "+cV.haste],
@@ -4046,7 +5160,7 @@ function BuildReport(){
 		var amount = healPerStat[ statData[0] ].amount;
 		var total = healPerStat[ statData[0] ].total;
 		var amountText = amount.toFixed(3);
-		var totalText = NumberToFormattedNumber(total,0,2);
+		var totalText = NumberToFormattedNumber(total);
 		var weightText = (amount / fightLen * 1000).toFixed(2);
 		if(statData[0] == "crit" && rV.resurgenceCritAmount > 0){
 			var regurgenceAmount = rV.resurgenceCrit / rV.manaUsage * rV.healFromMana;
@@ -4055,14 +5169,14 @@ function BuildReport(){
 			var preAmount = amount;
 			amount += regurgenceAmount / rV.resurgenceCritAmount;
 			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+preAmount.toFixed(3)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount).toFixed(3)+"</span></em>";
-			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total,0,2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+NumberToFormattedNumber(preTotal,0,2)+"<br>From resurgence: "+NumberToFormattedNumber(regurgenceAmount,0,2)+"</span></em>";			
+			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+NumberToFormattedNumber(preTotal)+"<br>From resurgence: "+NumberToFormattedNumber(regurgenceAmount)+"</span></em>";			
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+(preAmount / fightLen * 1000).toFixed(2)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount / fightLen * 1000).toFixed(2)+"</span></em>";
  		
  			healPerStat[ statData[0] ].amount = amount;
  		} else if(statData[0] == "int") {
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000 * 1.05).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">5% armor bonus included</span></em>";
 		} else if(statData[0] == "mastery") {
-			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total,0,2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Based on health %:<br>";
+			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Based on health %:<br>";
 			totalText += "100-80: "+NumberToFormattedNumber(healPerStat.mastery.b100,0,1)+"<br>";
 			totalText += "80-70: "+NumberToFormattedNumber(healPerStat.mastery.b80,0,1)+"<br>";
 			totalText += "70-60: "+NumberToFormattedNumber(healPerStat.mastery.b70,0,1)+"<br>";
@@ -4077,7 +5191,7 @@ function BuildReport(){
 			amount += hasteCastAmount;
 			amountText = "<em class=\"tooltip\">"+amount.toFixed(3)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+preAmount.toFixed(3)+"<br>From cast speed: "+hasteCastAmount.toFixed(3)+"</span></em>";
 			weightText = "<em class=\"tooltip\">"+(amount / fightLen * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+(preAmount / fightLen * 1000).toFixed(2)+"<br>From cast speed: "+(hasteCastAmount / fightLen * 1000).toFixed(2)+"</span></em>";
-			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total+hasteCastProfit,0,2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+NumberToFormattedNumber(total,0,2)+"<br>From cast speed: "+NumberToFormattedNumber(hasteCastProfit,0,2)+"</span></em>";			
+			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total+hasteCastProfit)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+NumberToFormattedNumber(total)+"<br>From cast speed: "+NumberToFormattedNumber(hasteCastProfit)+"</span></em>";			
  			
  			healPerStat[ statData[0] ].amount = amount;
 		}
@@ -4128,7 +5242,7 @@ function BuildReport(){
 		var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
 		manaSpellsText += "<br><img src=\""+GetIconUrl(icon)+"\" alt=\""+name+"\"> "+name+" - "+NumberToFormattedNumber(rV.manaUsageBySpell[spellID],0,2);	
 	}
-	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * baseMana / 20).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1% mana ("+(baseMana / 20).format()+")</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana,0,2)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 0.04 * baseMana).format()+"<br>Base manapull: "+(baseMana * 5).format()+manaSpellsText+"</span></em></div></div>";
+	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1000 mana points</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 8800).format()+"<br>Base manapull: "+(1100000).format()+manaSpellsText+"</span></em></div></div>";
 
 	HTML += "<div class=\"row full\"><div class=\"col full\" id=\"stats_graph_more\"><a href=\"javascript:void(0)\" class=\"more_graph\">Show graph</a></div><div class=\"ct-chart\" style=\"display:none\"  id=\"stats_graph\"></div></div>";	
 
@@ -4198,8 +5312,8 @@ function BuildReport(){
 			}
 						
 			HTML += "HPS: <em class=\"result-hps\">";
-			if(amount > 0) HTML += NumberToFormattedNumber(amount / fightLen * 1000,2);
-			if(passiveStats.heal > 0) HTML += (amount > 0 ? " / " : "")+NumberToFormattedNumber(passiveStats.heal / fightLen * 1000,2);
+			if(amount > 0) HTML += NumberToFormattedNumber(amount / fightLen * 1000,1);
+			if(passiveStats.heal > 0) HTML += (amount > 0 ? " / " : "")+NumberToFormattedNumber(passiveStats.heal / fightLen * 1000,1);
 			HTML += "</em>";
 		
 			if(obj.gearAdditionalText) HTML += "<br>"+obj.gearAdditionalText();
@@ -4234,7 +5348,7 @@ function BuildReport(){
 				HTML += "From <em class=\"tooltip\">passive stats<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+passiveStats.tip+"</span></em>: "+NumberToFormattedNumber(passiveStats.heal,2)+" ("+(passiveStats.heal/rV.total*100).toFixed(2)+"%)<br>";
 			}
 						
-			if(passiveStats.heal > 0) HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(passiveStats.heal / fightLen * 1000,2)+"</em>";
+			if(passiveStats.heal > 0) HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(passiveStats.heal / fightLen * 1000,1)+"</em>";
 		
 			HTML += "</div></div></div>";
 			counter++;
@@ -4245,7 +5359,6 @@ function BuildReport(){
 	HTML += "</ul></div></div></div>";
 
 	
-	/*
 	/// Gear Charts
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix gear_charts\"><header class=\"box-header\">GEAR CHARTS <sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Various numbers can be different based on buffs/fight length/overheal %/rng procs<br>Feeding into CBT/AG/ASC included in calculation.</span></sup></header>";
 	HTML += "<div class=\"full clearfix slot_select\" style=\"padding-bottom:10px;\">";
@@ -4269,9 +5382,8 @@ function BuildReport(){
 	HTML += "</div></div>";
 
 	HTML += "<div id=\"gear_chart\"></div></div></div></div>";
-	*/
 
-	/*
+	
 	/// Traits
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">TRAITS</header><div class=\"list-top-line\"> </div><ul class=\"list traits\">";
 	counter = 0;
@@ -4301,9 +5413,41 @@ function BuildReport(){
 		}
 	}	
 	HTML += "</ul></div></div></div>";
-	*/
 	
 	
+	/// NETHERLIGHT
+	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">NETHERLIGHT CRUCIBLE</header><div class=\"list-top-line\"> </div><ul class=\"list traits\">";
+	counter = 0;
+	var netherlightData = [];
+	for (var i = 0, len = NETHERLIGHT.length; i < len; i++) if(cV.traitBySpell[ NETHERLIGHT[i].obj.spellID ] || NETHERLIGHT[i].obj.spellID == -1) netherlightData.push([ NETHERLIGHT[i].obj.spellID,NETHERLIGHT[i] ]);
+	netherlightData.sort(function(a,b){ return rV.netherlight[ a[0] ] > rV.netherlight[ b[0] ] ? - 1 : 1 });
+	for (var i = 0, len = netherlightData.length; i < len; i++) {
+		var traitData = netherlightData[i][1].obj;
+		
+		var traitRank = 1;
+		if(cV.traitBySpell[traitData.spellID] && cV.traitBySpell[traitData.spellID].rank) traitRank = cV.traitBySpell[traitData.spellID].rank;
+
+		if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
+		
+		HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
+		HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(traitData.icon)+"\" alt=\""+traitData.name+"\"></a></div>";
+
+		HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\">"+traitData.name+"</a>";
+		if(traitRank > 1) HTML += " x"+traitRank;		
+		HTML += "</header>";
+	
+		var amount = rV.netherlight[traitData.spellID];
+		HTML += "<em class=\"result "+(traitData.tip ? "tooltip" : "")+"\">"+NumberToFormattedNumber(amount,2)+(traitData.tip ? "<span class=\"tip-text\" style=\"width: 180px;margin-left:-90px;\">"+traitData.tip()+"</span>" : "")+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+		HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
+
+		if(traitData.additionalText) HTML += "<br>"+traitData.additionalText();
+		if(traitRank > 1) HTML += "<br>Per rank: "+NumberToFormattedNumber(amount / traitRank,0,2)+" ("+(amount / traitRank/rV.total*100).toFixed(2)+"%)";		
+	
+		HTML += "</div></div>";
+		counter++;
+	}	
+	HTML += "</ul></div></div></div>";
+
 	/// Talents
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">TALENTS</header><div class=\"list-top-line\"> </div><ul class=\"list talents\">";
 	counter = 0;
