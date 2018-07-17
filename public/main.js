@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "16.07.2018 [quick BfA-prepatch update]";
+var LAST_UPDATE = "17.07.2018 [quick BfA-prepatch update]";
 
 var itemsStats = {};
 
@@ -1966,7 +1966,7 @@ var TALENTS = [
 					pV.ulPredRiptideTarget[event.targetID] = event.timestamp + 18500;
 					pV.ulPredStatus = event.timestamp + 10000;
 					
-					rV.talents_prediction[73685] += 3.5 * cV.intellect * (pV.critNow / 40000 + 1) * (pV.versNow / 47500 + 1) * 1.2 * 1.06 * 1.05 * 1.1;
+					rV.talents_prediction[73685] += 0.875 * cV.intellect * (pV.critNow / STATS.crit / 100 + 1) * (pV.versNow / STATS.vers / 100 + 1);
 				}
 			},
 			"removebuff", function(event,spellID){
