@@ -1883,7 +1883,115 @@ var ITEMS = [
 	},
 ];
 
-var TRAITS = [];
+var TRAITS = [
+	{	//SLT
+		init: function() {
+			rV.traits[423] = 0;
+			pV.azeriteSLTPrediction = 0;
+			pV.azeriteSLTPredictionLast = 0;
+		},
+		parse: [
+			"cast", function(event,spellID){
+				if(spellID == 98008){
+					pV.azeriteSLTPredictionLast = event.timestamp + 500;
+				}
+			},
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 98021 && event.timestamp > pV.azeriteSLTPredictionLast && event.timestamp < (pV.azeriteSLTPredictionLast + 1000)){
+					pV.azeriteSLTPrediction++;
+				}
+			},
+			"damage", function(event,spellID){
+				if(spellID == 98021 && event.timestamp > pV.azeriteSLTPredictionLast && event.timestamp < (pV.azeriteSLTPredictionLast + 1000)){
+					pV.azeriteSLTPrediction++;
+				}
+			},
+		],
+		obj: {
+			name: "Spouting Spirits",
+			id: 423,
+			spellID: 278715,
+			icon: "spell_shaman_spiritlink.jpg",
+		},
+	},
+	{	//HR
+		init: function() {
+			rV.traits[449] = 0;
+			pV.azeriteHRPrediction = 0;
+			pV.azeriteHRPredictionLast = 0;
+		},
+		parse: [
+			"cast", function(event,spellID){
+				if(spellID == 73920){
+					pV.azeriteHRPredictionLast = event.timestamp + 200;
+				}
+			},
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 73921 && event.timestamp < pV.azeriteHRPredictionLast){
+					pV.azeriteHRPrediction++;
+				}
+			},
+		],
+		obj: {
+			name: "Overflowing Shores",
+			id: 449,
+			spellID: 277658,
+			icon: "spell_nature_giftofthewaterspirit.jpg",
+		},
+	},
+	{	//HTT
+		init: function() {
+			rV.traits[191] = 0;
+			pV.azeriteHTTPrediction = 0;
+			pV.azeriteHTTPredictionX = 0;
+			pV.azeriteHTTPredictionY = 0;
+		},
+		parse: [
+			"cast", function(event,spellID){
+				if(spellID == 108280){
+					pV.azeriteHTTPredictionX = event.x;
+					pV.azeriteHTTPredictionY = event.y;
+				}
+			},
+			"heal", function(event,spellID,amount,overheal){
+				if(spellID == 114942 && pV.azeriteHTTPredictionX){
+					var dX = (pV.azeriteHTTPredictionX - event.x) / 100
+					var dY = (pV.azeriteHTTPredictionY - event.y) / 100
+					var dist = Math.sqrt(dX * dX + dY * dY)				
+				
+					pV.azeriteHTTPrediction += Math.min((Math.max(8,dist) - 8) / 32,1) * (event.hitType == 2 ? 2 : 1);
+				}
+			},
+		],
+		obj: {
+			name: "Ebb and Flow",
+			id: 191,
+			spellID: 273597,
+			icon: "ability_shaman_healingtide.jpg",
+		},
+	},
+	{	//Riptide
+		init: function() {
+			rV.traits[422] = 0;
+			pV.azeriteRiptidePrediction = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+ 				if(spellID == 61295 && !event.tick && event.resourceActor == 2 && event.hitPoints && event.maxHitPoints){
+ 					var targetHPbeforeHeal = Math.max(event.hitPoints - amount,0) / event.maxHitPoints;
+					if(targetHPbeforeHeal <= .5) pV.azeriteRiptidePrediction++;
+				}
+			},
+		],
+		obj: {
+			name: "Surging Tides",
+			id: 422,
+			spellID: 278713,
+			icon: "spell_nature_riptide.jpg",
+		},
+	},
+];
+
 
 NETHERLIGHT = [];
 
@@ -2663,7 +2771,7 @@ function GetVersFactor(){ return healPerStat.vers.avgStat / STATS.vers / 100 + 1
 function GetCritFactor(){ return cV.combantantInfo.critSpell / STATS.crit / 100 + 1; }
 function GetFightLenFactor(cd){ return (currFightData.end_time - currFightData.start_time) / cd / 1000; }
 function GetHasteFactor(){ return healPerStat.haste.avgStat / STATS.haste / 100 + 1; }
-function GetAftifactFactor(){ return 1.06 * 1.05 * 1.1; }
+function GetModFactor(){ return 1.4; }
 function GetFeedFactor(){ 
 	var factor = 1; 
 	for (var i = 0, len = sSpellsKeys.length; i < len; i++) {
@@ -2682,6 +2790,7 @@ function GetSocketFactor(){
 	return Math.max(haste_amount,crit_amount,vers_amount,mastery_amount);
 }
 
+
 var gear_charts_colors = {
 	1: ["Mage","World drop"],
 	2: ["Rogue","Dungeons"],
@@ -2693,7 +2802,19 @@ var gear_charts_colors = {
 };
 
 var GEAR = [
-
+	{slot:-2,spell:272989,type:2,tier:1,name:"Soothing Waters",icon:"spell_nature_healingwavegreater",special:function(ilvl){ return ScaleStat(93,310,ilvl,1); }},
+	{slot:-2,spell:278715,type:2,tier:1,name:"Spouting Spirits",icon:"spell_shaman_spiritlink",special:function(ilvl){ return ScaleStat(2488,310,ilvl,1); }},
+	{slot:-2,spell:273597,type:2,tier:1,name:"Ebb and Flow",icon:"ability_shaman_healingtide",special:function(ilvl){ return ScaleStat(220,310,ilvl,1); }},
+	{slot:-2,spell:278713,type:2,tier:1,name:"Surging Tides",icon:"spell_nature_riptide",special:function(ilvl){ return ScaleStat(3080,310,ilvl,1); }},
+	{slot:-2,spell:277658,type:2,tier:1,name:"Overflowing Shores",icon:"spell_nature_giftofthewaterspirit",special:function(ilvl){ return ScaleStat(465,310,ilvl,1); }},
+	{slot:-2,spell:275488,type:2,tier:1,name:"Swelling Stream",icon:"inv_spear_04",special:function(ilvl){ return ScaleStat(329,310,ilvl,1); }},
+	
+	{slot:-3,spell:272989,type:2,tier:1,name:"Soothing Waters",icon:"spell_nature_healingwavegreater",special:function(ilvl){ return ScaleStat(93,310,ilvl,1) * (pV.castNum[1064] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:278715,type:2,tier:1,name:"Spouting Spirits",icon:"spell_shaman_spiritlink",special:function(ilvl){ return ScaleStat(2488,310,ilvl,1) * (pV.azeriteSLTPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:273597,type:2,tier:1,name:"Ebb and Flow",icon:"ability_shaman_healingtide",special:function(ilvl){ return ScaleStat(220,310,ilvl,1) * (pV.azeriteHTTPrediction || 0) * GetModFactor() * GetVersFactor(); }},
+	{slot:-3,spell:278713,type:2,tier:1,name:"Surging Tides",icon:"spell_nature_riptide",special:function(ilvl){ return ScaleStat(3080,310,ilvl,1) * (pV.azeriteRiptidePrediction || 0) * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:277658,type:2,tier:1,name:"Overflowing Shores",icon:"spell_nature_giftofthewaterspirit",special:function(ilvl){ return ScaleStat(465,310,ilvl,1) * (pV.azeriteHRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:275488,type:2,tier:1,name:"Swelling Stream",icon:"inv_spear_04",special:function(ilvl){ return ScaleStat(329,310,ilvl,1) * (pV.castNum[5394] || 0) * 2.19 * 5 * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 ];
 
 
@@ -3626,75 +3747,37 @@ function GetIlvBonusID(baseIlvl,needIlvl){
 	return 0;
 }
 
-function CreateNCChartData(fightLen){
-	var tier_1 = [],tier_2 = [],tier_3 = [];
+var GEAR_CHARTS_SLOT = -3;
+var GEAR_CHARTS_ILVL = 340;
+
+function CreateAzChartData(fightLen){
+	var tier_1 = [];
 	for (var i = 0, len = GEAR.length; i < len; i++) {
 		var gearData = GEAR[i];
-		if(gearData.slot == 15) {
+		if(gearData.slot == GEAR_CHARTS_SLOT) {
 			var name = (gearData.icon ? "<img src=\""+GetIconUrl(gearData.icon.replace(/\-/,"")+".jpg")+"\" alt=\""+gearData.name+"\">" : "")+" <a href=\"//www.wowhead.com/spell="+gearData.spell+"\" target=\"_blank\">"+gearData.name+"</a>";
 		
-			if(gearData.tier == 1) {
-				tier_1.push( [ gearData.special() / (fightLen / 1000),name,false,gear_charts_colors[gearData.type][0] ] );
-			} else if(gearData.tier == 2) {
-				if(cV.traitBySpell[ gearData.spell ]){
-					var amount = rV.netherlight[gearData.spell] / ( cV.traitBySpell[gearData.spell].rank ? cV.traitBySpell[gearData.spell].rank : 1 );
-					tier_2.push( [ amount / (fightLen / 1000),name,true,"DeathKnight" ] );
-				} else {
-					tier_2.push( [ gearData.special() / (fightLen / 1000) * (cV.gearInfo[152626] ? 1.5 : 1),name,false,gear_charts_colors[gearData.type][0] ] );
-				}
-			} else if(gearData.tier == 3) {
-				tier_3.push( [ gearData.special() / (fightLen / 1000),name,false,gear_charts_colors[gearData.type][0] ] );
-			}
+			//tier_1.push( [ gearData.special(GEAR_CHARTS_ILVL) / (fightLen / 1000),name,gear_charts_colors[gearData.type][0] ] );
+			tier_1.push( [ gearData.special(GEAR_CHARTS_ILVL),name+" "+GEAR_CHARTS_ILVL,gear_charts_colors[gearData.type][0] ] );
 		}
 	}
 	
 	tier_1.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
-	tier_2.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
-	tier_3.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
 
 	var HTML = "";
 	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 1</div><div class=\"list-top-line\"></div></div>";
 	for (var i = 0, len = tier_1.length; i < len; i++) {
-		HTML += "<div class=\"row full "+(tier_1[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_1[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_1[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_1[i][3])+"-bg\" style=\"width: "+(Math.min(tier_1[i][0]/tier_1[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+		HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_1[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_1[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_1[i][2])+"-bg\" style=\"width: "+(Math.min(tier_1[i][0]/tier_1[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
 	}
-	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 2</div><div class=\"list-top-line\"></div></div>";
-	for (var i = 0, len = tier_2.length; i < len; i++) {
-		HTML += "<div class=\"row full "+(tier_2[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_2[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_2[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_2[i][3])+"-bg\" style=\"width: "+(Math.min(tier_2[i][0]/tier_2[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
-	}
-	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 3</div><div class=\"list-top-line\"></div></div>";
-	for (var i = 0, len = tier_3.length; i < len; i++) {
-		HTML += "<div class=\"row full "+(tier_3[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_3[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_3[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_3[i][3])+"-bg\" style=\"width: "+(Math.min(tier_3[i][0]/tier_3[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
-	}
-	
-	var tier_2_3 = [];
-	for (var i = 0, len = tier_2.length; i < len; i++) {
-		for (var j = 0, j_len = tier_3.length; j < j_len; j++) {
-			tier_2_3.push([
-				tier_2[i][0] + tier_3[j][0],
-				tier_2[i][0] > tier_3[j][0] ? (tier_2[i][1] + "<br>" + tier_3[j][1]) : (tier_3[j][1] + "<br>" + tier_2[i][1]),
-				false,
-				gear_charts_colors[3][0],
-			]);
-		}
-	}
-	tier_2_3.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
-	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 2+3</div><div class=\"list-top-line\"></div></div>";
-	for (var i = 0, len = tier_2_3.length; i < len; i++) {
-		HTML += "<div class=\"row full "+(tier_2_3[i][2] ? "eq" : "")+"\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_2_3[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_2_3[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_2_3[i][3])+"-bg\" style=\"width: "+(Math.min(tier_2_3[i][0]/tier_2_3[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
-	}
-	
 	
 	$("#gear_chart").html(HTML);
 	
-	$("#gear_chart_adv").hide();	
+	$("#gear_chart_adv").show();	
 }
 
-var GEAR_CHARTS_SLOT = 14;
-var GEAR_CHARTS_ILVL = 930;
-
 function CreateGearChartData(fightLen){
-	if(GEAR_CHARTS_SLOT == 15){
-		CreateNCChartData(fightLen)
+	if(GEAR_CHARTS_SLOT == -2 || GEAR_CHARTS_SLOT == -3){
+		CreateAzChartData(fightLen)
 		return;
 	}
 
@@ -3861,6 +3944,7 @@ function CalcHealingFromItem(itemID,diffStats)
 }
 
 var IsWowheadResponceRewritten = false;
+var IsWowheadRequestRewritten = false;
 
 function GetItemDataFromWowhead(itemID)
 {
@@ -3869,7 +3953,7 @@ function GetItemDataFromWowhead(itemID)
 		var oldRegister = $WowheadPower.register;
 		$WowheadPower.register = function(arr,id,locale,json){
 			if(arr == 3 && json && json.tooltip_enus){
-				//console.log(id,json);
+				console.log(arr,id,locale,json);
 			
 				var itemID = id.match(/^(\d+)/)[1];
 				
@@ -3916,14 +4000,21 @@ function GetItemDataFromWowhead(itemID)
 				}
 				
 			}
-			oldRegister(arr,id,locale,json);
+		  	var ret = oldRegister.apply(this, arguments);
+		  	return ret;
 		}
 		IsWowheadResponceRewritten = true;
 	}
 	
 	$.ajaxSetup({cache: true});
-	$.getScript( "https://www.wowhead.com/item="+itemID+"&power" );	
+	$.getJSON( "https://www.wowhead.com/item="+itemID[0]+(itemID[1] ? "&bonus="+itemID[1].join(":") : "")+"&json&power", function( data ) { 
+		var s = "" + itemID[0] + (itemID[1] ? "b"+itemID[1].join(",") : "");
+		$WowheadPower.register(3,s,0,data); 
+		//console.log(data); 
+	});	
 }
+
+var wowhead_tooltips = { "colorlinks": false, "iconizelinks": false, "renamelinks": true }
 
 Number.prototype.format = function() {
 	return this.toLocaleString(undefined, {maximumFractionDigits:0,useGrouping:true}).replace(/\D/g,",");
@@ -4252,25 +4343,25 @@ function BuildReport(){
 			HTML += "</div></div></div>";
 			counter++;
 			
-			UpdateFromWowhead.push(itemID);
+			UpdateFromWowhead.push([itemID,gearData.bonusIDs]);
 		}
 	}	
 	HTML += "</ul></div></div></div>";
 
 	
-	/*
 	/// Gear Charts
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix gear_charts\"><header class=\"box-header\">GEAR CHARTS <sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Various numbers can be different based on buffs/fight length/overheal %/rng procs<br>Feeding into CBT/AG/ASC included in calculation.</span></sup></header>";
 	HTML += "<div class=\"full clearfix slot_select\" style=\"padding-bottom:10px;\">";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"14\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_datacrystal04.jpg\" style=\"width:48px;height:48px;\"><br>Trinkets</div>";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-1\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_hammer_unique_sulfuras.jpg\" style=\"width:48px;height:48px;\"><br>Legendaries</div>";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"2\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_misc_necklace_firelands_2.jpg\" style=\"width:48px;height:48px;\"><br>Necks</div>";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"11\"><img src=\"http://media.blizzard.com/wow/icons/56/item_icecrownringc.jpg\" style=\"width:48px;height:48px;\"><br>Rings</div>";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"15\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Netherlight Crucible</div>";
+	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"14\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_datacrystal04.jpg\" style=\"width:48px;height:48px;\"><br>Trinkets</div>";
+	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-1\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_hammer_unique_sulfuras.jpg\" style=\"width:48px;height:48px;\"><br>Legendaries</div>";
+	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"2\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_misc_necklace_firelands_2.jpg\" style=\"width:48px;height:48px;\"><br>Necks</div>";
+	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"11\"><img src=\"http://media.blizzard.com/wow/icons/56/item_icecrownringc.jpg\" style=\"width:48px;height:48px;\"><br>Rings</div>";
+	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-2\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Clear azerite power</div>";
+	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-3\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Azerite prediction</div>";
 	HTML += "</div>";
 	
 	HTML += "<div class=\"full clearfix\" style=\"padding-bottom:5px;display:none\" id=\"gear_chart_adv\">";
-	HTML += "<input type=\"range\" min=\"900\" max=\"985\" value=\"930\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
+	HTML += "<input type=\"range\" min=\"310\" max=\"410\" value=\""+GEAR_CHARTS_ILVL+"\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
 	HTML += "<div class=\"full\">";
 	var gear_chart_colors_keys = Object.keys(gear_charts_colors);
 	for (var i = 0, len = gear_chart_colors_keys.length; i < len; i++) {
@@ -4282,7 +4373,6 @@ function BuildReport(){
 	HTML += "</div></div>";
 
 	HTML += "<div id=\"gear_chart\"></div></div></div></div>";
-	*/
 
 	/*
 	/// Traits
