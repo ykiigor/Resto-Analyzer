@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "17.07.2018 [quick BfA-prepatch update]";
+var LAST_UPDATE = "22.07.2018 [quick BfA-prepatch update]";
 
 var itemsStats = {};
 
@@ -480,7 +480,7 @@ function ScaleStat(stat,fromIlvl,toIlvl,isLinear)
 {
 	//	linear == 1 for int, linear == nil for secondaries, linear == 2 for jewel slots
 	var scalingFrom = (fromIlvl <= 160 || isLinear == 1) ? 1 : (isLinear == 2 ? ScaleStatData[fromIlvl][1] : ScaleStatData[fromIlvl][0]);
-	var scalingTo = (toIlvl <= 160 || isLinear == 1) ? 1 : (isLinear == 2 ? ScaleStatData[fromIlvl][1] : ScaleStatData[fromIlvl][0]);
+	var scalingTo = (toIlvl <= 160 || isLinear == 1) ? 1 : (isLinear == 2 ? ScaleStatData[toIlvl][1] : ScaleStatData[toIlvl][0]);
 	
 	stat = stat / scalingFrom;
 	var newValue = stat * Math.pow(1.00936,toIlvl - fromIlvl);
@@ -1912,6 +1912,7 @@ var TRAITS = [
 			id: 423,
 			spellID: 278715,
 			icon: "spell_shaman_spiritlink.jpg",
+			tier: 1,
 		},
 	},
 	{	//HR
@@ -1937,6 +1938,7 @@ var TRAITS = [
 			id: 449,
 			spellID: 277658,
 			icon: "spell_nature_giftofthewaterspirit.jpg",
+			tier: 1,
 		},
 	},
 	{	//HTT
@@ -1968,6 +1970,7 @@ var TRAITS = [
 			id: 191,
 			spellID: 273597,
 			icon: "ability_shaman_healingtide.jpg",
+			tier: 1,
 		},
 	},
 	{	//Riptide
@@ -1988,9 +1991,99 @@ var TRAITS = [
 			id: 422,
 			spellID: 278713,
 			icon: "spell_nature_riptide.jpg",
+			tier: 1,
+		},
+	},
+	{	//35% hp
+		init: function() {
+			rV.traits[42] = 0;
+			pV.azerite35hpPrediction = 0;
+		},
+		parse: [
+			"heal", function(event,spellID,amount){
+ 				if(event.resourceActor == 2 && event.hitPoints && event.maxHitPoints){
+ 					var targetHPbeforeHeal = Math.max(event.hitPoints - amount,0) / event.maxHitPoints;
+					if(targetHPbeforeHeal <= .35) pV.azerite35hpPrediction++;
+				}
+			},
+		],
+		obj: {
+			name: "Savior",
+			id: 42,
+			spellID: 267883,
+			icon: "achievement_guildperk_everyones.jpg",
+			tier: 2,
+		},
+	},
+	{	//heal on damage
+		init: function() {
+			rV.traits[83] = 0;
+			pV.azeriteImpassiveVisagePrediction = 0;
+			pV.azeriteImpassiveVisageLast = 0;
+		},
+		parse: [
+			"damage", function(event,spellID){
+ 				if(event.targetID == currFightData.actor && event.timestamp > pV.azeriteImpassiveVisageLast){
+ 					pV.azeriteImpassiveVisageLast = event.timestamp + 6000;
+					pV.azeriteImpassiveVisagePrediction++;
+				}
+			},
+		],
+		obj: {
+			name: "Impassive Visage",
+			id: 83,
+			spellID: 268437,
+			icon: "inv_pet_inquisitoreye.jpg",
+			tier: 3,
+		},
+	},
+	{	//mastery after ch
+		init: function() {
+			rV.traits[102] = 0;
+			pV.azeriteSynergisticGrowthPrediction = 0;
+			pV.azeriteSynergisticGrowthLast = 0;
+		},
+		parse: [
+			"cast", function(event,spellID){
+ 				if(spellID == 1064 && event.timestamp > pV.azeriteSynergisticGrowthLast){
+ 					pV.azeriteSynergisticGrowthLast = event.timestamp + 30000;
+					pV.azeriteSynergisticGrowthPrediction++;
+				}
+			},
+		],
+		obj: {
+			name: "Synergistic Growth",
+			id: 102,
+			spellID: 267892,
+			icon: "inv_misc_markoftheworldtree.jpg",
+			tier: 2,
+		},
+	},
+	{	//heal on damage
+		init: function() {
+			rV.traits[83] = 0;
+			pV.azeriteImpassiveVisagePrediction = 0;
+			pV.azeriteImpassiveVisageLast = 0;
+		},
+		parse: [
+			"damage", function(event,spellID){
+ 				if(event.targetID == currFightData.actor && event.timestamp > pV.azeriteImpassiveVisageLast){
+ 					pV.azeriteImpassiveVisageLast = event.timestamp + 6000;
+					pV.azeriteImpassiveVisagePrediction++;
+				}
+			},
+		],
+		obj: {
+			name: "Impassive Visage",
+			id: 83,
+			spellID: 268437,
+			icon: "inv_pet_inquisitoreye.jpg",
+			tier: 3,
 		},
 	},
 ];
+
+
 
 
 NETHERLIGHT = [];
@@ -2809,12 +2902,41 @@ var GEAR = [
 	{slot:-2,spell:277658,type:2,tier:1,name:"Overflowing Shores",icon:"spell_nature_giftofthewaterspirit",special:function(ilvl){ return ScaleStat(465,310,ilvl,1); }},
 	{slot:-2,spell:275488,type:2,tier:1,name:"Swelling Stream",icon:"inv_spear_04",special:function(ilvl){ return ScaleStat(329,310,ilvl,1); }},
 	
-	{slot:-3,spell:272989,type:2,tier:1,name:"Soothing Waters",icon:"spell_nature_healingwavegreater",special:function(ilvl){ return ScaleStat(93,310,ilvl,1) * (pV.castNum[1064] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:278715,type:2,tier:1,name:"Spouting Spirits",icon:"spell_shaman_spiritlink",special:function(ilvl){ return ScaleStat(2488,310,ilvl,1) * (pV.azeriteSLTPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:273597,type:2,tier:1,name:"Ebb and Flow",icon:"ability_shaman_healingtide",special:function(ilvl){ return ScaleStat(220,310,ilvl,1) * (pV.azeriteHTTPrediction || 0) * GetModFactor() * GetVersFactor(); }},
-	{slot:-3,spell:278713,type:2,tier:1,name:"Surging Tides",icon:"spell_nature_riptide",special:function(ilvl){ return ScaleStat(3080,310,ilvl,1) * (pV.azeriteRiptidePrediction || 0) * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:277658,type:2,tier:1,name:"Overflowing Shores",icon:"spell_nature_giftofthewaterspirit",special:function(ilvl){ return ScaleStat(465,310,ilvl,1) * (pV.azeriteHRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:275488,type:2,tier:1,name:"Swelling Stream",icon:"inv_spear_04",special:function(ilvl){ return ScaleStat(329,310,ilvl,1) * (pV.castNum[5394] || 0) * 2.19 * 5 * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:272989,type:4,tier:1,name:"Soothing Waters",icon:"spell_nature_healingwavegreater",special:function(ilvl){ return ScaleStat(93,310,ilvl,1) * (pV.castNum[1064] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:278715,type:4,tier:1,name:"Spouting Spirits",icon:"spell_shaman_spiritlink",special:function(ilvl){ return ScaleStat(2488,310,ilvl,1) * (pV.azeriteSLTPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:273597,type:4,tier:1,name:"Ebb and Flow",icon:"ability_shaman_healingtide",special:function(ilvl){ return ScaleStat(220,310,ilvl,1) * (pV.azeriteHTTPrediction || 0) * GetModFactor() * GetVersFactor(); }},
+	{slot:-3,spell:278713,type:4,tier:1,name:"Surging Tides",icon:"spell_nature_riptide",special:function(ilvl){ return ScaleStat(3080,310,ilvl,1) * (pV.azeriteRiptidePrediction || 0) * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:277658,type:4,tier:1,name:"Overflowing Shores",icon:"spell_nature_giftofthewaterspirit",special:function(ilvl){ return ScaleStat(465,310,ilvl,1) * (pV.azeriteHRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:275488,type:4,tier:1,name:"Swelling Stream",icon:"inv_spear_04",special:function(ilvl){ return ScaleStat(329,310,ilvl,1) * (pV.castNum[5394] || 0) * 2.19 * 5 * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+
+	{slot:-3,spell:281841,type:2,tier:1,name:"Tradewinds",icon:"ability_skyreach_wind",special:function(ilvl){ return ScaleStat(244,310,ilvl) * healPerStat.mastery.amount * 15 / 60; }},
+	{slot:-3,spell:281841,type:2,tier:1,name:"Meticulous Scheming",icon:"ability_rogue_masterofsubtlety",special:function(ilvl){ return ScaleStat(244,310,ilvl) * healPerStat.haste.amount * 20 / 60; }},
+	{slot:-3,spell:280410,type:2,tier:1,name:"Incite the Pack",icon:"ability_hunter_pet_raptor",special:function(ilvl){ return ScaleStat(227,310,ilvl) * healPerStat.mastery.amount * 20 / 60; }},
+	{slot:-3,spell:281514,type:2,tier:1,name:"Unstable Catalyst",icon:"inv__azerite-debuff",special:function(ilvl){ return ScaleStat(172,310,ilvl,1) * healPerStat.int.amount * 8 / 60 * 4; }},
+	{slot:-3,spell:267886,type:2,tier:1,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleStat(20,310,ilvl,1) * 2 * GetFightLenFactor(8) / rV.manaUsage * rV.healFromMana; }},
+	{slot:-3,spell:277666,type:4,tier:1,name:"Ancestral Resonance",icon:"spell_shaman_improvedreincarnation",special:function(ilvl){ return ScaleStat(50 * 1.5,310,ilvl) * 40 * healPerStat.mastery.amount / ( (currFightData.end_time - currFightData.start_time) / 1000 ); }},
+	{slot:-3,spell:280407,type:2,tier:1,name:"Blood Rite",icon:"inv_misc_volatilelife",special:function(ilvl){ return ScaleStat(276,310,ilvl) * healPerStat.haste.amount * 15 / 60; }},
+	{slot:-3,spell:273823,type:2,tier:1,name:"Blightborne Infusion",icon:"ability_argus_soulbombdebuffsmall",special:function(ilvl){ return ScaleStat(293,310,ilvl) * healPerStat.crit.amount * 14 / 60; }},
+	{slot:-3,spell:280555,type:3,tier:1,name:"Archive of the Titans",icon:"inv_trinket_80_titan01b",special:function(ilvl){ return ScaleStat(140,370,ilvl,1) * healPerStat.int.amount * 0.95; }},
+	{slot:-3,spell:280559,type:3,tier:1,name:"Laser Matrix (unknown, 6targets)",icon:"spell_nature_groundingtotem",special:function(ilvl){ return ScaleStat(2160,370,ilvl,1) * GetFightLenFactor(60) * GetModFactor() * GetVersFactor() * GetCritFactor() * 6; }},
+
+	{slot:-3,spell:279926,type:2,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleStat(186 / 2 + 31 /2,310,ilvl,1) * healPerStat.int.amount; }},
+	{slot:-3,spell:267889,type:2,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleStat(699,310,ilvl,1) * GetFightLenFactor(60 / 5) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:264108,type:2,tier:2,name:"Blood Siphon (only mastery)",icon:"ability_deathknight_deathsiphon2",special:function(ilvl){ return ScaleStat(87,310,ilvl) * healPerStat.mastery.amount; }},
+	{slot:-3,spell:267883,type:2,tier:2,name:"Savior",icon:"achievement_guildperk_everyonesahero",special:function(ilvl){ return ScaleStat(465,310,ilvl,1) * 2 * (pV.azerite35hpPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:266180,type:2,tier:2,name:"Overwhelming Power",icon:"ability_vehicle_electrocharge",special:function(ilvl){ return ScaleStat(150 * 0.9,310,ilvl) * healPerStat.haste.amount * 25 / 60; }},
+	{slot:-3,spell:267880,type:2,tier:2,name:"Woundbinder",icon:"inv_misc_emberweavebandage",special:function(ilvl){ return ScaleStat(198,310,ilvl) * 0.5 * healPerStat.haste.amount * 6 / 60 * 2; }},
+	{slot:-3,spell:279899,type:2,tier:2,name:"Unstable Flames",icon:"inv_ember",special:function(ilvl){ return ScaleStat(109 * 1.5,310,ilvl) * healPerStat.crit.amount * 5 / 60 * 10; }},
+	{slot:-3,spell:267884,type:2,tier:2,name:"Bracing Chill",icon:"achievement_zone_stormpeaks_01",special:function(ilvl){ return ScaleStat(337,310,ilvl,1) * 6 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
+	{slot:-3,spell:267892,type:4,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleStat(457,310,ilvl) * 10 * (pV.azeriteSynergisticGrowthPrediction || 0) * healPerStat.mastery.amount / ( (currFightData.end_time - currFightData.start_time) / 1000 ); }},
+	{slot:-3,spell:263984,type:2,tier:2,name:"Elemental Whirl (full potential)",icon:"ability_skyreach_four_wind",special:function(ilvl){ return ScaleStat(244,310,ilvl) * (healPerStat.haste.amount + healPerStat.mastery.amount + healPerStat.crit.amount + healPerStat.vers.amount) * 10 / 60 * 2 / 4; }},
+	{slot:-3,spell:267879,type:2,tier:2,name:"On My Way",icon:"inv_boots_cloth_08",special:function(ilvl){ return ScaleStat(87,310,ilvl) * healPerStat.vers.amount; }},
+	{slot:-3,spell:267882,type:2,tier:2,name:"Concentrated Mending",icon:"inv_offhand_1h_pvpdraenors1_d_02",special:function(ilvl){ return ScaleStat(3528,310,ilvl,1) * 12 / 60 * 3 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
+
+	{slot:-3,spell:263962,type:2,tier:3,name:"Resounding Protection",icon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(838,310,ilvl,1) * GetFightLenFactor(60 / 2) * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:274412,type:2,tier:3,name:"Serene Spirit",icon:"ability_shaman_astralshift",special:function(ilvl){ return ScaleStat(1748,310,ilvl,1) * 2 * (pV.castNum[108271] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:268437,type:2,tier:3,name:"Impassive Visage",icon:"inv_pet_inquisitoreye",special:function(ilvl){ return ScaleStat(560,310,ilvl,1) * (pV.azeriteImpassiveVisagePrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:280021,type:4,tier:3,name:"Pack Spirit",icon:"spell_nature_spiritwolf",special:function(ilvl){ return ScaleStat(156,310,ilvl,1) * (rV.wolfUptime / 1000) / 0.9; }},
 ];
 
 
@@ -3751,23 +3873,26 @@ var GEAR_CHARTS_SLOT = -3;
 var GEAR_CHARTS_ILVL = 340;
 
 function CreateAzChartData(fightLen){
-	var tier_1 = [];
+	var tier_data = [];
 	for (var i = 0, len = GEAR.length; i < len; i++) {
 		var gearData = GEAR[i];
 		if(gearData.slot == GEAR_CHARTS_SLOT) {
 			var name = (gearData.icon ? "<img src=\""+GetIconUrl(gearData.icon.replace(/\-/,"")+".jpg")+"\" alt=\""+gearData.name+"\">" : "")+" <a href=\"//www.wowhead.com/spell="+gearData.spell+"\" target=\"_blank\">"+gearData.name+"</a>";
 		
 			//tier_1.push( [ gearData.special(GEAR_CHARTS_ILVL) / (fightLen / 1000),name,gear_charts_colors[gearData.type][0] ] );
-			tier_1.push( [ gearData.special(GEAR_CHARTS_ILVL),name+" "+GEAR_CHARTS_ILVL,gear_charts_colors[gearData.type][0] ] );
+			if(!tier_data[gearData.tier - 1]) tier_data[gearData.tier - 1] = [];
+			tier_data[gearData.tier - 1].push( [ gearData.special(GEAR_CHARTS_ILVL) / (GEAR_CHARTS_SLOT == -2 ? 1 : (fightLen / 1000)),name+" "+GEAR_CHARTS_ILVL,gear_charts_colors[gearData.type][0],gearData.special(GEAR_CHARTS_ILVL) ] );
 		}
 	}
 	
-	tier_1.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
-
 	var HTML = "";
-	HTML += "<div class=\"row full\"><div class=\"col w20\">Tier 1</div><div class=\"list-top-line\"></div></div>";
-	for (var i = 0, len = tier_1.length; i < len; i++) {
-		HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_1[i][1]+"</div><div class=\"col w10 t-right\">"+NumberToFormattedNumber(tier_1[i][0],1)+"</div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_1[i][2])+"-bg\" style=\"width: "+(Math.min(tier_1[i][0]/tier_1[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+	for (var j = 0, len_j = tier_data.length; j < len_j; j++) {
+		tier_data[j].sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
+	
+		HTML += "<div class=\"row full\"><div class=\"col w20\">Tier "+(j+1)+"</div><div class=\"list-top-line\"></div></div>";
+		for (var i = 0, len = tier_data[j].length; i < len; i++) {
+			HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_data[j][i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(tier_data[j][i][0]+0.5)+(GEAR_CHARTS_SLOT != -2 ? "hps" : "")+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(tier_data[j][i][3],2)+"</span></em></div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_data[j][i][2])+"-bg\" style=\"width: "+(Math.min(tier_data[j][i][0]/tier_data[j][0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+		}
 	}
 	
 	$("#gear_chart").html(HTML);
@@ -3953,7 +4078,7 @@ function GetItemDataFromWowhead(itemID)
 		var oldRegister = $WowheadPower.register;
 		$WowheadPower.register = function(arr,id,locale,json){
 			if(arr == 3 && json && json.tooltip_enus){
-				console.log(arr,id,locale,json);
+				//console.log(arr,id,locale,json);
 			
 				var itemID = id.match(/^(\d+)/)[1];
 				
@@ -4362,6 +4487,7 @@ function BuildReport(){
 	
 	HTML += "<div class=\"full clearfix\" style=\"padding-bottom:5px;display:none\" id=\"gear_chart_adv\">";
 	HTML += "<input type=\"range\" min=\"310\" max=\"410\" value=\""+GEAR_CHARTS_ILVL+"\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
+	/*
 	HTML += "<div class=\"full\">";
 	var gear_chart_colors_keys = Object.keys(gear_charts_colors);
 	for (var i = 0, len = gear_chart_colors_keys.length; i < len; i++) {
@@ -4370,7 +4496,9 @@ function BuildReport(){
 		HTML += "<div class=\"col\" style=\"width:auto;\">"+gear_charts_colors[ gear_chart_colors_keys[i] ][1]+"</div>";
 		HTML += "</div>";
 	}
-	HTML += "</div></div>";
+	HTML += "</div>";
+	*/
+	HTML += "</div>";
 
 	HTML += "<div id=\"gear_chart\"></div></div></div></div>";
 
