@@ -65,6 +65,7 @@ var spellCastTime = {
 	204263: 1.5,	//Shining Force
 	527: 1.5,	//Purify
 	186263: 1.5,	//Shadow Mend
+	123040: 1.5,	//Mindbender
 	
 	232633: 1.5,	//Arcane torrent
 };
@@ -357,7 +358,15 @@ function GetTraitRank(traitID)
 	if(cV.traitInfo[traitID])
 		return cV.traitInfo[traitID].rank;
 	else
-		return 0;
+		return false;
+}
+
+function GetTraitBySpell(spellID)
+{
+	if(cV.traitBySpell[spellID])
+		return cV.traitBySpell[spellID];
+	else
+		return false;
 }
 
 var ScaleStatData = {
@@ -412,6 +421,19 @@ function NumberToFormattedNumber(num,decimals,decimals_m,decimals_k)
 function error_msg(msg) {
 	$("#main").html("<div class=\"panel\"><div class=\"col-full\"><div class=\"box\">"+msg+"</div></div></div>");
 
+}
+
+function CheckTraitBySpellID(event,spellID){
+	for (var k = 0, k_len = event.artifact.length; k < k_len; k++)
+		if(event.artifact[k].spellID == spellID) return event.artifact[k];
+}
+
+function CreateDataByTraitBySpellID(event,spellID,auraSpellID,stat,amount,isLinear){
+	var trait = CheckTraitBySpellID(event,spellID); 
+	if(trait){
+		if(!statsBuffsOther[stat][event.sourceID]) statsBuffsOther[stat][event.sourceID]={};  
+		statsBuffsOther[stat][event.sourceID][auraSpellID] = ScaleStat(amount,310,trait.rank,isLinear);
+	}
 }
 
 function AtonementDamageEvent(spellID,event,eSpellID) {
@@ -618,19 +640,6 @@ var ITEMS = [
 
 ];
 
-function CheckTraitBySpellID(event,spellID){
-	for (var k = 0, k_len = event.artifact.length; k < k_len; k++)
-		if(event.artifact[k].spellID == spellID) return event.artifact[k];
-}
-
-function CreateDataByTraitBySpellID(event,spellID,auraSpellID,stat,amount,isLinear){
-	var trait = CheckTraitBySpellID(event,spellID); 
-	if(trait){
-		if(!statsBuffsOther[stat][event.sourceID]) statsBuffsOther[stat][event.sourceID]={};  
-		statsBuffsOther[stat][event.sourceID][auraSpellID] = ScaleStat(amount,310,trait.rank,isLinear);
-	}
-}
-
 
 var TRAITS = [
 /*
@@ -761,6 +770,9 @@ var TRAITS = [
 			pV.azeritePWRPredictionAtt = 0;
 			pV.azeritePWRPredictionTargets = {};
 			pV.azeritePWRPredictionLast = 0;
+			pV.azeritePWRValue = 0;
+			pV.azeritePWRAmountBonus = 0;
+			pV.azeritePWRAmountAtt = 0;
 		},
 		parse: [
 			"cast", function(event,spellID){
@@ -774,16 +786,41 @@ var TRAITS = [
 			},
 			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 194509){
+					var trait = pV.azeritePWRValue * 1.4;
+					if(event.hitType == 2){
+						trait *= 2;
+					}
+					trait *= (1 / ((pV.versNow / STATS.vers) / 100 + 1));
+					if(pV.AtonementTarget[event.targetID]){
+						trait *= (1 / ((pV.masteryNow / STATS.mastery) / 100 + 1));
+					}
+					
+					rV.traits[399] += Math.min(trait,amount);
+					pV.azeritePWRAmountBonus += Math.min(trait,amount);
+				
 					pV.azeritePWRPrediction ++;
 					pV.azeritePWRPredictionTargets[event.targetID] = event.timestamp + 10500;
 				} else if(spellIsAtonement[spellID] && event.timestamp > pV.azeritePWRPredictionLast) {
 					pV.azeritePWRPredictionLast = event.timestamp + 200;
 					Object.keys(pV.azeritePWRPredictionTargets).forEach(function (targetID) {
-						if(pV.azeritePWRPredictionTargets[targetID] > event.timestamp && !pV.AtonementTarget[targetID]){
-							//console.log(amount + overheal,pV.azeritePWRPredictionTargets[targetID] - event.timestamp,event.timestamp-currFightData.start_time,actorsData[targetID].name);
-							pV.azeritePWRPredictionAtt += amount + overheal;
+						//console.log(amount + overheal,pV.azeritePWRPredictionTargets[targetID] - event.timestamp,event.timestamp-currFightData.start_time,actorsData[targetID].name);
+						if((pV.azeritePWRPredictionTargets[targetID] - event.timestamp) <= 1500 && (pV.azeritePWRPredictionTargets[targetID] - event.timestamp) >= 0){
+							if(GetTraitBySpell(278643)) {
+								rV.traits[399] += amount;
+								pV.azeritePWRAmountAtt += amount;
+							} else {
+								pV.azeritePWRPredictionAtt += amount + overheal;
+							}
 						}
 					});					
+				}
+			},
+			"combantantInfo", function(event){
+				var trait = GetTraitBySpell(278643);
+				if(trait){
+					for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
+						pV.azeritePWRValue += ScaleStat(720,340,trait.rank[k],1);
+					}
 				}
 			},
 		],
@@ -793,6 +830,7 @@ var TRAITS = [
 			spellID: 278643,
 			icon: "spell_priest_power-word.jpg",
 			tier: 1,
+			additionalText: function(){ return "Bonus: "+NumberToFormattedNumber(pV.azeritePWRAmountBonus,1)+(GetTraitBySpell(278643).rank.length > 1 ? " (per item: "+NumberToFormattedNumber(pV.azeritePWRAmountBonus/GetTraitBySpell(278643).rank.length,1)+")" : "")+"<br>Atonement: "+NumberToFormattedNumber(pV.azeritePWRAmountAtt,1); },
 		},
 	},
 	{	//Shadow Mend
@@ -833,7 +871,6 @@ var TRAITS = [
 			pV.azeritePenanceDamagePredictionSWPTime = 0;
 		},
 		parse: [
-			
 			"damage", function(event,spellID){
 				if(spellID == 47666){
 					Object.keys(pV.AtonementTarget).forEach(function (targetID) {
@@ -934,6 +971,10 @@ var TRAITS = [
 				}
 			},
 		],
+		afterParse: function() {
+			if(healingData[270117])
+				rV.traits[83] += healingData[270117][0];
+		},
 		obj: {
 			name: "Impassive Visage",
 			id: 83,
@@ -964,7 +1005,62 @@ var TRAITS = [
 			tier: 2,
 		},
 	},
-	
+	{	//prydaz 2.0
+		init: function() {
+			rV.traits[15] = 0;
+		},
+		afterParse: function() {
+			if(healingData[269279])
+				rV.traits[15] += healingData[269279][0];
+		},
+		obj: {
+			name: "Resounding Protection",
+			id: 15,
+			spellID: 263962,
+			icon: "ability_vehicle_shellshieldgenerator_green.jpg",
+			tier: 3,
+		},
+	},
+	{	//mastery passive
+		init: function() {
+			rV.traits[18] = 0;
+		},
+		afterParse: function() {
+			var trait = GetTraitBySpell(264108);
+			if(trait){
+				for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
+					rV.traits[18] += ScaleStat(87,310,trait.rank[k]) * healPerStat.mastery.amount;
+				}
+			}
+		},
+		obj: {
+			name: "Blood Siphon",
+			id: 18,
+			spellID: 264108,
+			icon: "ability_deathknight_deathsiphon2.jpg",
+			tier: 2,
+		},
+	},
+	{	//vers passive
+		init: function() {
+			rV.traits[38] = 0;
+		},
+		afterParse: function() {
+			var trait = GetTraitBySpell(267879);
+			if(trait){
+				for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
+					rV.traits[38] += ScaleStat(87,310,trait.rank[k]) * healPerStat.vers.amount;
+				}
+			}
+		},
+		obj: {
+			name: "On My Way",
+			id: 38,
+			spellID: 267879,
+			icon: "inv_boots_cloth_08.jpg",
+			tier: 2,
+		},
+	},
 	
 ];
 
@@ -1560,7 +1656,7 @@ var gear_charts_colors = {
 var GEAR = [
 	{slot:-3,spell:273307,type:9,tier:1,name:"Weal and Woe",icon:"spell_holy_penance",special:function(ilvl){ return ScaleStat(501,340,ilvl,1) * (pV.azeritePenancePredictionSmite || 0) * GetVersFactor() * GetCritFactor() * GetMasteryFactor() * 1.5 * GetDpsFactor() * 0.6 + ScaleStat(1877,340,ilvl,1) * (pV.azeritePenancePredictionPWS || 0) * GetVersFactor() * GetCritFactor(); }},
 	{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleStat(10012,340,ilvl,1) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleStat(10012,340,ilvl,1) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePainSuppressionPredictionAtt; }},
-	{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleStat(720,340,ilvl,1) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePWRPredictionAtt; }},
+	{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleStat(720,340,ilvl,1) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePWRPredictionAtt; },textAmount:function(){ var t="Atonement duration effect can't be stacked.<br>Atonement: "+NumberToFormattedNumber(pV.azeritePWRPredictionAtt,2)+(GetTraitBySpell(278643) ? " (already have it)" : ""); return t;}},
 	{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleStat(56,340,ilvl,1) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 	{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleStat(166,340,ilvl,1) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 0.6 * GetDpsFactor() + pV.azeritePenanceDamagePredictionSWPHeal; }},
 	{slot:-3,spell:277680,type:9,tier:1,name:"Gift of Forgiveness",icon:"spell_holy_holysmite",special:function(ilvl){ return ScaleStat(375,340,ilvl,1) * (pV.azeriteSmitePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 1.5 * GetDpsFactor() * 0.6; }},
@@ -2186,7 +2282,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						parsePlugins.energize[j](event,spellID);
 					}				
 				}			
-			} else if(event.type == "combatantinfo" && event.sourceID == actor_id){
+			} else if(event.type == "combatantinfo" && event.sourceID == actor_id && !cV.combantantInfo){
 
 				if(event["specID"] != 256){
 					error_msg("Wrong specialization");
@@ -2207,8 +2303,13 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				for (var k = 0, k_len = event.artifact.length; k < k_len; k++) {
 					var traitData = event.artifact[k];
 				
-					cV.traitInfo[traitData.traitID] = traitData;
-					cV.traitBySpell[traitData.spellID] = traitData;
+					if(cV.traitInfo[traitData.traitID]){
+						cV.traitInfo[traitData.traitID].rank.push(traitData.rank);
+					} else {
+						traitData.rank = [traitData.rank];
+						cV.traitInfo[traitData.traitID] = traitData;
+						cV.traitBySpell[traitData.spellID] = traitData;
+					}
 				}
 				for (var k = 0, k_len = event.talents.length; k < k_len; k++) {
 					var talentInfo = event.talents[k];
@@ -2433,9 +2534,16 @@ function CreateAzChartData(fightLen){
 		if(gearData.slot == GEAR_CHARTS_SLOT) {
 			var name = (gearData.icon ? "<img src=\""+GetIconUrl(gearData.icon.replace(/\-/,"")+".jpg")+"\" alt=\""+gearData.name+"\">" : "")+" <a href=\"//www.wowhead.com/spell="+gearData.spell+"\" target=\"_blank\">"+gearData.name+"</a>";
 		
+			var textAmount = gearData.textAmount ? gearData.textAmount() : "";
 			//tier_1.push( [ gearData.special(GEAR_CHARTS_ILVL) / (fightLen / 1000),name,gear_charts_colors[gearData.type][0] ] );
 			if(!tier_data[gearData.tier - 1]) tier_data[gearData.tier - 1] = [];
-			tier_data[gearData.tier - 1].push( [ gearData.special(GEAR_CHARTS_ILVL) / (GEAR_CHARTS_SLOT == -2 ? 1 : (fightLen / 1000)),name+" "+GEAR_CHARTS_ILVL,gear_charts_colors[gearData.type][0],gearData.special(GEAR_CHARTS_ILVL) ] );
+			tier_data[gearData.tier - 1].push( [ 
+				gearData.special(GEAR_CHARTS_ILVL) / (GEAR_CHARTS_SLOT == -2 ? 1 : (fightLen / 1000)),
+				name+" "+GEAR_CHARTS_ILVL,
+				gear_charts_colors[gearData.type][0],
+				gearData.special(GEAR_CHARTS_ILVL),
+				textAmount ,
+			] );
 		}
 	}
 	
@@ -2445,7 +2553,7 @@ function CreateAzChartData(fightLen){
 	
 		HTML += "<div class=\"row full\"><div class=\"col w20\">Tier "+(j+1)+"</div><div class=\"list-top-line\"></div></div>";
 		for (var i = 0, len = tier_data[j].length; i < len; i++) {
-			HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_data[j][i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(tier_data[j][i][0]+0.5)+(GEAR_CHARTS_SLOT != -2 ? "hps" : "")+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(tier_data[j][i][3],2)+"</span></em></div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_data[j][i][2])+"-bg\" style=\"width: "+(Math.min(tier_data[j][i][0]/tier_data[j][0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+			HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_data[j][i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(tier_data[j][i][0]+0.5)+(GEAR_CHARTS_SLOT != -2 ? "hps" : "")+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(tier_data[j][i][3],2)+(tier_data[j][i][4] != "" ? "<br>"+tier_data[j][i][4] : "" )+"</span></em></div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_data[j][i][2])+"-bg\" style=\"width: "+(Math.min(tier_data[j][i][0]/tier_data[j][0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
 		}
 	}
 	
@@ -3083,37 +3191,63 @@ function BuildReport(){
 
 	HTML += "<div id=\"gear_chart\"></div></div></div></div>";
 
-	/*
 	/// Traits
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">TRAITS</header><div class=\"list-top-line\"> </div><ul class=\"list traits\">";
 	counter = 0;
 	var traitsData = [];
-	for (var i = 0, len = TRAITS.length; i < len; i++) if(GetTraitRank(TRAITS[i].obj.id) > 0) traitsData.push([ TRAITS[i].obj.id,TRAITS[i] ]);
+	for (var i = 0, len = TRAITS.length; i < len; i++) if(TRAITS[i].obj && GetTraitRank(TRAITS[i].obj.id)) traitsData.push([ TRAITS[i].obj.id,TRAITS[i] ]);
 	traitsData.sort(function(a,b){ return rV.traits[ a[0] ] > rV.traits[ b[0] ] ? - 1 : 1 });
+	Object.keys(cV.traitInfo).forEach(function (traitID) {
+		var isFound = false;
+		for (var i = 0, len = traitsData.length; i < len; i++) {
+			if(traitsData[i][0] == cV.traitInfo[traitID].traitID) {
+				isFound = true;
+				break;
+			}
+		}
+		if(!isFound) traitsData.push([ cV.traitInfo[traitID].traitID,false,cV.traitInfo[traitID] ]);
+	});
 	for (var i = 0, len = traitsData.length; i < len; i++) {
-		var traitData = traitsData[i][1].obj
-		var traitRank = GetTraitRank(traitData.id)
-		if(traitRank > 0){
+		var preDefTrait = traitsData[i][1];
+		if(preDefTrait){
+			var traitData = traitsData[i][1].obj;
+			var traitRanks = GetTraitRank(traitData.id);
+			if(traitRanks){
+				if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
+				
+				HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
+				HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(traitData.icon)+"\" alt=\""+traitData.name+"\"></a></div>";
+	
+				HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\">"+traitData.name+"</a> [Level "+traitRanks.join(", ")+"]</header>";
+			
+				var amount = rV.traits[traitData.id];
+				if(amount > 0){
+					HTML += "<em class=\"result "+(traitData.tip ? "tooltip" : "")+"\">"+NumberToFormattedNumber(amount,2)+(traitData.tip ? "<span class=\"tip-text\" style=\"width: 180px;margin-left:-90px;\">"+traitData.tip()+"</span>" : "")+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+					HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
+		
+					if(traitData.additionalText) HTML += "<br>"+traitData.additionalText();
+					else if(traitRanks.length > 1) HTML += "<br>Avg per item: "+NumberToFormattedNumber(amount / traitRanks.length,0,2)+" ("+(amount / traitRanks.length/rV.total*100).toFixed(2)+"%)";	
+				}
+			
+				HTML += "</div></div>";
+				counter++;
+			}
+		} else {
+			var traitData = traitsData[i][2];
+			
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
 			
 			HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
-			HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(traitData.icon)+"\" alt=\""+traitData.name+"\"></a></div>";
-
-			HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\">"+traitData.name+"</a>"+(traitRank > 1 ? " [Rank "+traitRank+"]" : "")+"</header>";
-		
-			var amount = rV.traits[traitData.id];
-			HTML += "<em class=\"result "+(traitData.tip ? "tooltip" : "")+"\">"+NumberToFormattedNumber(amount,2)+(traitData.tip ? "<span class=\"tip-text\" style=\"width: 180px;margin-left:-90px;\">"+traitData.tip()+"</span>" : "")+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
-			HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
-
-			if(traitData.additionalText) HTML += "<br>"+traitData.additionalText();
-			else if(traitRank > 1) HTML += "<br>Per rank: "+NumberToFormattedNumber(amount / traitRank,0,2)+" ("+(amount / traitRank/rV.total*100).toFixed(2)+"%)";		
-		
+			HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(traitData.icon)+"\"></a></div>";
+			HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"></a> [Level "+traitData.rank.join(", ")+"]</header>";
 			HTML += "</div></div>";
+			
 			counter++;
 		}
 	}	
 	HTML += "</ul></div></div></div>";
-	*/
+	
+	console.log(traitsData);
 	
 	
 	/// Talents
