@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "03.08.2018";
+var LAST_UPDATE = "04.08.2018";
 
 var itemsStats = {};
 
@@ -423,16 +423,23 @@ function error_msg(msg) {
 
 }
 
-function CheckTraitBySpellID(event,spellID){
-	for (var k = 0, k_len = event.artifact.length; k < k_len; k++)
-		if(event.artifact[k].spellID == spellID) return event.artifact[k];
+function ScaleStatRanks(spellID,ranks,type)
+{
+	var result = 0;
+	for (var k = 0, k_len = ranks.length; k < k_len; k++) result += ScaleTrait(spellID,ranks[k],type);
+	return result;
 }
 
-function CreateDataByTraitBySpellID(event,spellID,auraSpellID,stat,amount,isLinear){
-	var trait = CheckTraitBySpellID(event,spellID); 
-	if(trait){
+function CreateDataByTraitBySpellID(event,spellID,auraSpellID,stat,type){
+	var scaledAmount = 0;
+	for (var k = 0, k_len = event.artifact.length; k < k_len; k++){
+		if(event.artifact[k].spellID == spellID){
+			scaledAmount += ScaleTrait(spellID,event.artifact[k].rank,type);
+		}
+	}
+	if(scaledAmount > 0){
 		if(!statsBuffsOther[stat][event.sourceID]) statsBuffsOther[stat][event.sourceID]={};  
-		statsBuffsOther[stat][event.sourceID][auraSpellID] = ScaleStat(amount,310,trait.rank,isLinear);
+		statsBuffsOther[stat][event.sourceID][auraSpellID] = scaledAmount;	
 	}
 }
 
@@ -451,6 +458,71 @@ function AtonementAnyEvent(spellID,event) {
 		delete pV.atonementDamageTarget[spellID];
 		pV.atonementQueue.splice(pV.atonementQueue.indexOf(spellID), 1);
 	}
+}
+
+var TRAITS_NUMBERS = {
+	273307: [{stat:501,lvl:340,isLinear:true},{stat:1877,lvl:340,isLinear:true}],	//Weal and Woe
+	272775: [{stat:10012,lvl:340,isLinear:true}],	//Moment of Repose
+	278643: [{stat:720,lvl:340,isLinear:true}],	//Enduring
+	275541: [{stat:56,lvl:340,isLinear:true}],	//Depth of the Shadows
+	278629: [{stat:166,lvl:340,isLinear:true}],	//Contemptuous Homily
+	277680: [{stat:375,lvl:340,isLinear:true}],	//Gift of Forgiveness
+	267892: [{stat:207,lvl:340,isLinear:false}],	//Synergistic Growth
+	274366: [{stat:10597,lvl:340,isLinear:true}],	//Sanctum
+	280018: [{stat:5005,lvl:340,isLinear:true}],	//Twist Magic
+	
+	272989: [{stat:1001,lvl:340,isLinear:true}],	//Soothing Waters
+	278715: [{stat:2503,lvl:340,isLinear:true}],	//Spouting Spirits
+	273597: [{stat:289,lvl:340,isLinear:true}],	//Ebb and Flow
+	278713: [{stat:5100,lvl:340,isLinear:true}],	//Surging Tides
+	277658: [{stat:813,lvl:340,isLinear:true}],	//Overflowing Shores
+	275488: [{stat:1326,lvl:340,isLinear:true}],	//Swelling Stream
+	277666: [{stat:67,lvl:340,isLinear:false}],	//Ancestral Resonance
+	280021: [{stat:1570,lvl:340,isLinear:true}],	//Pack Spirit
+	274412: [{stat:5416,lvl:340,isLinear:true}],	//Serene Spirit
+	
+	281841: [{stat:287,lvl:340,isLinear:false},{stat:144,lvl:340,isLinear:false}],	//Tradewinds
+	273682: [{stat:296,lvl:340,isLinear:false}],	//Meticulous Scheming
+	280410: [{stat:300,lvl:340,isLinear:false},{stat:70,lvl:340,isLinear:false}],	//Incite the Pack
+	281514: [{stat:228,lvl:340,isLinear:true}],	//Unstable Catalyst
+	267886: [{stat:44,lvl:340,isLinear:false}],	//Ephemeral Recovery
+	280407: [{stat:324,lvl:340,isLinear:false}],	//Blood Rite
+	273823: [{stat:345,lvl:340,isLinear:false}],	//Blightborne Infusion
+	280555: [{stat:153/20,lvl:360,isLinear:false}],	//Archive of the Titans		???
+	280559: [{stat:2160,lvl:370,isLinear:false}],	//Laser Matrix (unknown, 6targets)
+	273829: [{stat:206,lvl:340,isLinear:true},{stat:411,lvl:340,isLinear:true}],	//Secrets of the Deep
+	280429: [{stat:431,lvl:340,isLinear:false}],	//Swirling Sands
+	280581: [{stat:543,lvl:370,isLinear:true}],	//Collective Will
+	280577: [{stat:304,lvl:310,isLinear:false},{stat:190,lvl:310,isLinear:false}],	//Glory in Battle ???	
+	
+	279926: [{stat:13,lvl:340,isLinear:true}],	//Earthlink
+	267889: [{stat:4521,lvl:340,isLinear:true}],	//Blessed Portents
+	264108: [{stat:64,lvl:340,isLinear:false},{stat:32,lvl:340,isLinear:false}],	//Blood Siphon 
+	267883: [{stat:3060,lvl:340,isLinear:true}],	//Savior
+	266180: [{stat:20,lvl:340,isLinear:false}],	//Overwhelming Power
+	267880: [{stat:544,lvl:340,isLinear:false}],	//Woundbinder
+	279899: [{stat:56,lvl:340,isLinear:false}],	//Unstable Flames
+	267884: [{stat:1530,lvl:340,isLinear:true}],	//Bracing Chill
+	263984: [{stat:192,lvl:340,isLinear:false}],	//Elemental Whirl
+	267879: [{stat:64,lvl:340,isLinear:false},{stat:32,lvl:340,isLinear:false}],	//On My Way
+	267882: [{stat:62,lvl:340,isLinear:true}],	//Concentrated Mending
+	
+	263962: [{stat:8410,lvl:340,isLinear:true}],	//Resounding Protection
+	268437: [{stat:2944,lvl:340,isLinear:true}],	//Impassive Visage
+	268596: [{stat:111,lvl:340,isLinear:false}],	//Gemhide
+	268599: [{stat:4183,lvl:340,isLinear:true},{stat:76,lvl:340,isLinear:false}],	//Vampiric Speed	
+	268600: [{stat:785,lvl:340,isLinear:true}],	//
+	268435: [{stat:10008,lvl:340,isLinear:true}],	//
+	268595: [{stat:11214,lvl:340,isLinear:true}],	//
+};
+
+function ScaleTrait(spellID,toIlvl,type) {
+	var trait = TRAITS_NUMBERS[spellID];
+	if(trait){
+		trait = trait[type ? type - 1 : 0];
+		return ScaleStat(trait.stat,trait.lvl,toIlvl,trait.isLinear ? 1 : null)
+	}else
+		return 0;
 }
 
 var ATONEMENT = [
@@ -633,57 +705,39 @@ var ITEMS = [
 		},
 	},
 
-{parse:["gear", function(itemData,itemID){if(itemID == 159620) statsBuffs.crit[271071] = ScaleStat(485,310,itemData.itemLevel);}]}, //Conch of Dark Whispers
-{parse:["gear", function(itemData,itemID){if(itemID == 158371) statsBuffs.haste[281724] = ScaleStat(83.6,300,itemData.itemLevel);}]}, //Seabreeze
-{parse:["gear", function(itemData,itemID){if(itemID == 159615) statsBuffs.haste[271115] = ScaleStat(182,300,itemData.itemLevel);}]}, //Ignition Mage's Fuse
-{parse:["gear", function(itemData,itemID){if(itemID == 159630) statsBuffs.int[268998] = ScaleStat(8,300,itemData.itemLevel,1);}]}, //Balefire Branch
-
+	{parse:["gear", function(itemData,itemID){if(itemID == 159620) statsBuffs.crit[271071] = ScaleStat(485,310,itemData.itemLevel);}]}, //Conch of Dark Whispers
+	{parse:["gear", function(itemData,itemID){if(itemID == 158371) statsBuffs.haste[281724] = ScaleStat(83.6,300,itemData.itemLevel);}]}, //Seabreeze
+	{parse:["gear", function(itemData,itemID){if(itemID == 159615) statsBuffs.haste[271115] = ScaleStat(182,300,itemData.itemLevel);}]}, //Ignition Mage's Fuse
+	{parse:["gear", function(itemData,itemID){if(itemID == 159630) statsBuffs.int[268998] = ScaleStat(8,300,itemData.itemLevel,1);}]}, //Balefire Branch
 ];
 
 
 var TRAITS = [
-/*
-
-{slot:-3,spell:267886,type:2,tier:1,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleStat(20,310,ilvl,1) * 2 * GetFightLenFactor(8) / rV.manaUsage * rV.healFromMana; }},
-{slot:-3,spell:277666,type:4,tier:1,name:"Ancestral Resonance",icon:"spell_shaman_improvedreincarnation",special:function(ilvl){ return ScaleStat(50 * 1.5,310,ilvl) * 40 * healPerStat.mastery.amount / ( (currFightData.end_time - currFightData.start_time) / 1000 ); }},
-{slot:-3,spell:280555,type:3,tier:1,name:"Archive of the Titans",icon:"inv_trinket_80_titan01b",special:function(ilvl){ return ScaleStat(140,370,ilvl,1) * healPerStat.int.amount * 0.95; }},
-{slot:-3,spell:280559,type:3,tier:1,name:"Laser Matrix (unknown, 6targets)",icon:"spell_nature_groundingtotem",special:function(ilvl){ return ScaleStat(2160,370,ilvl,1) * GetFightLenFactor(60) * GetModFactor() * GetVersFactor() * GetCritFactor() * 6; }},
-
-{slot:-3,spell:267889,type:2,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleStat(699,310,ilvl,1) * GetFightLenFactor(60 / 5) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-{slot:-3,spell:267883,type:2,tier:2,name:"Savior (20% chance)",icon:"achievement_guildperk_everyonesahero",special:function(ilvl){ return ScaleStat(465,310,ilvl,1) * 2 * (pV.azerite35hpPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() * 0.2; }},
-{slot:-3,spell:279899,type:2,tier:2,name:"Unstable Flames (100% possible uptime)",icon:"inv_ember",special:function(ilvl){ return ScaleStat(109 * 1.5,310,ilvl) * healPerStat.crit.amount * 5 / 60 * 10; }},
-{slot:-3,spell:267884,type:2,tier:2,name:"Bracing Chill",icon:"achievement_zone_stormpeaks_01",special:function(ilvl){ return ScaleStat(337,310,ilvl,1) * 6 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
-{slot:-3,spell:267882,type:2,tier:2,name:"Concentrated Mending",icon:"inv_offhand_1h_pvpdraenors1_d_02",special:function(ilvl){ return ScaleStat(3528,310,ilvl,1) * 12 / 60 * 3 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
-
-{slot:-3,spell:263962,type:2,tier:3,name:"Resounding Protection",icon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(838,310,ilvl,1) * GetFightLenFactor(60 / 2) * GetVersFactor() * GetCritFactor(); }},
-{slot:-3,spell:274412,type:2,tier:3,name:"Serene Spirit",icon:"ability_shaman_astralshift",special:function(ilvl){ return ScaleStat(1748,310,ilvl,1) * 2 * (pV.castNum[108271] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-{slot:-3,spell:268437,type:2,tier:3,name:"Impassive Visage",icon:"inv_pet_inquisitoreye",special:function(ilvl){ return ScaleStat(560,310,ilvl,1) * (pV.azeriteImpassiveVisagePrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-
-*/
-
-
-{parse:["combantantInfo", function(){if(cV.traitBySpell[280577]) statsBuffs.crit[280780] = ScaleStat(304,310,cV.traitBySpell[280577].rank);}]}, //Glory in Battle	
-{parse:["combantantInfo", function(){if(cV.traitBySpell[280577]) statsBuffs.haste[280780] = ScaleStat(190,310,cV.traitBySpell[280577].rank);}]}, //Glory in Battle	
-{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.haste[268954] = ScaleStat(244,310,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
-{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.mastery[268955] = ScaleStat(244,310,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
-{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.crit[268953] = ScaleStat(244,310,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
-{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.vers[268956] = ScaleStat(244,310,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
-{parse:["combantantInfo", function(){if(cV.traitBySpell[267880]) statsBuffs.haste[269085] = ScaleStat(198,310,cV.traitBySpell[267880].rank);}]}, //Woundbinder
-{parse:["combantantInfo", function(){if(cV.traitBySpell[267892]) statsBuffs.mastery[272090] = ScaleStat(457,310,cV.traitBySpell[267892].rank);}]}, //Synergistic Growth
-{parse:["combantantInfo", function(){if(cV.traitBySpell[279926]) statsBuffs.int[279928] = ScaleStat(31,310,cV.traitBySpell[279926].rank,1);}]}, //Earthlink
-{parse:["combantantInfo", function(){if(cV.traitBySpell[280407]) statsBuffs.haste[280409] = ScaleStat(276,310,cV.traitBySpell[280407].rank);}]}, //Blood Rite
-{parse:["combantantInfo", function(){if(cV.traitBySpell[273823]) statsBuffs.crit[280204] = ScaleStat(293,310,cV.traitBySpell[273823].rank);}]}, //Blightborne Infusion
-{parse:["combantantInfo", function(){if(cV.traitBySpell[280410]) statsBuffs.mastery[280412] = ScaleStat(227,310,cV.traitBySpell[280410].rank);}]}, //Incite the Pack
-{parse:["combantantInfo", function(){if(cV.traitBySpell[273829]) statsBuffs.int[273842] = ScaleStat(135,295,cV.traitBySpell[273829].rank,1);}]}, //Secrets of the Deep
-{parse:["combantantInfo", function(){if(cV.traitBySpell[273829]) statsBuffs.int[273843] = ScaleStat(270,295,cV.traitBySpell[273829].rank,1);}]}, //Secrets of the Deep
-{parse:["combantantInfo", function(){if(cV.traitBySpell[266180]) statsBuffs.haste[271711] = ScaleStat(14,340,cV.traitBySpell[266180].rank);}]}, //Overwhelming Power
-{parse:["combantantInfo", function(){if(cV.traitBySpell[281841]) statsBuffs.mastery[281843] = ScaleStat(244,310,cV.traitBySpell[281841].rank);}]}, //Tradewinds
-{parse:["combantantInfo", function(){if(cV.traitBySpell[273684]) statsBuffs.haste[273714] = ScaleStat(244,310,cV.traitBySpell[273684].rank);}]}, //Meticulous Scheming
-{parse:["combantantInfo", function(){if(cV.traitBySpell[281514]) statsBuffs.int[281517] = ScaleStat(172,310,cV.traitBySpell[281514].rank,1);}]}, //Unstable Catalyst
-
-{parse:["allCombantantInfo", function(e){ CreateDataByTraitBySpellID(e,280410,280413,"mastery",53);  }]}, //Incite the Pack
-{parse:["allCombantantInfo", function(e){ CreateDataByTraitBySpellID(e,281841,281844,"mastery",122);  }]}, //Tradewinds
-
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[280577]) statsBuffs.crit[280780] = ScaleStatRanks(280577,cV.traitBySpell[280577].rank,1);}]}, //Glory in Battle	
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[280577]) statsBuffs.haste[280780] = ScaleStatRanks(280577,cV.traitBySpell[280577].rank,2);}]}, //Glory in Battle	
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.haste[268954] = ScaleStatRanks(263984,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.mastery[268955] = ScaleStatRanks(263984,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.crit[268953] = ScaleStatRanks(263984,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.vers[268956] = ScaleStatRanks(263984,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[267880]) statsBuffs.haste[269085] = ScaleStatRanks(267880,cV.traitBySpell[267880].rank);}]}, //Woundbinder
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[267892]) statsBuffs.mastery[272090] = ScaleStatRanks(267892,cV.traitBySpell[267892].rank);}]}, //Synergistic Growth
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[279926]) statsBuffs.int[279928] = ScaleStatRanks(279926,cV.traitBySpell[279926].rank);}]}, //Earthlink
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[280407]) statsBuffs.haste[280409] = ScaleStatRanks(280407,cV.traitBySpell[280407].rank);}]}, //Blood Rite
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[273823]) statsBuffs.crit[280204] = ScaleStatRanks(273823,cV.traitBySpell[273823].rank);}]}, //Blightborne Infusion
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[280410]) statsBuffs.mastery[280412] = ScaleStatRanks(280410,cV.traitBySpell[280410].rank);}]}, //Incite the Pack
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[273829]) statsBuffs.int[273842] = ScaleStatRanks(273829,cV.traitBySpell[273829].rank,1);}]}, //Secrets of the Deep
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[273829]) statsBuffs.int[273843] = ScaleStatRanks(273829,cV.traitBySpell[273829].rank,2);}]}, //Secrets of the Deep
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[266180]) statsBuffs.haste[271711] = ScaleStatRanks(266180,cV.traitBySpell[266180].rank);}]}, //Overwhelming Power
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[281841]) statsBuffs.mastery[281843] = ScaleStatRanks(281841,cV.traitBySpell[281841].rank);}]}, //Tradewinds
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[273682]) statsBuffs.haste[273714] = ScaleStatRanks(273682,cV.traitBySpell[273682].rank);}]}, //Meticulous Scheming
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[281514]) statsBuffs.int[281517] = ScaleStatRanks(281514,cV.traitBySpell[281514].rank);}]}, //Unstable Catalyst
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[279899]) statsBuffs.crit[279902] = ScaleStatRanks(279899,cV.traitBySpell[279899].rank);}]}, //Unstable Flames
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[280555]) statsBuffs.int[280709] = ScaleStatRanks(280555,cV.traitBySpell[280555].rank);}]}, //Archive of the Titans
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[277666]) statsBuffs.mastery[277942] = ScaleStatRanks(277666,cV.traitBySpell[277666].rank);}]}, //Ancestral Resonance
+	
+	{parse:["allCombantantInfo", function(e){ CreateDataByTraitBySpellID(e,280410,280413,"mastery",2);  }]}, //Incite the Pack
+	{parse:["allCombantantInfo", function(e){ CreateDataByTraitBySpellID(e,281841,281844,"mastery",2);  }]}, //Tradewinds
+	{parse:["allCombantantInfo", function(e){ CreateDataByTraitBySpellID(e,280581,280830,"int");  }]}, //Collective Will
 
 	{	//Penance
 		init: function() {
@@ -691,12 +745,21 @@ var TRAITS = [
 			pV.azeritePenancePredictionPWS = 0;
 			pV.azeritePenancePredictionSmite = 0;
 			pV.azeritePenancePredictionLast = 0;
+			pV.azeritePenanceSmite = 0;
+			pV.azeritePenanceSmiteValue = 0;
+			pV.azeritePenanceSmiteLastMod = 0;
+			pV.azeritePenanceSmiteAuraStatus = false;
+			pV.azeritePenancePWS = 0;
+			pV.azeritePenancePWSValue = 0;
+			pV.azeritePenancePWSAuraStatus = false;
+			pV.azeritePenanceRaptureStatus = false;
 		},
 		parse: [
 			"cast", function(event,spellID){
 				if(spellID == 17 && pV.azeritePenancePredictionType == 2){
 					pV.azeritePenancePredictionType = 0;
 					pV.azeritePenancePredictionPWS ++; 
+					if(pV.azeritePenanceRaptureStatus) pV.azeritePenancePredictionPWS += 2; 
 				} else if(spellID == 585 && pV.azeritePenancePredictionType == 1){
 					pV.azeritePenancePredictionType = 0;
 					Object.keys(pV.AtonementTarget).forEach(function (targetID) {
@@ -714,15 +777,64 @@ var TRAITS = [
 				if(spellID == 47666){
 					pV.azeritePenancePredictionLast = event.timestamp;
 					pV.azeritePenancePredictionType = 2;
+				} else if(spellID == 585){
+					if(event.amount > 0 && pV.azeritePenanceSmiteAuraStatus){
+						var value = pV.azeritePenanceSmiteValue * 1.05;
+						if(event.hitType == 2) value *= 2;
+						value *= (1 / ((pV.versNow / STATS.vers) / 100 + 1));
+						pV.azeritePenanceSmiteLastMod = Math.min(value / event.amount,1);
+					} else
+						pV.azeritePenanceSmiteLastMod = 0;
 				}
 			},
+			"applybuff", function(event,spellID){
+				if(spellID == 273312) pV.azeritePenanceSmiteAuraStatus = true;
+				else if(spellID == 273310) pV.azeritePenancePWSAuraStatus = true;
+				else if(spellID == 47536) pV.azeritePenanceRaptureStatus = true;
+			},
+			"removebuff", function(event,spellID){
+				if(spellID == 273312) pV.azeritePenanceSmiteAuraStatus = false;
+				else if(spellID == 273310) pV.azeritePenancePWSAuraStatus = false;
+				else if(spellID == 47536) pV.azeritePenanceRaptureStatus = false;
+			},
+			"applybuffany", function(event,spellID){
+				if(spellID == 17 && actors[event.sourceID]) {
+					if(event.absorb && event.absorb > 0 && pV.azeritePenancePWSAuraStatus){
+						var value = pV.azeritePenancePWSValue;
+						if(pV.AtonementTarget[event.targetID]) value *= (1 / ((pV.masteryNow / STATS.mastery) / 100 + 1));
+						value *= (1 / ((pV.versNow / STATS.vers) / 100 + 1));
+						if(pV.azeritePenanceRaptureStatus) value *= 3;
+						pV.azeritePenancePWS += Math.min(value,event.absorb);
+					}				
+				}
+			},			
+			"atonement", function(event,spellID){
+				if(spellID == 585){
+					pV.azeritePenanceSmite += event.amount * pV.azeritePenanceSmiteLastMod;
+				}
+			},
+			"combantantInfo", function(event){
+				var trait = GetTraitBySpell(273307);
+				if(trait){
+					for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
+						pV.azeritePenanceSmiteValue += ScaleTrait(273307,trait.rank[k],1) * 1.5;
+						pV.azeritePenancePWSValue += ScaleTrait(273307,trait.rank[k],2);
+					}
+				}
+			},			
+			
 		],
+		afterParse: function() {
+			rV.traits[164] += pV.azeritePenanceSmite;
+			rV.traits[164] += pV.azeritePenancePWS;
+		},
 		obj: {
 			name: "Weal and Woe",
 			id: 164,
 			spellID: 273307,
 			icon: "spell_holy_penance.jpg",
 			tier: 1,
+			additionalText: function(){ return "Smite: "+NumberToFormattedNumber(pV.azeritePenanceSmite,1)+"<br>PW:S: "+NumberToFormattedNumber(pV.azeritePenancePWS,1); },
 		},
 	},
 	{	//Pain Suppression
@@ -732,6 +844,7 @@ var TRAITS = [
 			pV.azeritePainSuppressionPredictionMastery = 0;
 			pV.azeritePainSuppressionPredictionAtt = 0;
 			pV.azeritePainSuppressionPredictionLast = 0;
+			pV.azeritePainSuppressionAtt = 0;
 		},
 		parse: [
 			"cast", function(event,spellID){
@@ -753,14 +866,23 @@ var TRAITS = [
 					pV.azeritePainSuppressionPredictionAtt += amount + overheal;
 					pV.azeritePainSuppressionPredictionLastAtt = event.timestamp + 200;
 				}
+				if(spellIsAtonement[spellID] && event.timestamp < pV.azeritePainSuppressionPredictionLast){
+					rV.traits[113] += amount;
+				}
 			},
 		],
+		afterParse: function() {
+			pV.azeritePainSuppressionAtt = rV.traits[113];
+			if(healingData[272776])
+				rV.traits[113] += healingData[272776][0];
+		},
 		obj: {
 			name: "Moment of Repose",
-			id: 164,
+			id: 113,
 			spellID: 272775,
 			icon: "spell_holy_painsupression.jpg",
 			tier: 1,
+			additionalText: function(){ return "Atonement: "+NumberToFormattedNumber(pV.azeritePainSuppressionAtt,1); },
 		},
 	},
 	{	//Power Word: Radiance 
@@ -787,9 +909,7 @@ var TRAITS = [
 			"heal", function(event,spellID,amount,overheal){
 				if(spellID == 194509){
 					var trait = pV.azeritePWRValue * 1.4;
-					if(event.hitType == 2){
-						trait *= 2;
-					}
+					if(event.hitType == 2) trait *= 2;
 					trait *= (1 / ((pV.versNow / STATS.vers) / 100 + 1));
 					if(pV.AtonementTarget[event.targetID]){
 						trait *= (1 / ((pV.masteryNow / STATS.mastery) / 100 + 1));
@@ -800,26 +920,28 @@ var TRAITS = [
 				
 					pV.azeritePWRPrediction ++;
 					pV.azeritePWRPredictionTargets[event.targetID] = event.timestamp + 10500;
-				} else if(spellIsAtonement[spellID] && event.timestamp > pV.azeritePWRPredictionLast) {
-					pV.azeritePWRPredictionLast = event.timestamp + 200;
-					Object.keys(pV.azeritePWRPredictionTargets).forEach(function (targetID) {
-						//console.log(amount + overheal,pV.azeritePWRPredictionTargets[targetID] - event.timestamp,event.timestamp-currFightData.start_time,actorsData[targetID].name);
-						if((pV.azeritePWRPredictionTargets[targetID] - event.timestamp) <= 1500 && (pV.azeritePWRPredictionTargets[targetID] - event.timestamp) >= 0){
-							if(GetTraitBySpell(278643)) {
-								rV.traits[399] += amount;
-								pV.azeritePWRAmountAtt += amount;
-							} else {
-								pV.azeritePWRPredictionAtt += amount + overheal;
+				} else if(spellIsAtonement[spellID]) {
+					if(event.timestamp > pV.azeritePWRPredictionLast && !GetTraitBySpell(278643)){
+						pV.azeritePWRPredictionLast = event.timestamp + 100;
+						Object.keys(pV.azeritePWRPredictionTargets).forEach(function (targetID) {
+							//console.log(amount + overheal,pV.azeritePWRPredictionTargets[targetID] - event.timestamp,event.timestamp-currFightData.start_time,actorsData[targetID].name);
+							if((pV.azeritePWRPredictionTargets[targetID] - event.timestamp) <= 1500 && (pV.azeritePWRPredictionTargets[targetID] - event.timestamp) >= 0){
+								pV.azeritePWRPredictionAtt += (amount + overheal) * 0.65;
 							}
-						}
-					});					
+						});
+					}
+					
+					if(GetTraitBySpell(278643) && pV.azeritePWRPredictionTargets[event.targetID] && (pV.azeritePWRPredictionTargets[event.targetID] - event.timestamp) <= 1500 && (pV.azeritePWRPredictionTargets[event.targetID] - event.timestamp) >= 0 && pV.AtonementTarget[event.targetID]) {
+						rV.traits[399] += amount;
+						pV.azeritePWRAmountAtt += amount;
+					}
 				}
 			},
 			"combantantInfo", function(event){
 				var trait = GetTraitBySpell(278643);
 				if(trait){
 					for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
-						pV.azeritePWRValue += ScaleStat(720,340,trait.rank[k],1);
+						pV.azeritePWRValue += ScaleTrait(278643,trait.rank[k]);
 					}
 				}
 			},
@@ -831,6 +953,7 @@ var TRAITS = [
 			icon: "spell_priest_power-word.jpg",
 			tier: 1,
 			additionalText: function(){ return "Bonus: "+NumberToFormattedNumber(pV.azeritePWRAmountBonus,1)+(GetTraitBySpell(278643).rank.length > 1 ? " (per item: "+NumberToFormattedNumber(pV.azeritePWRAmountBonus/GetTraitBySpell(278643).rank.length,1)+")" : "")+"<br>Atonement: "+NumberToFormattedNumber(pV.azeritePWRAmountAtt,1); },
+			disablePerItem: true,
 		},
 	},
 	{	//Shadow Mend
@@ -869,6 +992,8 @@ var TRAITS = [
 			pV.azeritePenanceDamagePredictionSWPCast = 0;
 			pV.azeritePenanceDamagePredictionSWPTargets = {};
 			pV.azeritePenanceDamagePredictionSWPTime = 0;
+			pV.azeritePenanceDamageLastMod = 0;
+			pV.azeritePenanceDamageValue = 0;
 		},
 		parse: [
 			"damage", function(event,spellID){
@@ -877,6 +1002,14 @@ var TRAITS = [
 						pV.azeritePenanceDamagePrediction++;
 					});
 					pV.azeritePenanceDamagePredictionSWP ++;
+					
+					if(event.amount > 0){
+						var value = pV.azeritePenanceDamageValue * 1.05;
+						if(event.hitType == 2) value *= 2;
+						value *= (1 / ((pV.versNow / STATS.vers) / 100 + 1));
+						pV.azeritePenanceDamageLastMod = Math.min(value / event.amount,1);
+					} else
+						pV.azeritePenanceDamageLastMod = 0;
 				}
 			},
 			"cast", function(event,spellID){
@@ -894,11 +1027,26 @@ var TRAITS = [
 					pV.azeritePenanceDamagePredictionSWPTime += event.timestamp - pV.azeritePenanceDamagePredictionSWPTargets[event.targetID];
 				}
 			},
+			"atonement", function(event,spellID){
+				if(spellID == 47666){
+					rV.traits[398] += event.amount * pV.azeritePenanceDamageLastMod;
+				}
+			},
+			"combantantInfo", function(event){
+				var trait = GetTraitBySpell(278629);
+				if(trait){
+					for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
+						pV.azeritePenanceDamageValue += ScaleTrait(278629,trait.rank[k]);
+					}
+				}
+			},
 		],
 		afterParse: function() {
+			pV.azeritePenanceDamageFromDamage = rV.traits[398];
 			if(pV.azeritePenanceDamagePredictionSWPCast > 0){
 				var a = pV.azeritePenanceDamagePredictionSWP / 16;
 				pV.azeritePenanceDamagePredictionSWPHeal = pV.healFromHaste / pV.savedTimeTotal * cV.gcd * a;
+				rV.traits[398] += pV.azeritePenanceDamagePredictionSWPHeal;
 			}
 		},
 		obj: {
@@ -907,12 +1055,16 @@ var TRAITS = [
 			spellID: 278629,
 			icon: "spell_shadow_painandsuffering.jpg",
 			tier: 1,
+			additionalText: function(){ return "Atonement: "+NumberToFormattedNumber(pV.azeritePenanceDamageFromDamage,1)+"<br>SW:P: "+NumberToFormattedNumber(pV.azeritePenanceDamagePredictionSWPHeal,1); },
 		},
 	},
 	{	//Smite
 		init: function() {
 			rV.traits[397] = 0;
 			pV.azeriteSmitePrediction = 0;
+			pV.azeriteSmiteValue = 0;
+			pV.azeriteSmiteLastMod = 0;
+			pV.azeriteSmiteT = 0;
 		},
 		parse: [
 			"cast", function(event,spellID){
@@ -923,6 +1075,43 @@ var TRAITS = [
 					});
 					if(count >= 3) {
 						pV.azeriteSmitePrediction += count;
+						//console.log('prediction',count * ScaleStat(375,340,360,1) * GetMasteryFactor() * (cV.versatility / STATS.vers / 100 + 1) * GetCritFactor() * 1.5 * GetDpsFactor() * 0.6,ScaleStat(375,340,360,1) * GetMasteryFactor() * (cV.versatility / STATS.vers / 100 + 1) * GetCritFactor() * 1.5 * GetDpsFactor() * 0.6);
+					}
+				}
+			},
+			"damage", function(event,spellID){
+				if(spellID == 585){
+					if(event.amount > 0){
+						var value = pV.azeriteSmiteValue * 1.05;
+						if(event.hitType == 2) value *= 2;
+						value *= (1 / ((pV.versNow / STATS.vers) / 100 + 1));
+						pV.azeriteSmiteLastMod = Math.min(value / event.amount,1);
+					} else
+						pV.azeriteSmiteLastMod = 0;
+						
+					var count = 0;
+					Object.keys(pV.AtonementTarget).forEach(function (targetID) {
+						count++;
+					});
+					if(count < 3) {
+						pV.azeriteSmiteLastMod = 0;
+					}
+				}
+			},
+			"atonement", function(event,spellID){
+				if(spellID == 585){
+					rV.traits[397] += event.amount * pV.azeriteSmiteLastMod;
+					if(pV.azeriteSmiteLastMod > 0) {
+						pV.azeriteSmiteT++;
+						//console.log('real',event.amount * pV.azeriteSmiteLastMod);
+					}
+				}
+			},
+			"combantantInfo", function(event){
+				var trait = GetTraitBySpell(277680);
+				if(trait){
+					for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
+						pV.azeriteSmiteValue += ScaleTrait(277680,trait.rank[k]) * 1.5;
 					}
 				}
 			},
@@ -964,7 +1153,7 @@ var TRAITS = [
 			pV.azeriteImpassiveVisageLast = 0;
 		},
 		parse: [
-			"damage", function(event,spellID){
+			"damageany", function(event,spellID){
  				if(event.targetID == currFightData.actor && event.timestamp > pV.azeriteImpassiveVisageLast){
  					pV.azeriteImpassiveVisageLast = event.timestamp + 6000;
 					pV.azeriteImpassiveVisagePrediction++;
@@ -983,20 +1172,32 @@ var TRAITS = [
 			tier: 3,
 		},
 	},
-	{	//mastery after ch
+	{	//mastery after radiance
 		init: function() {
 			rV.traits[102] = 0;
 			pV.azeriteSynergisticGrowthPrediction = 0;
 			pV.azeriteSynergisticGrowthLast = 0;
+			pV.azeriteSynergisticGrowthPrediction2 = 0;
+			pV.azeriteSynergisticGrowthLast2 = 0;
 		},
 		parse: [
 			"cast", function(event,spellID){
  				if(spellID == 194509 && event.timestamp > pV.azeriteSynergisticGrowthLast){
  					pV.azeriteSynergisticGrowthLast = event.timestamp + 30000;
+ 					pV.azeriteSynergisticGrowthLast2 = event.timestamp + 10000;
 					pV.azeriteSynergisticGrowthPrediction++;
 				}
 			},
+			"heal", function(event,spellID){
+				if(spellScaleMastery[spellID] && (event.timestamp < pV.azeriteSynergisticGrowthLast2) && pV.masteryNow){
+					pV.azeriteSynergisticGrowthPrediction2 += pV.currHealFromMastery / pV.masteryNow;
+				}
+			},
 		],
+		afterParse: function() {
+			if(rV.buffs.mastery[272090])
+				rV.traits[102] += rV.buffs.mastery[272090];
+		},
 		obj: {
 			name: "Synergistic Growth",
 			id: 102,
@@ -1029,7 +1230,7 @@ var TRAITS = [
 			var trait = GetTraitBySpell(264108);
 			if(trait){
 				for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
-					rV.traits[18] += ScaleStat(87,310,trait.rank[k]) * healPerStat.mastery.amount;
+					rV.traits[18] += ScaleTrait(264108,trait.rank[k]) * healPerStat.mastery.amount;
 				}
 			}
 		},
@@ -1049,7 +1250,7 @@ var TRAITS = [
 			var trait = GetTraitBySpell(267879);
 			if(trait){
 				for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
-					rV.traits[38] += ScaleStat(87,310,trait.rank[k]) * healPerStat.vers.amount;
+					rV.traits[38] += ScaleTrait(267879,trait.rank[k]) * healPerStat.vers.amount;
 				}
 			}
 		},
@@ -1061,7 +1262,118 @@ var TRAITS = [
 			tier: 2,
 		},
 	},
-	
+	{	//crit on damage, rppm
+		init: function() {
+			rV.traits[459] = 0;
+		},
+		afterParse: function() {
+			if(rV.buffs.crit[279902])
+				rV.traits[459] += rV.buffs.crit[279902];
+		},
+		obj: {
+			name: "Unstable Flames",
+			id: 459,
+			spellID: 279899,
+			icon: "inv_ember.jpg",
+			tier: 2,
+		},
+	},
+	{	//Concentrated Mending
+		init: function() {
+			rV.traits[103] = 0;
+		},
+		afterParse: function() {
+			if(healingData[272260])
+				rV.traits[103] += healingData[272260][0];
+		},
+		obj: {
+			name: "Concentrated Mending",
+			id: 103,
+			spellID: 267882,
+			icon: "inv_offhand_1h_pvpdraenors1_d_02.jpg",
+			tier: 2,
+		},
+	},
+	{	//crit buff from damage
+		init: function() {
+			rV.traits[504] = 0;
+		},
+		afterParse: function() {
+			if(rV.buffs.int[281517])
+				rV.traits[504] += rV.buffs.int[281517];
+		},
+		obj: {
+			name: "Unstable Catalyst",
+			id: 504,
+			spellID: 281514,
+			icon: "inv__azerite-debuff.jpg",
+			tier: 1,
+		},
+	},
+	{	//haste proc
+		init: function() {
+			rV.traits[480] = 0;
+		},
+		afterParse: function() {
+			if(rV.buffs.haste[280409])
+				rV.traits[480] += rV.buffs.haste[280409];
+		},
+		obj: {
+			name: "Blood Rite",
+			id: 480,
+			spellID: 280407,
+			icon: "inv_misc_volatilelife.jpg",
+			tier: 1,
+		},
+	},
+	{	//Archive of the Titans
+		init: function() {
+			rV.traits[483] = 0;
+		},
+		afterParse: function() {
+			if(rV.buffs.int[280709])
+				rV.traits[483] += rV.buffs.int[280709];
+		},
+		obj: {
+			name: "Archive of the Titans",
+			id: 483,
+			spellID: 280555,
+			icon: "inv_trinket_80_titan01b.jpg",
+			tier: 1,
+		},
+	},
+	{	//int proc
+		init: function() {
+			rV.traits[195] = 0;
+		},
+		afterParse: function() {
+			if(rV.buffs.int[273842]) rV.traits[195] += rV.buffs.int[273842];
+			if(rV.buffs.int[273843]) rV.traits[195] += rV.buffs.int[273843];
+		},
+		obj: {
+			name: "Secrets of the Deep",
+			id: 195,
+			spellID: 273829,
+			icon: "inv_misc_enchantedpearlf.jpg",
+			tier: 1,
+		},
+	},
+	{	//mastery proc
+		init: function() {
+			rV.traits[505] = 0;
+		},
+		afterParse: function() {
+			if(rV.buffs.mastery[281843])
+				rV.traits[505] += rV.buffs.mastery[281843];
+		},
+		obj: {
+			name: "Tradewinds",
+			id: 505,
+			spellID: 281841,
+			icon: "ability_skyreach_wind.jpg",
+			tier: 1,
+		},
+	},	
 ];
 
 
@@ -1342,7 +1654,7 @@ var TALENTS = [
 					rV.talents_prediction[271466] += count * 2.8 * cV.intellect * 
 						((pV.versNow || cV.versatility) / STATS.vers / 100 + 1) *
 						((pV.masteryNow || cV.mastery) / STATS.mastery / 100 * (mastery / count) + 1) * 
-						((pV.critNow || cV.combantantInfo.critSpell) / STATS.crit / 100 + 1);
+						((pV.critNow || (cV.combantantInfo && cV.combantantInfo.critSpell)) / STATS.crit / 100 + 1);
 				}
 			},
 		],
@@ -1528,7 +1840,7 @@ var OTHER = [
 			pV.dr45242active = 0;
 		},
 		parse: [
-			"damage", function(event,spellID){
+			"damageany", function(event,spellID){
 				if(event.targetID == currFightData.actor && pV.dr45242active > 0){
 					var amount = event.amount;
 					if(event.absorbed) event.amount += event.absorbed;				
@@ -1552,7 +1864,7 @@ var OTHER = [
 			rV.dr["Versatility"] = 0;
 		},
 		parse: [
-			"damage", function(event,spellID){
+			"damageany", function(event,spellID){
 				if(event.targetID == currFightData.actor){
 					var amount = event.amount;
 					if(event.absorbed) event.amount += event.absorbed;				
@@ -1632,6 +1944,7 @@ function GetHasteFactor(){ return healPerStat.haste.avgStat / STATS.haste / 100 
 function GetModFactor(){ return 1.4; }
 function GetDpsFactor(){ return 1.05; }
 function GetMasteryFactor(){ return cV.combantantInfo.mastery / STATS.mastery / 100 + 0.096 + 1; }
+function GetAtonementOverhealFactor(spellID){ if(!rV.atonementData[spellID] || (rV.atonementData[spellID][1] == 0)) return 1; return rV.atonementData[spellID][1] / (rV.atonementData[spellID][0]+rV.atonementData[spellID][1]); }
 
 function GetSocketFactor(){ 
 	var haste_amount = healPerStat.haste.amount * 40;
@@ -1654,39 +1967,42 @@ var gear_charts_colors = {
 };
 
 var GEAR = [
-	{slot:-3,spell:273307,type:9,tier:1,name:"Weal and Woe",icon:"spell_holy_penance",special:function(ilvl){ return ScaleStat(501,340,ilvl,1) * (pV.azeritePenancePredictionSmite || 0) * GetVersFactor() * GetCritFactor() * GetMasteryFactor() * 1.5 * GetDpsFactor() * 0.6 + ScaleStat(1877,340,ilvl,1) * (pV.azeritePenancePredictionPWS || 0) * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleStat(10012,340,ilvl,1) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleStat(10012,340,ilvl,1) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePainSuppressionPredictionAtt; }},
-	{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleStat(720,340,ilvl,1) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePWRPredictionAtt; },textAmount:function(){ var t="Atonement duration effect can't be stacked.<br>Atonement: "+NumberToFormattedNumber(pV.azeritePWRPredictionAtt,2)+(GetTraitBySpell(278643) ? " (already have it)" : ""); return t;}},
-	{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleStat(56,340,ilvl,1) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleStat(166,340,ilvl,1) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 0.6 * GetDpsFactor() + pV.azeritePenanceDamagePredictionSWPHeal; }},
-	{slot:-3,spell:277680,type:9,tier:1,name:"Gift of Forgiveness",icon:"spell_holy_holysmite",special:function(ilvl){ return ScaleStat(375,340,ilvl,1) * (pV.azeriteSmitePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 1.5 * GetDpsFactor() * 0.6; }},
+	{slot:-3,spell:273307,type:9,tier:1,name:"Weal and Woe",icon:"spell_holy_penance",special:function(ilvl){ return ScaleTrait(273307,ilvl,1) * (pV.azeritePenancePredictionSmite || 0) * GetVersFactor() * GetCritFactor() * GetMasteryFactor() * 1.5 * GetDpsFactor() * 0.6 * GetAtonementOverhealFactor(585) + ScaleTrait(273307,ilvl,2) * (pV.azeritePenancePredictionPWS || 0) * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePainSuppressionPredictionAtt; }},
+	{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleTrait(278643,ilvl) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePWRPredictionAtt; },textAmount:function(){ var t="Atonement duration effect can't be stacked.<br>Atonement: "+NumberToFormattedNumber(pV.azeritePWRPredictionAtt,2)+(GetTraitBySpell(278643) ? " (already have it)" : ""); return t;}},
+	{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleTrait(278629,ilvl) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 0.6 * GetDpsFactor() * GetAtonementOverhealFactor(47666) + pV.azeritePenanceDamagePredictionSWPHeal; }},
+	{slot:-3,spell:277680,type:9,tier:1,name:"Gift of Forgiveness",icon:"spell_holy_holysmite",special:function(ilvl){ return ScaleTrait(277680,ilvl) * (pV.azeriteSmitePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 1.5 * GetDpsFactor() * 0.6 * GetAtonementOverhealFactor(585); }},
 	
-	{slot:-3,spell:281841,type:2,tier:1,name:"Tradewinds",icon:"ability_skyreach_wind",special:function(ilvl){ return ScaleStat(244,310,ilvl) * healPerStat.mastery.amount * 15 / 60; }},
-	{slot:-3,spell:273684,type:2,tier:1,name:"Meticulous Scheming",icon:"ability_rogue_masterofsubtlety",special:function(ilvl){ return ScaleStat(244,310,ilvl) * healPerStat.haste.amount * 20 / 60; }},
-	{slot:-3,spell:280410,type:2,tier:1,name:"Incite the Pack",icon:"ability_hunter_pet_raptor",special:function(ilvl){ return ScaleStat(227,310,ilvl) * healPerStat.mastery.amount * 20 / 60; }},
-	{slot:-3,spell:281514,type:2,tier:1,name:"Unstable Catalyst",icon:"inv__azerite-debuff",special:function(ilvl){ return ScaleStat(172,310,ilvl,1) * 1.05 * healPerStat.int.amount * 8 / 60 * 4; }},
-	{slot:-3,spell:267886,type:2,tier:1,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleStat(20,310,ilvl,1) * 2 * GetFightLenFactor(8) / rV.manaUsage * rV.healFromMana; }},
-	{slot:-3,spell:280407,type:2,tier:1,name:"Blood Rite",icon:"inv_misc_volatilelife",special:function(ilvl){ return ScaleStat(276,310,ilvl) * healPerStat.haste.amount * 15 / 60; }},
-	{slot:-3,spell:273823,type:2,tier:1,name:"Blightborne Infusion",icon:"ability_argus_soulbombdebuffsmall",special:function(ilvl){ return ScaleStat(293,310,ilvl) * healPerStat.crit.amount * 14 / 60; }},
-	{slot:-3,spell:280555,type:3,tier:1,name:"Archive of the Titans",icon:"inv_trinket_80_titan01b",special:function(ilvl){ return ScaleStat(140,370,ilvl,1) * 1.05 * healPerStat.int.amount * 0.95; }},
-	{slot:-3,spell:280559,type:3,tier:1,name:"Laser Matrix (unknown, 6targets)",icon:"spell_nature_groundingtotem",special:function(ilvl){ return ScaleStat(2160,370,ilvl,1) * GetFightLenFactor(60) * GetModFactor() * GetVersFactor() * GetCritFactor() * 6; }},
+	{slot:-3,spell:281841,type:2,tier:1,name:"Tradewinds",icon:"ability_skyreach_wind",special:function(ilvl){ return ScaleTrait(281841,ilvl) * healPerStat.mastery.amount * 15 / 60; }},
+	{slot:-3,spell:273682,type:2,tier:1,name:"Meticulous Scheming",icon:"ability_rogue_masterofsubtlety",special:function(ilvl){ return ScaleTrait(273682,ilvl) * healPerStat.haste.amount * 20 / 60; }},
+	{slot:-3,spell:280410,type:2,tier:1,name:"Incite the Pack",icon:"ability_hunter_pet_raptor",special:function(ilvl){ return ScaleTrait(280410,ilvl) * healPerStat.mastery.amount * 20 / 60; }},
+	{slot:-3,spell:281514,type:2,tier:1,name:"Unstable Catalyst",icon:"inv__azerite-debuff",special:function(ilvl){ return ScaleTrait(281514,ilvl) * 1.05 * healPerStat.int.amount * 8 / 60 * 4; }},
+	{slot:-3,spell:267886,type:2,tier:1,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * 2 * GetFightLenFactor(8) / rV.manaUsage * rV.healFromMana; }},
+	{slot:-3,spell:280407,type:2,tier:1,name:"Blood Rite",icon:"inv_misc_volatilelife",special:function(ilvl){ return ScaleTrait(280407,ilvl) * healPerStat.haste.amount * 15 / 60; }},
+	{slot:-3,spell:273823,type:2,tier:1,name:"Blightborne Infusion",icon:"ability_argus_soulbombdebuffsmall",special:function(ilvl){ return ScaleTrait(273823,ilvl) * healPerStat.crit.amount * 14 / 60; }},
+	{slot:-3,spell:280555,type:3,tier:1,name:"Archive of the Titans",icon:"inv_trinket_80_titan01b",special:function(ilvl){ return ScaleTrait(280555,ilvl) * 20 * 1.05 * healPerStat.int.amount * 0.85; }},
+	{slot:-3,spell:280559,type:3,tier:1,name:"Laser Matrix (unknown, 6targets)",icon:"spell_nature_groundingtotem",special:function(ilvl){ return ScaleTrait(280559,ilvl) * GetFightLenFactor(60) * GetModFactor() * GetVersFactor() * GetCritFactor() * 6; }},
+	{slot:-3,spell:273829,type:3,tier:1,name:"Secrets of the Deep",icon:"inv_misc_enchantedpearlf",special:function(ilvl){ return ScaleTrait(273829,ilvl,1) * 1.05 * healPerStat.int.amount * 18 / 60 * 2 * 0.75; }},
+	{slot:-3,spell:280429,type:2,tier:1,name:"Swirling Sands",icon:"spell_sandstorm",special:function(ilvl){ return ScaleTrait(280429,ilvl) * healPerStat.crit.amount * 12 / 60; }},
+	{slot:-3,spell:280581,type:3,tier:1,name:"Collective Will",icon:"spell_misc_hellifrepvpthrallmarfavor",special:function(ilvl){ return ScaleTrait(280581,ilvl) * 1.05 * healPerStat.int.amount * 6 / 60; }},
 
-	{slot:-3,spell:279926,type:2,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleStat(31 * 3,310,ilvl,1) * 1.05 * healPerStat.int.amount; }},
-	{slot:-3,spell:267889,type:2,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleStat(699,310,ilvl,1) * GetFightLenFactor(60 / 5) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:264108,type:2,tier:2,name:"Blood Siphon (only mastery)",icon:"ability_deathknight_deathsiphon2",special:function(ilvl){ return ScaleStat(87,310,ilvl) * healPerStat.mastery.amount; }},
-	{slot:-3,spell:267883,type:2,tier:2,name:"Savior (20% chance)",icon:"achievement_guildperk_everyonesahero",special:function(ilvl){ return ScaleStat(465,310,ilvl,1) * 2 * (pV.azerite35hpPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() * 0.2; }},
-	{slot:-3,spell:266180,type:2,tier:2,name:"Overwhelming Power",icon:"ability_vehicle_electrocharge",special:function(ilvl){ return ScaleStat(150 * 0.9,310,ilvl) * healPerStat.haste.amount * 25 / 60; }},
-	{slot:-3,spell:267880,type:2,tier:2,name:"Woundbinder",icon:"inv_misc_emberweavebandage",special:function(ilvl){ return ScaleStat(198,310,ilvl) * 0.5 * healPerStat.haste.amount * 6 / 60 * 2; }},
-	{slot:-3,spell:279899,type:2,tier:2,name:"Unstable Flames (100% possible uptime)",icon:"inv_ember",special:function(ilvl){ return ScaleStat(109 * 1.5,310,ilvl) * healPerStat.crit.amount * 5 / 60 * 10; }},
-	{slot:-3,spell:267884,type:2,tier:2,name:"Bracing Chill",icon:"achievement_zone_stormpeaks_01",special:function(ilvl){ return ScaleStat(337,310,ilvl,1) * 6 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
-	{slot:-3,spell:267892,type:9,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleStat(457,310,ilvl) * 10 * (pV.azeriteSynergisticGrowthPrediction || 0) * healPerStat.mastery.amount / ( (currFightData.end_time - currFightData.start_time) / 1000 ); }},
-	{slot:-3,spell:263984,type:2,tier:2,name:"Elemental Whirl (full potential)",icon:"ability_skyreach_four_wind",special:function(ilvl){ return ScaleStat(244,310,ilvl) * (healPerStat.haste.amount + healPerStat.mastery.amount + healPerStat.crit.amount + healPerStat.vers.amount) * 10 / 60 * 2 / 4; }},
-	{slot:-3,spell:267879,type:2,tier:2,name:"On My Way",icon:"inv_boots_cloth_08",special:function(ilvl){ return ScaleStat(87,310,ilvl) * healPerStat.vers.amount; }},
-	{slot:-3,spell:267882,type:2,tier:2,name:"Concentrated Mending",icon:"inv_offhand_1h_pvpdraenors1_d_02",special:function(ilvl){ return ScaleStat(3528,310,ilvl,1) * 12 / 60 * 3 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
+	{slot:-3,spell:279926,type:2,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleTrait(279926,ilvl) * 3 * 1.05 * healPerStat.int.amount; }},
+	{slot:-3,spell:267889,type:2,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleTrait(267889,ilvl) * GetFightLenFactor(60 / 5) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:264108,type:2,tier:2,name:"Blood Siphon (only mastery)",icon:"ability_deathknight_deathsiphon2",special:function(ilvl){ return ScaleTrait(264108,ilvl) * healPerStat.mastery.amount; }},
+	{slot:-3,spell:267883,type:2,tier:2,name:"Savior (20% chance)",icon:"achievement_guildperk_everyonesahero",special:function(ilvl){ return ScaleTrait(267883,ilvl) * 2 * (pV.azerite35hpPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() * 0.2; }},
+	{slot:-3,spell:266180,type:2,tier:2,name:"Overwhelming Power",icon:"ability_vehicle_electrocharge",special:function(ilvl){ return ScaleTrait(266180,ilvl) * 25 * 0.5 * healPerStat.haste.amount * 25 / 60 * 0.9; }},
+	{slot:-3,spell:267880,type:2,tier:2,name:"Woundbinder",icon:"inv_misc_emberweavebandage",special:function(ilvl){ return ScaleTrait(267880,ilvl) * 0.5 * healPerStat.haste.amount * 6 / 60 * 2; }},
+	{slot:-3,spell:279899,type:2,tier:2,name:"Unstable Flames (100% possible uptime)",icon:"inv_ember",special:function(ilvl){ return ScaleTrait(279899,ilvl) * 1.5 * healPerStat.crit.amount * 5 / 60 * 10; }},
+	{slot:-3,spell:267884,type:2,tier:2,name:"Bracing Chill",icon:"achievement_zone_stormpeaks_01",special:function(ilvl){ return ScaleTrait(267884,ilvl) * 6 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
+	{slot:-3,spell:267892,type:9,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction2 || 0); }},
+	{slot:-3,spell:263984,type:2,tier:2,name:"Elemental Whirl",icon:"ability_skyreach_four_wind",special:function(ilvl){ return ScaleTrait(263984,ilvl) * (healPerStat.haste.amount + healPerStat.mastery.amount + healPerStat.crit.amount + healPerStat.vers.amount) * 10 / 60 * 2 / 4; }},
+	{slot:-3,spell:267879,type:2,tier:2,name:"On My Way",icon:"inv_boots_cloth_08",special:function(ilvl){ return ScaleTrait(267879,ilvl) * healPerStat.vers.amount; }},
+	{slot:-3,spell:267882,type:2,tier:2,name:"Concentrated Mending",icon:"inv_offhand_1h_pvpdraenors1_d_02",special:function(ilvl){ return ScaleTrait(267882,ilvl) * 6 * 4 * 3 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
 
-	{slot:-3,spell:263962,type:2,tier:3,name:"Resounding Protection",icon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleStat(6349,310,ilvl,1) * GetFightLenFactor(60 / 2) * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:274366,type:9,tier:3,name:"Sanctum",icon:"spell_magic_lesserinvisibilty",special:function(ilvl){ return ScaleStat(10597,340,ilvl,1) * (pV.castNum[586] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:268437,type:2,tier:3,name:"Impassive Visage",icon:"inv_pet_inquisitoreye",special:function(ilvl){ return ScaleStat(2222,310,ilvl,1) * (pV.azeriteImpassiveVisagePrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:263962,type:2,tier:3,name:"Resounding Protection",icon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleTrait(263962,ilvl) * GetFightLenFactor(60 / 2) * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:274366,type:9,tier:3,name:"Sanctum",icon:"spell_magic_lesserinvisibilty",special:function(ilvl){ return ScaleTrait(274366,ilvl) * (pV.castNum[586] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:268437,type:2,tier:3,name:"Impassive Visage",icon:"inv_pet_inquisitoreye",special:function(ilvl){ return ScaleTrait(268437,ilvl) * (pV.azeriteImpassiveVisagePrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 
 
 	{slot:14,item:158320,ilvl:340,type:2,name:"Revitalizing Voodoo Totem",int:205,icon:"ability_shaman_repulsiontotem",special:function(ilvl){ return ScaleStat(161,340,ilvl,1) * 91 * GetFightLenFactor(90) * GetVersFactor() * GetCritFactor(); },wilvl:300},
@@ -1716,7 +2032,8 @@ parsePlugins = {
 	removebuffstackany: [],	//any target
 	cast: [],
 	begincast: [],
-	damage: [],
+	damage: [],		//source only player
+	damageany: [],
 	energize: [],
 	gear: [],
 	combantantInfo: [],
@@ -1962,14 +2279,14 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				if(statsBuffs['vers'][spellID] || statsBuffs['crit'][spellID] || statsBuffs['haste'][spellID] || statsBuffs['haste_mod'][spellID] || statsBuffs['mastery'][spellID] || statsBuffs['int'][spellID]) {		//stats buffs
 					buffStatus[spellID] = true;
 				}
-				if(
+				if(	!actors[event.sourceID] && (
 					(statsBuffsOther['vers'][event.sourceID] && statsBuffsOther['vers'][event.sourceID][spellID]) || 
 					(statsBuffsOther['crit'][event.sourceID] && statsBuffsOther['crit'][event.sourceID][spellID]) || 
 					(statsBuffsOther['haste'][event.sourceID] && statsBuffsOther['haste'][event.sourceID][spellID]) || 
 					(statsBuffsOther['haste_mod'][event.sourceID] && statsBuffsOther['haste_mod'][event.sourceID][spellID]) || 
 					(statsBuffsOther['mastery'][event.sourceID] && statsBuffsOther['mastery'][event.sourceID][spellID]) || 
 					(statsBuffsOther['int'][event.sourceID] && statsBuffsOther['int'][event.sourceID][spellID])
-				){
+				)){
 					if(!buffOtherStatus[event.sourceID]) buffOtherStatus[event.sourceID] = {};
 					buffOtherStatus[event.sourceID][spellID] = true;
 				}
@@ -2015,14 +2332,14 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				if(statsBuffs['vers'][spellID] || statsBuffs['crit'][spellID] || statsBuffs['haste'][spellID] || statsBuffs['haste_mod'][spellID] || statsBuffs['mastery'][spellID] || statsBuffs['int'][spellID]) {		//stats buffs
 					buffStatus[spellID] = false;
 				}
-				if(
+				if(	!actors[event.sourceID] && (
 					(statsBuffsOther['vers'][event.sourceID] && statsBuffsOther['vers'][event.sourceID][spellID]) || 
 					(statsBuffsOther['crit'][event.sourceID] && statsBuffsOther['crit'][event.sourceID][spellID]) || 
 					(statsBuffsOther['haste'][event.sourceID] && statsBuffsOther['haste'][event.sourceID][spellID]) || 
 					(statsBuffsOther['haste_mod'][event.sourceID] && statsBuffsOther['haste_mod'][event.sourceID][spellID]) || 
 					(statsBuffsOther['mastery'][event.sourceID] && statsBuffsOther['mastery'][event.sourceID][spellID]) || 
 					(statsBuffsOther['int'][event.sourceID] && statsBuffsOther['int'][event.sourceID][spellID])
-				){
+				)){
 					if(!buffOtherStatus[event.sourceID]) buffOtherStatus[event.sourceID] = {};
 					buffOtherStatus[event.sourceID][spellID] = false;
 				}
@@ -2233,45 +2550,52 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				for (var j = 0, j_len = parsePlugins.cast.length; j < j_len; j++) {
 					parsePlugins.cast[j](event,spellID);
 				}			
-			} else if(event.type == "damage"){
+			} else if(event.type == "damage" && actors[event.sourceID]){
 				var spellID = event.ability.guid;
 				
-				if(actors[event.sourceID]){
-					for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
-						if(cooldownsTracking[j].opened){
-							var currTime = event["timestamp"] - cooldownsTracking[j].start;
-							var pos = -1;
-							for (var k = 0, k_len = cooldownsTracking[j].heal.length; k < k_len; k++) {
-								if(currTime == cooldownsTracking[j].heal[k].time && spellID == cooldownsTracking[j].heal[k].id){
-									pos = k;
-									break;
-								}else if(currTime > cooldownsTracking[j].heal[k].time && spellID == cooldownsTracking[j].heal[k].id && ((currTime - cooldownsTracking[j].heal[k].time) <= 200)){
-									pos = k;
-									break;
-								}
+				for (var j = 0, j_len = cooldownsTracking.length; j < j_len; j++) {
+					if(cooldownsTracking[j].opened){
+						var currTime = event["timestamp"] - cooldownsTracking[j].start;
+						var pos = -1;
+						for (var k = 0, k_len = cooldownsTracking[j].heal.length; k < k_len; k++) {
+							if(currTime == cooldownsTracking[j].heal[k].time && spellID == cooldownsTracking[j].heal[k].id){
+								pos = k;
+								break;
+							}else if(currTime > cooldownsTracking[j].heal[k].time && spellID == cooldownsTracking[j].heal[k].id && ((currTime - cooldownsTracking[j].heal[k].time) <= 200)){
+								pos = k;
+								break;
 							}
-							
-							if(pos == -1){
-								cooldownsTracking[j].heal.push({
-									time: currTime,
-									id: spellID,
-									amount: 0,
-									over: 0,
-									count: 0,
-									type: 2,
-								});
-								pos = cooldownsTracking[j].heal.length - 1;
-							}
-
-							cooldownsTracking[j].heal[pos].amount += event["amount"];
-							cooldownsTracking[j].heal[pos].count ++;
 						}
+						
+						if(pos == -1){
+							cooldownsTracking[j].heal.push({
+								time: currTime,
+								id: spellID,
+								amount: 0,
+								over: 0,
+								count: 0,
+								type: 2,
+							});
+							pos = cooldownsTracking[j].heal.length - 1;
+						}
+
+						cooldownsTracking[j].heal[pos].amount += event["amount"];
+						cooldownsTracking[j].heal[pos].count ++;
 					}
 				}
 
 				for (var j = 0, j_len = parsePlugins.damage.length; j < j_len; j++) {
 					parsePlugins.damage[j](event,spellID);
 				}
+				for (var j = 0, j_len = parsePlugins.damageany.length; j < j_len; j++) {
+					parsePlugins.damageany[j](event,spellID);
+				}
+			} else if(event.type == "damage"){
+				var spellID = event.ability.guid;
+				
+				for (var j = 0, j_len = parsePlugins.damageany.length; j < j_len; j++) {
+					parsePlugins.damageany[j](event,spellID);
+				}				
 			} else if(event.type == "energize" && event.targetID == actor_id){
 				if(event.resourceChangeType==0){
 					var spellID = event.ability.guid;
@@ -2338,6 +2662,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				cV.versatility = event["versatilityHealingDone"] + vantusRune;
 				cV.mastery = event["mastery"] + 9.6 * STATS.mastery;
 				cV.haste = event["hasteSpell"];
+				cV.leech = event["leech"];
 				
 				cV.gcd = 1500 / (cV.haste / STATS.haste / 100 + 1);
 				
@@ -2525,7 +2850,7 @@ function GetIlvBonusID(baseIlvl,needIlvl){
 }
 
 var GEAR_CHARTS_SLOT = -3;
-var GEAR_CHARTS_ILVL = 340;
+var GEAR_CHARTS_ILVL = 360;
 
 function CreateAzChartData(fightLen){
 	var tier_data = [];
@@ -3066,7 +3391,7 @@ function BuildReport(){
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix predictionlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Items predictions ";
 	HTML += "<sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Only benefit from \"spell\" part of item is counted here.<br>Without feeding (CBT/AG/ASC) bonus</span></sup></header>";
 	for (var i = 0, len = ITEMS.length; i < len; i++) {
-		if(ITEMS[i].obj && ITEMS[i].obj.prediction && (!ITEMS[i].obj.predictionСondition || ITEMS[i].obj.predictionСondition()) && (ITEMS[i].obj.type!="item" || (!ITEMS[i].obj.predictionСondition && !cV.gearInfo[ITEMS[i].obj.id]))){
+		if(ITEMS[i].obj && ITEMS[i].obj.prediction && (!ITEMS[i].obj.predictionCondition || ITEMS[i].obj.predictionCondition()) && (ITEMS[i].obj.type!="item" || (!ITEMS[i].obj.predictionCondition && !cV.gearInfo[ITEMS[i].obj.id]))){
 			var itemData = ITEMS[i].obj;
 			HTML += "<div class=\"row full\"><div class=\"col s-1\"><a href=\"//www.wowhead.com/"+itemData.type+"="+itemData.id+"\" target=\"_blank\" style=\"color: #"+qualityColors[ itemData.quality ]+";\">"+itemData.name+"</a></div><div class=\"col s-2\">"+NumberToFormattedNumber(rV[ itemData.prediction ],2)+(itemData.text ? (" "+itemData.text()) : "")+"</div><div class=\"col s-2\">"+(rV[ itemData.prediction ]/rV.total*100).toFixed(2)+"%</div></div>";
 		}
@@ -3226,7 +3551,7 @@ function BuildReport(){
 					HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
 		
 					if(traitData.additionalText) HTML += "<br>"+traitData.additionalText();
-					else if(traitRanks.length > 1) HTML += "<br>Avg per item: "+NumberToFormattedNumber(amount / traitRanks.length,0,2)+" ("+(amount / traitRanks.length/rV.total*100).toFixed(2)+"%)";	
+					if(!traitData.disablePerItem && traitRanks.length > 1) HTML += "<br>Avg per item: "+NumberToFormattedNumber(amount / traitRanks.length,0,2)+" ("+(amount / traitRanks.length/rV.total*100).toFixed(2)+"%)";	
 				}
 			
 				HTML += "</div></div>";
@@ -3239,15 +3564,15 @@ function BuildReport(){
 			
 			HTML += "<div class=\"row w33\"><div class=\"col w70p\">";
 			HTML += "<a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(traitData.icon)+"\"></a></div>";
-			HTML += "<div class=\"col div_more_1 w80\"><header><a href=\"//www.wowhead.com/spell="+traitData.spellID+"\" target=\"_blank\"></a> [Level "+traitData.rank.join(", ")+"]</header>";
+			HTML += "<div class=\"col div_more_1 w80\"><header>[Level "+traitData.rank.join(", ")+"]</header>";
+			//HTML += "Trait ID: "+traitData.traitID+"<br>Spell ID: "+traitData.spellID+"<br>Icon: "+traitData.icon;	//debug
 			HTML += "</div></div>";
 			
 			counter++;
 		}
 	}	
 	HTML += "</ul></div></div></div>";
-	
-	console.log(traitsData);
+
 	
 	
 	/// Talents
@@ -3257,7 +3582,7 @@ function BuildReport(){
 	var talentsData = [[],[],[],[],[],[],[],[]];
 	for (var i = 0, len = TALENTS.length; i < len; i++) talentsData[ TALENTS[i].obj.tier ][ TALENTS[i].obj.col ] = [ TALENTS[i].obj.id,TALENTS[i] ];
 	for (var i = 1; i <= 7; i++) {
-		for (var j = 1; j <= 3; j++) {
+		for (var j = 1; j <= 3; j++) if(talentsData[i].length > 0) {
 			var talentData = talentsData[i][j];
 	
 			if(counter % 3 == 0) HTML += "<li class=\"item clearfix\">";
@@ -3306,7 +3631,6 @@ function BuildReport(){
 			counter++;
 		}
 	}	
-	console.log(talentsData);
 	HTML += "</ul></div></div></div>";
 			
 	
