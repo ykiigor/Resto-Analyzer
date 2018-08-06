@@ -1,4 +1,4 @@
-//Disc priest, 17:43 06.08.2018
+//Disc priest, 23:43 06.08.2018
 
 //OTHER & CLASS SPECIFIC
 var OTHER_256 = [
@@ -32,6 +32,7 @@ var OTHER_256 = [
 				186263: 3 / 100 * baseMana,	//Shadow Mend
 				110744: 2 / 100 * baseMana,	//Divine Star
 				21562: 4 / 100 * baseMana,	//stamina buff
+				8122: 3 / 100 * baseMana,	//Psychic Scream
 			};
 
 			spellCastTime = {
@@ -64,6 +65,7 @@ var OTHER_256 = [
 				123040: 1.5,	//Mindbender
 				110744: 1.5,	//Divine Star
 				21562: 1.5,	//stamina buff
+				8122: 1.5,	//Psychic Scream
 				
 				232633: 1.5,	//Arcane torrent
 				69070: 1.5,	//Rocket jump
@@ -1645,6 +1647,9 @@ var TALENTS_256 = [
 		init: function() {
 			rV.talents[204065] = 0;
 			rV.talents_prediction[204065] = 0;
+		},
+		afterParse: function() {
+			if(healingData[204065])	rV.talents[204065] += healingData[204065][0];
 		},
 		obj: {
 			name: "Shadow Covenant",

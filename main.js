@@ -14,7 +14,7 @@ var CLASS_AVAILABLE = {};
 var SPECS_CLASS = {};
 
 var STATS_BASE = {
-	crit: 6,
+	crit: 5,
 	mastery: 8,
 	haste: 0,
 	vers: 0,
@@ -334,6 +334,14 @@ var enchToStat = {
 	5944: ["mastery",37],
 	5945: ["vers",37],	
 };
+
+var spellRacial = {
+	69070: ['haste',STATS.haste,function() {cV.haste+=STATS.haste;}],
+	232633: ['crit',STATS.crit,function() {cV.critSpell+=STATS.crit;}],
+	255654: ['vers',STATS.vers,function() {cV.versatility+=STATS.vers;}],
+	20549: ['crit',0,function() {pV.critMod = 0.02;}],
+};
+var SavedRacial = {};
 
 var WCL_API_KEY = "c715943c916421282ae9451912918422";
 var STATS_GRAPH_STEP = 15;
@@ -756,8 +764,8 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				
 				if(event.hitType == 2){
 					pV.critNow = cV.critSpell;
-					pV.critAmount = amount / 2;
-					pV.critAmountOh = (amount + overheal) / 2;
+					pV.critAmount = amount * ((1 + (pV.critMod || 0)) / (2 + (pV.critMod || 0)));
+					pV.critAmountOh = (amount + overheal) * ((1 + (pV.critMod || 0)) / (2 + (pV.critMod || 0)));
 					
 					Object.keys(statsBuffs.crit).forEach(function (buffSpellID) {
 						if(buffStatus[buffSpellID]) pV.critNow += statsBuffs.crit[buffSpellID];
@@ -956,6 +964,11 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					}
 				}
 				
+				if(actors[event.sourceID] && event.absorb && event.absorb > 0) {
+					if(!healingData[spellID]) healingData[spellID] = [0,0];
+					healingData[spellID][1] += event.absorb;
+				}
+				
 				if(foodBuffs[spellID]){
 					statsBuffs[ foodBuffs[spellID][0] ][spellID] = foodBuffs[spellID][1] * (-1);
 					buffStatus[spellID] = true;
@@ -1015,6 +1028,11 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						}
 					}
 				}
+				
+				if(actors[event.sourceID] && event.absorb && event.absorb > 0) {
+					if(!healingData[spellID]) healingData[spellID] = [0,0];
+					healingData[spellID][1] += event.absorb;
+				}
 
 				for (var j = 0, j_len = parsePlugins.removebuffany.length; j < j_len; j++) {
 					parsePlugins.removebuffany[j](event,spellID);
@@ -1045,6 +1063,17 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						heal: [],
 						healing: 0,
 					});
+				}
+				
+				if(spellRacial[spellID] && !pV.racialAdded){
+					statsBuffs[ spellRacial[spellID][0] ][-11] = spellRacial[spellID][1];
+					buffStatus[-11] = true;
+					
+					pV.racialAddedInFight = spellRacial[spellID][0];
+					pV.racialAddedInFightTime = event.timestamp;
+					
+					if(!SavedRacial[fight_code]) SavedRacial[fight_code] = {};
+					SavedRacial[fight_code][currFightData.actor] = spellRacial[spellID];
 				}
 				
 				if(spellManaCost[spellID] && !pV.innervate){
@@ -1268,6 +1297,11 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 				cV.mastery = event["mastery"] + STATS_BASE.mastery * STATS.mastery;
 				cV.haste = event["hasteSpell"] + STATS_BASE.haste * STATS.haste;
 				cV.leech = event["leech"];
+				
+				if(SavedRacial[fight_code] && SavedRacial[fight_code][currFightData.actor]){
+					SavedRacial[fight_code][currFightData.actor][2]();
+					pV.racialAdded = SavedRacial[fight_code][currFightData.actor];
+				}
 				
 				cV.gcd = 1500 / (cV.haste / STATS.haste / 100 + 1);
 				
@@ -1888,13 +1922,25 @@ function BuildReport(){
 
 	/// Stats List
 	HTML += "<div class=\"col-half\"><div class=\"box clearfix statlist\"><header class=\"box-header\" style=\"padding-bottom:0;padding-top:0\">Stats</header>";
+	var addRefreshLink = false;
+	function CreateStatsValTooltip(stat,modGear){
+		var gear = 0,base = 0;
+		if(stat == "int") {gear = cV.intellect_min;}
+		else if(stat == "crit") {gear = cV.critSpell-STATS_BASE.crit*STATS.crit; base = STATS.crit*STATS_BASE.crit;}
+		else if(stat == "mastery") {gear = cV.mastery-STATS_BASE.mastery*STATS.mastery; base = STATS.mastery*STATS_BASE.mastery;}
+		else if(stat == "vers") {gear = cV.versatility;}
+		else if(stat == "haste") {gear = cV.haste;}
+		if(modGear) gear += modGear;
+		var t = "From gear: "+(gear).toFixed(0);
+		if(base > 0) t += "<br>Base value: "+(base).toFixed(0);
+		return t;
+	}
 	var allStatsList = [
-		["int","Int","From gear: "+cV.intellect_min],
-		["crit","Crit","From gear: "+(cV.critSpell-STATS_BASE.crit*STATS.crit)+"<br>Base value: "+(STATS.crit*STATS_BASE.crit).toFixed(0)],
-		["mastery","Mastery","From gear: "+(cV.mastery-STATS_BASE.mastery*STATS.mastery)+"<br>Base value: "+(STATS.mastery*STATS_BASE.mastery).toFixed(0)],
-		["vers","Vers","From gear: "+cV.versatility],
-		//["haste","<em class=\"tooltip\">Haste<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Cast time not counted here, only profit from ticks</span></em>","From gear: "+cV.haste],
-		["haste","Haste","From gear: "+cV.haste],
+		["int","Int",CreateStatsValTooltip("int")],
+		["crit","Crit",CreateStatsValTooltip("crit")],
+		["mastery","Mastery",CreateStatsValTooltip("mastery")],
+		["vers","Vers",CreateStatsValTooltip("vers")],
+		["haste","Haste",CreateStatsValTooltip("haste")],
 	];
 	HTML += "<div class=\"row full\"><div class=\"col size\"> </div><div class=\"col size\">Heal per stat</div><div class=\"col size\">Stat weight</div><div class=\"col size\">Total from stat</div><div class=\"col size\">Avg on fight</div></div>";
 	for (var j = 0, j_len = allStatsList.length; j < j_len; j++) {
@@ -1921,6 +1967,14 @@ function BuildReport(){
 			totalText = "<em class=\"tooltip\">"+NumberToFormattedNumber(total+hasteCastProfit,0,2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From ticks: "+NumberToFormattedNumber(total,0,2)+"<br>From cast speed: "+NumberToFormattedNumber(hasteCastProfit,0,2)+"</span></em>";			
  			
  			healPerStat[ statData[0] ].amount = amount;
+		}
+		
+		if(pV.racialAddedInFight && pV.racialAddedInFight == statData[0]){
+			statData[2] += "<br>Note: Racial value was added in mid fight (only for "+((fightEnd-pV.racialAddedInFightTime) / fightLen * 100).toFixed(0)+"% fight)";
+			addRefreshLink = true;
+		}
+		if(pV.racialAdded && pV.racialAdded[0] == statData[0]){
+			statData[2] = CreateStatsValTooltip(statData[0],-pV.racialAdded[1])+"<br>Racial: "+pV.racialAdded[1];
 		}
 		
 		var subSpellsList = "";
@@ -1962,14 +2016,15 @@ function BuildReport(){
 				healPerStat[ statData[0] ].avgStat = (healPerStat[ statData[0] ].avgStat + pV.savedTimeAvg / pV.savedTimeAvgCount) / 2;
 		}
 
-		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+amountText+subSpellsList+"</div><div class=\"col size\">"+weightText+"</div><div class=\"col size\">"+totalText+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avgStat).format()+"<span class=\"tip-text\" style=\"width: "+(statData[0] == "crit" ? 300 : 120)+"px;margin-left:-"+(statData[0] == "crit" ? 150 : 60)+"px;\">"+statData[2]+"</span></em>"+(STATS[ statData[0] ] ? " - "+(healPerStat[ statData[0] ].avgStat / STATS[ statData[0] ]).toFixed(1)+"%" : "")+"</div></div>";
+		HTML += "<div class=\"row full\"><div class=\"col size\">"+statData[1]+"</div><div class=\"col size\">"+amountText+subSpellsList+"</div><div class=\"col size\">"+weightText+"</div><div class=\"col size\">"+totalText+"</div><div class=\"col size\"><em class=\"tooltip\">"+(healPerStat[ statData[0] ].avgStat).format()+"<span class=\"tip-text\" style=\"width: 140px;margin-left:-70px;\">"+statData[2]+"</span></em>"+(STATS[ statData[0] ] ? " - "+(healPerStat[ statData[0] ].avgStat / STATS[ statData[0] ]).toFixed(1)+"%" : "")+"</div></div>";
 	}
-	
 	
 	var manaSpellsText = "<br>Mana used by spells:<br>"+CreateSpellsTextFromList(rV.manaUsageBySpell);
 	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * maxMana / 100).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1% mana ("+(maxMana / 100).format()+")</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana,0,2)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 0.04 * maxMana / 5).format()+"<br>Base manapull: "+(maxMana).format()+manaSpellsText+"</span></em></div></div>";
 
-	HTML += "<div class=\"row full\"><div class=\"col full\" id=\"stats_graph_more\"><a href=\"javascript:void(0)\" class=\"more_graph\">Show graph</a></div><div class=\"ct-chart\" style=\"display:none\"  id=\"stats_graph\"></div></div>";	
+	HTML += "<div class=\"row full\"><div class=\"col half\" id=\"stats_graph_more\"><a href=\"javascript:void(0)\" class=\"more_graph\">Show graph</a></div>";
+	if(addRefreshLink) HTML += "<div class=\"col half t-right\"><a href=\"javascript:void(0)\" id=\"refresh_stats_button\"><em class=\"tooltip\">Refresh<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Recalculate stats with acknowledge about character race</span></em></a></div>";
+	HTML += "<div class=\"ct-chart\" style=\"display:none\"  id=\"stats_graph\"></div></div>";	
 
 	HTML += "</div></div>";	
 	
@@ -2096,14 +2151,20 @@ function BuildReport(){
 
 	
 	/// Gear Charts
+	var gearList = GEAR_BASE.concat(GEAR);
+	var gearCats = {};
+	for (var i = 0, len = gearList.length; i < len; i++){
+		if(gearList[i].slot) gearCats[gearList[i].slot] = true;
+	}
+	
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix gear_charts\"><header class=\"box-header\">GEAR CHARTS <sup class=\"tooltip\" style=\"font-size: 0.4em\"> [?]<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Various numbers can be different based on buffs/fight length/overheal %/rng procs</span></sup></header>";
 	HTML += "<div class=\"full clearfix slot_select\" style=\"padding-bottom:10px;\">";
-	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-1\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_hammer_unique_sulfuras.jpg\" style=\"width:48px;height:48px;\"><br>Legendaries</div>";
-	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"2\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_misc_necklace_firelands_2.jpg\" style=\"width:48px;height:48px;\"><br>Necks</div>";
-	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"11\"><img src=\"http://media.blizzard.com/wow/icons/56/item_icecrownringc.jpg\" style=\"width:48px;height:48px;\"><br>Rings</div>";
-	//HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-2\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Clear azerite power</div>";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-3\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Azerite prediction</div>";
-	HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"14\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_datacrystal04.jpg\" style=\"width:48px;height:48px;\"><br>Trinkets</div>";
+	if(gearCats[-2]) HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-2\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Clear azerite power</div>";
+	if(gearCats[-3]) HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-3\"><img src=\"http://media.blizzard.com/wow/icons/56/ability_paladin_empoweredsealstruth.jpg\" style=\"width:48px;height:48px;\"><br>Azerite prediction</div>";
+	if(gearCats[14]) HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"14\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_datacrystal04.jpg\" style=\"width:48px;height:48px;\"><br>Trinkets</div>";
+	if(gearCats[-1]) HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"-1\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_hammer_unique_sulfuras.jpg\" style=\"width:48px;height:48px;\"><br>Legendaries</div>";
+	if(gearCats[2]) HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"2\"><img src=\"http://media.blizzard.com/wow/icons/56/inv_misc_necklace_firelands_2.jpg\" style=\"width:48px;height:48px;\"><br>Necks</div>";
+	if(gearCats[11]) HTML += "<div class=\"col gear_charts_slot_select\" style=\"width:15%;height:68px;\" data-id=\"11\"><img src=\"http://media.blizzard.com/wow/icons/56/item_icecrownringc.jpg\" style=\"width:48px;height:48px;\"><br>Rings</div>";
 	HTML += "</div>";
 	
 	HTML += "<div class=\"full clearfix\" style=\"padding-bottom:5px;display:none\" id=\"gear_chart_adv\">";
@@ -2258,7 +2319,7 @@ function BuildReport(){
 		
 			if(!potionData.text){
 				var amount = rV.potions[potionData.id]
-				HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
+				HTML += "<em class=\"result\">"+NumberToFormattedNumber(amount,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)<br>";
 				HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(amount / fightLen * 1000,1)+"</em>";
 			} else {
 				HTML += potionData.text();
@@ -2382,6 +2443,9 @@ function BuildReport(){
 	$("a.more_2").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_3").show();return false;});
 	$("a.more_3").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_1").show();return false;});
 	$("a.more_3-2").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_2").show();return false;});
+	
+	$("#refresh_stats_button").click(function(){PrepParse(currFightData.id,currFightData.actor);return false;});
+	
 
 	for (var i = 0, len = predictionButtons.length; i < len; i++) {
 		$("#talent-"+predictionButtons[i][0]+"-"+(predictionButtons[i][2] == true ? "result" : "prediction")).click(predictionButtons[i][1]);
@@ -2429,6 +2493,7 @@ function BuildReport(){
 	
 		$("#stats_graph_more").hide();
 		$("#stats_graph").show();
+		$("#refresh_stats_button").hide();
 		return false;
 	});
 	
@@ -2445,6 +2510,7 @@ function BuildFightsList(){
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><ul class=\"list fightslist\">";
 	
 	var WCLFightCounter = {};
+	var prevFightID;
 	Object.keys(fightsData).forEach(function (fightID) {
 		var obj = fightsData[fightID];
 		if(obj.actors && obj.boss && diffIdToName[obj.difficulty]){
@@ -2454,8 +2520,9 @@ function BuildFightsList(){
 				if(actorsData[ obj.actors[j] ].class && CLASS_AVAILABLE[ actorsData[ obj.actors[j] ].class ]){
 					HTML += "<a href=\"?report="+reportFightCode+"&fight="+fightID+"&actor="+obj.actors[j]+"\" data-fight=\""+fightID+"\" data-actor=\""+obj.actors[j]+"\" class=\"fightlist-btn\">";
 					HTML += "<li class=\"item clearfix\" style=\"padding: 5px 15px;\"><div class=\"row full\"><div class=\"col\" style=\"width:30%\">";
-					HTML += diffIdToName[obj.difficulty]+" "+obj.name+" "+(!obj.kill ? "#"+WCLFightCounter[obj.boss][obj.difficulty] : "")+" <em class=\""+(obj.kill ? "kill" : "wipe")+"\">"+(obj.kill ? "kill" : "wipe")+"</em></div>";
-					HTML += "<div class=\"col\" style=\"width:5%\">"+MsToFormattedTime(obj.end_time - obj.start_time)+"</div><div class=\"col\" style=\"width:20%\">"+actorsData[ obj.actors[j] ].name+"</div><div class=\"col\" style=\"width:20%\">"+actorsData[ obj.actors[j] ].class+"</div></div>";
+					if(prevFightID != fightID) HTML += diffIdToName[obj.difficulty]+" "+obj.name+" "+(!obj.kill ? "#"+WCLFightCounter[obj.boss][obj.difficulty] : "")+" <em class=\""+(obj.kill ? "kill" : "wipe")+"\">"+(obj.kill ? "kill" : "wipe")+"</em>";
+					prevFightID = fightID;
+					HTML += "</div><div class=\"col\" style=\"width:5%\">"+MsToFormattedTime(obj.end_time - obj.start_time)+"</div><div class=\"col\" style=\"width:20%\">"+actorsData[ obj.actors[j] ].name+"</div><div class=\"col "+actorsData[ obj.actors[j] ].class+"\" style=\"width:20%\">"+actorsData[ obj.actors[j] ].class+"</div></div>";
 					HTML += "</li></a>";
 				}
 			}
@@ -2463,7 +2530,7 @@ function BuildFightsList(){
 	});
 	
 	HTML += "</ul></div></div></div>";
-	
+	 
 	$("#main").html(HTML);
 	
 	$(".fightlist-btn").click(function(e){
@@ -2501,6 +2568,7 @@ function PrepParse(fightID,actorID){
 	currFightData.name = diffIdToName[obj.difficulty]+" "+obj.name+(obj.kill ? " - Kill" : "");
 	currFightData.actorName = actorsData[actorID].name;
 	currFightData.len = obj.end_time - obj.start_time;
+	currFightData.reportFightCode = reportFightCode;
 	
 	PrepAllData();
 	

@@ -1,3 +1,5 @@
+//  Resto Shaman, 21:05 06.08.2018
+
 var OTHER_264 = [
 	{	//OVERALL
 		init: function() {
@@ -1115,8 +1117,6 @@ var OTHER_264 = [
 
 var ITEMS_264 = [
 
-	
-	
 	{parse:["gear", function(itemData,itemID){if(itemID == 159620) statsBuffs.crit[271071] = ScaleItemSpell(159620,itemData.itemLevel);}]}, //Conch of Dark Whispers
 	{parse:["gear", function(itemData,itemID){if(itemID == 158371) statsBuffs.haste[281724] = ScaleItemSpell(158371,itemData.itemLevel);}]}, //Seabreeze
 	{parse:["gear", function(itemData,itemID){if(itemID == 159615) statsBuffs.haste[271115] = ScaleItemSpell(159615,itemData.itemLevel);}]}, //Ignition Mage's Fuse
