@@ -1,4 +1,4 @@
-var OTHER_254 = [
+var OTHER_264 = [
 	{	//OVERALL
 		init: function() {
 			uV.SPEC_ID = 264;
@@ -272,7 +272,7 @@ var OTHER_254 = [
 			};
 			
 			uV.SpellParseCooldown = function(spellID,event,cooldown){
-				return (cooldown.spellID == 157153 && spellID == 157503 && (event.timestamp - cooldown.start) <= 20000);
+				return cooldown.spellID != 157503 || (cooldown.spellID == 157153 && spellID == 157503 && (event.timestamp - cooldown.start) <= 17000);
 			};
 			
 			uV.SpellParseCooldownAdd = function(spellID,event,cooldown){
@@ -419,7 +419,7 @@ var OTHER_254 = [
 				{slot:-3,spell:275488,type:4,tier:1,name:"Swelling Stream",icon:"inv_spear_04",special:function(ilvl){ return ScaleTrait(275488,ilvl) * ((pV.castNum[5394] || 0) + (pV.castNum[157153] || 0)) * 2.19 * 5 * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 				{slot:-3,spell:277666,type:4,tier:1,name:"Ancestral Resonance",icon:"spell_shaman_improvedreincarnation",special:function(ilvl){ return ScaleTrait(277666,ilvl) * 15 * 40 * healPerStat.mastery.amount / ( (currFightData.end_time - currFightData.start_time) / 1000 ); }},
 			
-				{slot:-3,spell:267892,type:4,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction2 || 0); }},
+				{slot:-3,spell:267892,type:4,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction || 0) * healPerStat.mastery.amount * 10 / ( (currFightData.end_time - currFightData.start_time) / 1000 ); }},
 			
 				{slot:-3,spell:274412,type:4,tier:3,name:"Serene Spirit",icon:"ability_shaman_astralshift",special:function(ilvl){ return ScaleTrait(274412,ilvl) * 2 * (pV.castNum[108271] || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 				{slot:-3,spell:280021,type:4,tier:3,name:"Pack Spirit",icon:"spell_nature_spiritwolf",special:function(ilvl){ return ScaleTrait(280021,ilvl) * GetModFactor()  * GetVersFactor() * GetCritFactor() * (rV.wolfUptime / 1000) / 0.9; }},
@@ -471,9 +471,10 @@ var OTHER_254 = [
 					return "<em class=\"tooltip\">"+(arg1 / arg2 * 1000).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">From crit heals: "+(preAmount / arg2 * 1000).toFixed(2)+"<br>From resurgence: "+(regurgenceAmount / rV.resurgenceCritAmount / arg2 * 1000).toFixed(2)+"</span></em>";
 				} else if (code == 4 && stat == "crit"){	// fix stat numbers
 					var regurgenceAmount = rV.resurgenceCrit / rV.manaUsage * rV.healFromMana;
-					arg1 += regurgenceAmount / rV.resurgenceCritAmount;
+					var amount = healPerStat[ stat ].amount;
+					amount += regurgenceAmount / rV.resurgenceCritAmount;
 					
-					healPerStat[ stat ].amount = arg1;
+					healPerStat[ stat ].amount = amount;
 				}
 				return text;
 			};
@@ -484,7 +485,7 @@ var OTHER_254 = [
 				HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">RESURGENCE</header><div class=\"list-top-line\"> </div><ul class=\"list resurgence\">";
 				counter = 0;
 				var resurgenceData = [];
-				for (var i = 0, len = CLASS_254.length; i < len; i++) if(rV.resurgence[ CLASS_254[i].obj.id ][0] > 0) resurgenceData.push([ CLASS_254[i].obj.id,CLASS_254[i] ]);
+				for (var i = 0, len = CLASS_264.length; i < len; i++) if(rV.resurgence[ CLASS_264[i].obj.id ][0] > 0) resurgenceData.push([ CLASS_264[i].obj.id,CLASS_264[i] ]);
 				resurgenceData.sort(function(a,b){ return rV.resurgence[ a[0] ][0] > rV.resurgence[ b[0] ][0] ? - 1 : 1 });
 				for (var i = 0, len = resurgenceData.length; i < len; i++) {
 					var obj = resurgenceData[i][1].obj
@@ -1112,7 +1113,7 @@ var OTHER_254 = [
 	},
 ];
 
-var ITEMS_254 = [
+var ITEMS_264 = [
 
 	
 	
@@ -1129,7 +1130,7 @@ var ITEMS_254 = [
 ];
 
 
-var TRAITS_254 = [
+var TRAITS_264 = [
 	{parse:["combantantInfo", function(){if(cV.traitBySpell[280577]) statsBuffs.crit[280780] = ScaleStatRanks(280577,cV.traitBySpell[280577].rank,1);}]}, //Glory in Battle	
 	{parse:["combantantInfo", function(){if(cV.traitBySpell[280577]) statsBuffs.haste[280780] = ScaleStatRanks(280577,cV.traitBySpell[280577].rank,2);}]}, //Glory in Battle	
 	{parse:["combantantInfo", function(){if(cV.traitBySpell[263984]) statsBuffs.haste[268954] = ScaleStatRanks(263984,cV.traitBySpell[263984].rank);}]}, //Elemental Whirl
@@ -1490,7 +1491,7 @@ var TRAITS_254 = [
 ];
 
 
-var TALENTS_254 = [
+var TALENTS_264 = [
 	{	//CBT
 		init: function() {
 			rV.talents[157153] = 0;
@@ -1853,7 +1854,7 @@ var TALENTS_254 = [
 ];
 
 
-var CLASS_254 = [
+var CLASS_264 = [
 	{	//surge
 		init: function() {
 			rV.resurgence[8004] = [0,0];
@@ -1955,7 +1956,7 @@ var CLASS_254 = [
 	},
 ];
 
-var POTIONS_254 = [
+var POTIONS_264 = [
 	{
 		init: function() {
 			rV.potions[188016] = 0;
@@ -2050,6 +2051,7 @@ var POTIONS_254 = [
 
 SPECS[264] = function(){
 	$('body').css('background-image', 'url("background-merged-shaman.png")');
-	return [OTHER_254, CLASS_254, ITEMS_254, TRAITS_254, TALENTS_254, POTIONS_254];
+	return [OTHER_264, CLASS_264, ITEMS_264, TRAITS_264, TALENTS_264, POTIONS_264];
 }
+SPECS_CLASS[264] = "Shaman";
 CLASS_AVAILABLE["Shaman"] = true;

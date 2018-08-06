@@ -11,6 +11,7 @@ var itemsStats = {};
 
 var SPECS = {};
 var CLASS_AVAILABLE = {};
+var SPECS_CLASS = {};
 
 var STATS_BASE = {
 	crit: 6,
@@ -1848,7 +1849,7 @@ function BuildReport(){
 	var fightLen = fightEnd - fightStart;
 	
 	HTML += "<div class=\"panel\" style=\"margin-top:-10px;\"><div class=\"row full\" style=\"margin-bottom:5px;\">";
-	if(uV.BuildReportHeaderIcons) HTML += uV.BuildReportHeaderIcons(fightLen);
+	if(uV.BuildReportHeaderIcons) HTML += uV.BuildReportHeaderIcons(fightLen,fightStart,fightEnd);
 	HTML += "</div></div>";	
 	
 	
@@ -1880,7 +1881,7 @@ function BuildReport(){
 	}
 
 	HTML += "</div>";	
-	if(uV.BuildReportTopLeft) HTML += uV.BuildReportTopLeft(fightLen);
+	if(uV.BuildReportTopLeft) HTML += uV.BuildReportTopLeft(fightLen,fightStart,fightEnd);
 	HTML += "</div>";	
 	
 		
@@ -1980,7 +1981,7 @@ function BuildReport(){
 		}
 	}
 
-	if(uV.BuildReportTopRight) HTML += uV.BuildReportTopRight(fightLen);
+	if(uV.BuildReportTopRight) HTML += uV.BuildReportTopRight(fightLen,fightStart,fightEnd);
 
 	/// Items predictions
 	var itemsPredictionsHTML = "";
@@ -2240,7 +2241,7 @@ function BuildReport(){
 	HTML += "</ul></div></div></div>";
 
 
-	if(uV.BuildReportAfterTalents) HTML += uV.BuildReportAfterTalents(fightLen);			
+	if(uV.BuildReportAfterTalents) HTML += uV.BuildReportAfterTalents(fightLen,fightStart,fightEnd);			
 	
 	/// Potions
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">POTIONS</header><div class=\"list-top-line\"> </div><ul class=\"list potions\">";
@@ -2302,7 +2303,7 @@ function BuildReport(){
 	}
 	HTML += "</div></div></div>";
 		
-	if(uV.BuildReportBeforeCooldowns) HTML += uV.BuildReportBeforeCooldowns(fightLen);
+	if(uV.BuildReportBeforeCooldowns) HTML += uV.BuildReportBeforeCooldowns(fightLen,fightStart,fightEnd);
 	
 	/// COOLDOWNS
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">COOLDOWN USAGES</header><div class=\"list-top-line\"> </div><ul class=\"list cooldowns\">";
@@ -2527,7 +2528,15 @@ function BuildMainPage(){
 	HTML += "<header class=\"box-header\">ANALYZE REPORT</header>";
 
 	HTML += "<form id=\"mainpage-form\"><b>Enter your Warcraft Logs report code.</b><br>https://www.warcraftlogs.com/reports/ <input type=\"text\" id=\"mainpage-input\" size=\"20\" class=\"form-control\"> /<br>";
-	HTML += "<input type=\"submit\" value=\"Analyze\" class=\"form-btn\" id=\"mainpage-btn\"></form></div></div></div>";
+	HTML += "<input type=\"submit\" value=\"Analyze\" class=\"form-btn\" id=\"mainpage-btn\"></form><br>Supported specs: ";
+	var isNotFirstSpec;
+	Object.keys(SPECS).forEach(function (specID) {
+		if(isNotFirstSpec) HTML += ", ";
+		isNotFirstSpec = true;
+		//HTML += "<span class="+SPECS_CLASS[specID]+">"+specsNames[specID]+"<span>";
+		HTML += specsNames[specID];
+	});
+	HTML += "</div></div></div>";
 
 	$("#main").html(HTML);
 	
