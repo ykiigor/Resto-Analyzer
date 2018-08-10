@@ -1,4 +1,4 @@
-//Disc priest, 23:43 06.08.2018
+//Disc priest, 2:06 07.08.2018
 
 //OTHER & CLASS SPECIFIC
 var OTHER_256 = [
@@ -134,6 +134,7 @@ var OTHER_256 = [
 			};
 			
 			cooldownsTrackingIDs = {
+				29166: true,
 				47536: true,
 				214621: true,
 			};
@@ -1746,7 +1747,7 @@ var POTIONS_256 = [
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
-				if(spellScaleInt[spellID]){
+				if(SpellParseInt(spellID,event)){
 					if(pV.prolongedActive){
 						rV.potions[229206] += amount / cV.intellect * 113 * 1.05;
 					} else {
@@ -1786,7 +1787,7 @@ var POTIONS_256 = [
 			text: function(){
 				var amount = rV.potions[188017] / rV.manaUsage * rV.healFromMana;
 			
-				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188017],0,2)+"</em> ("+(rV.potions[188017]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
+				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188017],2)+"</em> ("+(rV.potions[188017]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
 			},
 		},
 	},
@@ -1806,7 +1807,7 @@ var POTIONS_256 = [
 			text: function(){
 				var amount = rV.potions[188030] / rV.manaUsage * rV.healFromMana;
 			
-				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188030],0,2)+"</em> ("+(rV.potions[188030]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
+				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188030],2)+"</em> ("+(rV.potions[188030]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
 			},
 		},
 	},
@@ -1816,4 +1817,5 @@ SPECS[256] = function(){
 	$('body').css('background-image', 'url("background-merged-priest.png")');
 	return [OTHER_256, CLASS_256, ITEMS_256, TRAITS_256, TALENTS_256, POTIONS_256];
 }
+SPECS_CLASS[256] = "Priest";
 CLASS_AVAILABLE["Priest"] = true;

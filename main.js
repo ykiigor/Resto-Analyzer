@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "06.08.2018";
+var LAST_UPDATE = "10.08.2018";
 
 var itemsStats = {};
 
@@ -247,7 +247,16 @@ var foodBuffs = {	//downscale stats if food buff went down; only top food, lazy 
 	225604: ["mastery",19],
 	225602: ["crit",19],
 	225605: ["vers",19],
-	//201640: ["int",500],	//autoupdated stat
+	
+	257413: ["haste",41],
+	257418: ["mastery",41],
+	257408: ["crit",41],
+	257422: ["vers",41],
+	
+	257415: ["haste",55],
+	257420: ["mastery",55],
+	257410: ["crit",55],
+	257424: ["vers",55],	
 };
 
 var diffIdToName = {
@@ -495,7 +504,7 @@ var ITEM_SPELLS_NUMBERS = {
 	280429: [{stat:431,lvl:340,isLinear:false}],	//Swirling Sands
 	280581: [{stat:543,lvl:370,isLinear:true}],	//Collective Will
 	280577: [{stat:357,lvl:340,isLinear:false},{stat:224,lvl:340,isLinear:false}],	//Glory in Battle	
-	280178: [{stat:411,lvl:340,isLinear:true},{stat:394,lvl:340,isLinear:false}],	//Relational Normalization Gizmo
+	280178: [{stat:471,lvl:340,isLinear:true},{stat:767,lvl:340,isLinear:false}],	//Relational Normalization Gizmo
 	280579: [{stat:247,lvl:340,isLinear:false},{stat:3288,lvl:340,isLinear:true}],	//Retaliatory Fury	
 	
 	//azerite powers; tier 2
@@ -519,22 +528,22 @@ var ITEM_SPELLS_NUMBERS = {
 	268600: [{stat:785,lvl:340,isLinear:true}],	//
 	268435: [{stat:10008,lvl:340,isLinear:true}],	//
 	268595: [{stat:11214,lvl:340,isLinear:true}],	//
-	280181: [{stat:47791,lvl:340,isLinear:true}],	//Personal Absorb-o-Tron
+	280181: [{stat:16830,lvl:340,isLinear:true}],	//Personal Absorb-o-Tron
 	
 	//trinkets
-	271071: [{itemID:159620,stat:570,lvl:340,isLinear:false}],	//Conch of Dark Whispers
+	271071: [{itemID:159620,stat:599,lvl:340,isLinear:false}],	//Conch of Dark Whispers
 	281724: [{itemID:158371,stat:83.6,lvl:300,isLinear:false}],	//Seabreeze
-	271115: [{itemID:159615,stat:228,lvl:340,isLinear:false}],	//Ignition Mage's Fuse
+	271115: [{itemID:159615,stat:240,lvl:340,isLinear:false}],	//Ignition Mage's Fuse
 	268998: [{itemID:159630,stat:12,lvl:340,isLinear:true}],	//Balefire Branch
 	266018: [{itemID:158320,stat:161,lvl:340,isLinear:true}],	//Revitalizing Voodoo Totem
-	271054: [{itemID:158368,stat:953,lvl:340,isLinear:false}],	//Fangs of Intertwined Essence
-	278359: [{itemID:161461,stat:427,lvl:370,isLinear:false}],	//Doom's Hatred
-	278383: [{itemID:161377,stat:1227 / 5,lvl:355,isLinear:false}],	//Azurethos' Singed Plumage
-	278862: [{itemID:161380,stat:1331,lvl:355,isLinear:true}],	//Drust-Runed Icicle
-	278227: [{itemID:161411,stat:1104,lvl:355,isLinear:false}],	//T'zane's Barkspines
+	271054: [{itemID:158368,stat:191,lvl:340,isLinear:false}],	//Fangs of Intertwined Essence
+	278359: [{itemID:161461,stat:448,lvl:370,isLinear:false}],	//Doom's Hatred
+	278383: [{itemID:161377,stat:245,lvl:355,isLinear:false}],	//Azurethos' Singed Plumage
+	278862: [{itemID:161380,stat:1401,lvl:355,isLinear:true}],	//Drust-Runed Icicle
+	278227: [{itemID:161411,stat:1159,lvl:355,isLinear:false}],	//T'zane's Barkspines
 	278156: [{itemID:160656,stat:976,lvl:355,isLinear:true}],	//Twitching Tentacle of Xalzaix
 	278081: [{itemID:160649,stat:3135,lvl:355,isLinear:true}],	//Inoculating Extract
-	277185: [{itemID:161902,stat:1445,lvl:370,isLinear:true}],	//Dread Gladiator's Badge
+	277185: [{itemID:161902,stat:1517,lvl:370,isLinear:true}],	//Dread Gladiator's Badge
 };
 
 function ScaleTrait(spellID,toIlvl,type) {
@@ -624,22 +633,22 @@ GEAR_BASE = [
 	{slot:-3,spell:280178,type:1,tier:1,name:"Relational Normalization Gizmo",icon:"inv_misc_enggizmos_15",special:function(ilvl){ return ScaleTrait(280178,ilvl,1) * 1.05 * healPerStat.int.amount * 10 / 60 * 0.75 + ScaleTrait(280178,ilvl,2) * healPerStat.haste.amount * 10 / 60 * 0.75; },min:340,max:340},
 	{slot:-3,spell:280579,type:1,tier:1,name:"Retaliatory Fury",icon:"achievement_boss_twinorcbrutes",special:function(ilvl){ return ScaleTrait(280579,ilvl,1) * healPerStat.mastery.amount * 10 / 60 * 3 + ScaleTrait(280579,ilvl,2) * GetFightLenFactor(20) * GetVersFactor() * GetCritFactor() * 0.7; }},
 
-	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * 2 * GetFightLenFactor(8) / rV.manaUsage * rV.healFromMana; }},
+	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * GetFightLenFactor(8) / rV.manaUsage * rV.healFromMana; }},
 	{slot:-3,spell:279926,type:3,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleTrait(279926,ilvl) * 3 * 1.05 * healPerStat.int.amount; }},
-	{slot:-3,spell:267889,type:3,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleTrait(267889,ilvl) * GetFightLenFactor(60 / 5) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:267889,type:3,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleTrait(267889,ilvl) * GetFightLenFactor(60 / 5) * GetVersFactor() * GetCritFactor() * 0.4; }},
 	{slot:-3,spell:264108,type:3,tier:2,name:"Blood Siphon (only mastery)",icon:"ability_deathknight_deathsiphon2",special:function(ilvl){ return ScaleTrait(264108,ilvl) * healPerStat.mastery.amount; }},
-	{slot:-3,spell:267883,type:3,tier:2,name:"Savior (20% chance)",icon:"achievement_guildperk_everyonesahero",special:function(ilvl){ return ScaleTrait(267883,ilvl) * 2 * (pV.azerite35hpPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() * 0.2; }},
+	{slot:-3,spell:267883,type:3,tier:2,name:"Savior (10% chance)",icon:"achievement_guildperk_everyonesahero",special:function(ilvl){ return ScaleTrait(267883,ilvl) * (pV.azerite35hpPrediction || 0) * GetVersFactor() * GetCritFactor() * 0.1; }},
 	{slot:-3,spell:266180,type:3,tier:2,name:"Overwhelming Power",icon:"ability_vehicle_electrocharge",special:function(ilvl){ return ScaleTrait(266180,ilvl) * 25 * 0.5 * healPerStat.haste.amount * 25 / 60 * 0.9; }},
 	{slot:-3,spell:267880,type:3,tier:2,name:"Woundbinder",icon:"inv_misc_emberweavebandage",special:function(ilvl){ return ScaleTrait(267880,ilvl) * 0.5 * healPerStat.haste.amount * 6 / 60 * 2; }},
 	{slot:-3,spell:279899,type:3,tier:2,name:"Unstable Flames (100% possible uptime)",icon:"inv_ember",special:function(ilvl){ return ScaleTrait(279899,ilvl) * 1.5 * healPerStat.crit.amount * 5 / 60 * 10; }},
-	{slot:-3,spell:267884,type:3,tier:2,name:"Bracing Chill",icon:"achievement_zone_stormpeaks_01",special:function(ilvl){ return ScaleTrait(267884,ilvl) * 6 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
+	{slot:-3,spell:267884,type:3,tier:2,name:"Bracing Chill",icon:"achievement_zone_stormpeaks_01",special:function(ilvl){ return ScaleTrait(267884,ilvl) * 6 * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60) * 0.8; }},
 	{slot:-3,spell:263984,type:3,tier:2,name:"Elemental Whirl",icon:"ability_skyreach_four_wind",special:function(ilvl){ return ScaleTrait(263984,ilvl) * (healPerStat.haste.amount + healPerStat.mastery.amount + healPerStat.crit.amount + healPerStat.vers.amount) * 10 / 60 * 2 / 4; }},
 	{slot:-3,spell:267879,type:3,tier:2,name:"On My Way",icon:"inv_boots_cloth_08",special:function(ilvl){ return ScaleTrait(267879,ilvl) * healPerStat.vers.amount; }},
-	{slot:-3,spell:267882,type:3,tier:2,name:"Concentrated Mending",icon:"inv_offhand_1h_pvpdraenors1_d_02",special:function(ilvl){ return ScaleTrait(267882,ilvl) * 6 * 4 * 3 * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
+	{slot:-3,spell:267882,type:3,tier:2,name:"Concentrated Mending",icon:"inv_offhand_1h_pvpdraenors1_d_02",special:function(ilvl){ return ScaleTrait(267882,ilvl) * 6 * 4 * 3 * GetVersFactor() * GetCritFactor() * GetFightLenFactor(60); }},
 
-	{slot:-3,spell:263962,type:3,tier:3,name:"Resounding Protection",icon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleTrait(263962,ilvl) * GetFightLenFactor(60 / 2) * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:268437,type:3,tier:3,name:"Impassive Visage",icon:"inv_pet_inquisitoreye",special:function(ilvl){ return ScaleTrait(268437,ilvl) * (pV.azeriteImpassiveVisagePrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-	{slot:-3,spell:280181,type:1,tier:3,name:"Personal Absorb-o-Tron",icon:"inv_robotpet",special:function(ilvl){ return ScaleTrait(280181,ilvl) * GetFightLenFactor(40) * GetVersFactor() * GetCritFactor() * 0.9; },min:340,max:340},
+	{slot:-3,spell:263962,type:3,tier:3,name:"Resounding Protection",icon:"ability_vehicle_shellshieldgenerator_green",special:function(ilvl){ return ScaleTrait(263962,ilvl) * GetFightLenFactor(60 / 2) * GetVersFactor(); }},
+	{slot:-3,spell:268437,type:3,tier:3,name:"Impassive Visage",icon:"inv_pet_inquisitoreye",special:function(ilvl){ return ScaleTrait(268437,ilvl) * (pV.azeriteImpassiveVisagePrediction || 0) * GetVersFactor() * GetCritFactor(); }},
+	{slot:-3,spell:280181,type:1,tier:3,name:"Personal Absorb-o-Tron",icon:"inv_robotpet",special:function(ilvl){ return ScaleTrait(280181,ilvl) * GetFightLenFactor(20) * GetVersFactor() * 0.9; },min:340,max:340},
 
 	{slot:14,item:158320,ilvl:340,type:2,name:"Revitalizing Voodoo Totem",int:205,icon:"ability_shaman_repulsiontotem",special:function(ilvl){ return ScaleItemSpell(158320,ilvl) * 91 * GetFightLenFactor(90) * GetVersFactor() * GetCritFactor(); },wilvl:300},
 	{slot:14,item:159620,ilvl:340,type:2,name:"Conch of Dark Whispers",int:205,icon:"inv_misc_food_legion_seashellc1",special:function(ilvl){ return ScaleItemSpell(159620,ilvl) * healPerStat.crit.amount * 15 / 60 * 1; },wilvl:300},
@@ -799,12 +808,14 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						});
 					});
 					
-					pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((pV.masteryNow / STATS.mastery) / 100) )) );
-					pV.currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((pV.masteryNow / STATS.mastery) / 100) )) );
-
-					if(uV.MasteryParse) uV.MasteryParse(event,spellID,amount,overheal);
-				
-					AddStatAmount('mastery',pV.currHealFromMastery,pV.currHealFromMasteryOh,pV.masteryNow,amount,spellID,event.timestamp,event);
+					if(!uV.MasteryParseDisable){
+						pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((pV.masteryNow / STATS.mastery) / 100) )) );
+						pV.currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((pV.masteryNow / STATS.mastery) / 100) )) );
+	
+						if(uV.MasteryParse) uV.MasteryParse(event,spellID,amount,overheal);
+					
+						AddStatAmount('mastery',pV.currHealFromMastery,pV.currHealFromMasteryOh,pV.masteryNow,amount,spellID,event.timestamp,event);
+					}
 				}			
 
 				if(spellScaleVers[spellID]){
@@ -1065,7 +1076,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 					});
 				}
 				
-				if(spellRacial[spellID] && !pV.racialAdded){
+				if(spellRacial[spellID] && !pV.racialAdded && !buffStatus[-11]){
 					statsBuffs[ spellRacial[spellID][0] ][-11] = spellRacial[spellID][1];
 					buffStatus[-11] = true;
 					

@@ -1981,7 +1981,7 @@ var POTIONS_264 = [
 		},
 		parse: [
 			"heal", function(event,spellID,amount){
-				if(spellScaleInt[spellID]){
+				if(SpellParseInt(spellID,event)){
 					if(pV.prolongedActive){
 						rV.potions[229206] += amount / cV.intellect * 113 * 1.05;
 					} else {
@@ -2021,7 +2021,7 @@ var POTIONS_264 = [
 			text: function(){
 				var amount = rV.potions[188017] / rV.manaUsage * rV.healFromMana;
 			
-				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188017],0,2)+"</em> ("+(rV.potions[188017]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
+				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188017],2)+"</em> ("+(rV.potions[188017]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
 			},
 		},
 	},
@@ -2041,7 +2041,7 @@ var POTIONS_264 = [
 			text: function(){
 				var amount = rV.potions[188030] / rV.manaUsage * rV.healFromMana;
 			
-				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188030],0,2)+"</em> ("+(rV.potions[188030]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
+				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188030],2)+"</em> ("+(rV.potions[188030]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
 			},
 		},
 	},
