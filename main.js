@@ -85,7 +85,7 @@ var buffStatus = [];		// Buffs
 var buffOtherStatus = [];	// Buffs
 
 var parsePlugins, pluginsList;
-var OTHER = [], CLASS = [], ITEMS = [], TRAITS = [], TALENTS = [], POTIONS = []; //parse plugins data
+var OTHER = [], CLASS = [], ITEMS = [], TRAITS = [], TALENTS = [], POTIONS = [], GENERAL = []; //parse plugins data
 var GEAR = [], GEAR_BASE = [];	//prediction tables
 
 function CreateHealPerStatTable(){
@@ -209,7 +209,8 @@ function PrepPluginsData(){
 	ITEMS = pluginsList[2]; 
 	TRAITS = pluginsList[3];  
 	TALENTS = pluginsList[4]; 
-	POTIONS = pluginsList[5]; 
+	POTIONS = pluginsList[5];
+	pluginsList[6] = GENERAL;
 
 	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 		var pluginData = pluginsList[k];
@@ -491,24 +492,24 @@ var ITEM_SPELLS_NUMBERS = {
 	274412: [{stat:5416,lvl:340,isLinear:true}],	//Serene Spirit
 	
 	//azerite powers; tier 1
-	281841: [{stat:287,lvl:340,isLinear:false},{stat:144,lvl:340,isLinear:false}],	//Tradewinds
-	273682: [{stat:296,lvl:340,isLinear:false}],	//Meticulous Scheming
-	280410: [{stat:300,lvl:340,isLinear:false},{stat:70,lvl:340,isLinear:false}],	//Incite the Pack
-	281514: [{stat:228,lvl:340,isLinear:true}],	//Unstable Catalyst
-	267886: [{stat:44,lvl:340,isLinear:false}],	//Ephemeral Recovery
-	280407: [{stat:324,lvl:340,isLinear:false}],	//Blood Rite
-	273823: [{stat:345,lvl:340,isLinear:false}],	//Blightborne Infusion
-	280555: [{stat:153/20,lvl:360,isLinear:false}],	//Archive of the Titans		???
-	280559: [{stat:2160,lvl:370,isLinear:false}],	//Laser Matrix (unknown, 6targets)
+	281841: [{stat:729,lvl:340,isLinear:false},{stat:144,lvl:340,isLinear:false}],	//Tradewinds
+	273682: [{stat:606,lvl:340,isLinear:false}],	//Meticulous Scheming
+	280410: [{stat:533,lvl:340,isLinear:false},{stat:86,lvl:340,isLinear:false}],	//Incite the Pack
+	281514: [{stat:257,lvl:340,isLinear:true}],	//Unstable Catalyst
+	267886: [{stat:52,lvl:340,isLinear:false}],	//Ephemeral Recovery
+	280407: [{stat:582,lvl:340,isLinear:false}],	//Blood Rite
+	273823: [{stat:960,lvl:340,isLinear:false}],	//Blightborne Infusion
+	280555: [{stat:33,lvl:500,isLinear:true}],	//Archive of the Titans		???
+	280559: [{stat:9784,lvl:370,isLinear:true}],	//Laser Matrix (unknown, 6targets)
 	273829: [{stat:206,lvl:340,isLinear:true},{stat:411,lvl:340,isLinear:true}],	//Secrets of the Deep
-	280429: [{stat:431,lvl:340,isLinear:false}],	//Swirling Sands
-	280581: [{stat:543,lvl:370,isLinear:true}],	//Collective Will
-	280577: [{stat:357,lvl:340,isLinear:false},{stat:224,lvl:340,isLinear:false}],	//Glory in Battle	
+	280429: [{stat:720,lvl:340,isLinear:false}],	//Swirling Sands
+	280581: [{stat:210,lvl:350,isLinear:true}],	//Collective Will
+	280577: [{stat:282,lvl:355,isLinear:false},{stat:172,lvl:355,isLinear:false}],	//Glory in Battle	
 	280178: [{stat:471,lvl:340,isLinear:true},{stat:767,lvl:340,isLinear:false}],	//Relational Normalization Gizmo
-	280579: [{stat:247,lvl:340,isLinear:false},{stat:3288,lvl:340,isLinear:true}],	//Retaliatory Fury	
+	280579: [{stat:317,lvl:355,isLinear:false},{stat:1703,lvl:355,isLinear:true}],	//Retaliatory Fury	
 	
 	//azerite powers; tier 2
-	279926: [{stat:13,lvl:340,isLinear:true}],	//Earthlink
+	279926: [{stat:15,lvl:340,isLinear:true}],	//Earthlink
 	267889: [{stat:4521,lvl:340,isLinear:true}],	//Blessed Portents
 	264108: [{stat:64,lvl:340,isLinear:false},{stat:32,lvl:340,isLinear:false}],	//Blood Siphon 
 	267883: [{stat:3060,lvl:340,isLinear:true}],	//Savior
@@ -516,7 +517,7 @@ var ITEM_SPELLS_NUMBERS = {
 	267880: [{stat:544,lvl:340,isLinear:false}],	//Woundbinder
 	279899: [{stat:56,lvl:340,isLinear:false}],	//Unstable Flames
 	267884: [{stat:1530,lvl:340,isLinear:true}],	//Bracing Chill
-	263984: [{stat:192,lvl:340,isLinear:false}],	//Elemental Whirl
+	263984: [{stat:211,lvl:340,isLinear:false}],	//Elemental Whirl
 	267879: [{stat:64,lvl:340,isLinear:false},{stat:32,lvl:340,isLinear:false}],	//On My Way
 	267882: [{stat:62,lvl:340,isLinear:true}],	//Concentrated Mending
 	
@@ -589,6 +590,16 @@ function CreateSpellsTextFromList(list){
 	return text;
 }
 
+GENERAL = [
+	{
+		parse: [
+			"applybuff", function(event,spellID){
+				if(spellID == 278383) buffStatus[spellID] = 5;	//Azurethos' Singed Plumage, item 161377
+			},		
+		],		
+	},
+];
+
 
 function GetVersFactor(){ return healPerStat.vers.avgStat / STATS.vers / 100 + 1 + STATS_BASE.vers / 100; }
 function GetCritFactor(){ return cV.combantantInfo.critSpell / STATS.crit / 100 + 1 + STATS_BASE.crit / 100; }
@@ -625,7 +636,7 @@ GEAR_BASE = [
 	{slot:-3,spell:280407,type:2,tier:1,name:"Blood Rite",icon:"inv_misc_volatilelife",special:function(ilvl){ return ScaleTrait(280407,ilvl) * healPerStat.haste.amount * 15 / 60; }},
 	{slot:-3,spell:273823,type:2,tier:1,name:"Blightborne Infusion",icon:"ability_argus_soulbombdebuffsmall",special:function(ilvl){ return ScaleTrait(273823,ilvl) * healPerStat.crit.amount * 14 / 60; }},
 	{slot:-3,spell:280555,type:6,tier:1,name:"Archive of the Titans",icon:"inv_trinket_80_titan01b",special:function(ilvl){ return ScaleTrait(280555,ilvl) * 20 * 1.05 * healPerStat.int.amount * 0.85; }},
-	{slot:-3,spell:280559,type:6,tier:1,name:"Laser Matrix (unknown, 6targets)",icon:"spell_nature_groundingtotem",special:function(ilvl){ return ScaleTrait(280559,ilvl) * GetFightLenFactor(60) * GetModFactor() * GetVersFactor() * GetCritFactor() * 6; }},
+	{slot:-3,spell:280559,type:6,tier:1,name:"Laser Matrix",icon:"spell_nature_groundingtotem",special:function(ilvl){ return ScaleTrait(280559,ilvl) * GetFightLenFactor(60) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 	{slot:-3,spell:273829,type:2,tier:1,name:"Secrets of the Deep",icon:"inv_misc_enchantedpearlf",special:function(ilvl){ return ScaleTrait(273829,ilvl,1) * 1.05 * healPerStat.int.amount * 18 / 60 * 2 * 0.75; }},
 	{slot:-3,spell:280429,type:2,tier:1,name:"Swirling Sands",icon:"spell_sandstorm",special:function(ilvl){ return ScaleTrait(280429,ilvl) * healPerStat.crit.amount * 12 / 60; }},
 	{slot:-3,spell:280581,type:1,tier:1,name:"Collective Will",icon:"spell_misc_hellifrepvpthrallmarfavor",special:function(ilvl){ return ScaleTrait(280581,ilvl) * 1.05 * healPerStat.int.amount * 6 / 60; }},
@@ -633,7 +644,7 @@ GEAR_BASE = [
 	{slot:-3,spell:280178,type:1,tier:1,name:"Relational Normalization Gizmo",icon:"inv_misc_enggizmos_15",special:function(ilvl){ return ScaleTrait(280178,ilvl,1) * 1.05 * healPerStat.int.amount * 10 / 60 * 0.75 + ScaleTrait(280178,ilvl,2) * healPerStat.haste.amount * 10 / 60 * 0.75; },min:340,max:340},
 	{slot:-3,spell:280579,type:1,tier:1,name:"Retaliatory Fury",icon:"achievement_boss_twinorcbrutes",special:function(ilvl){ return ScaleTrait(280579,ilvl,1) * healPerStat.mastery.amount * 10 / 60 * 3 + ScaleTrait(280579,ilvl,2) * GetFightLenFactor(20) * GetVersFactor() * GetCritFactor() * 0.7; }},
 
-	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * GetFightLenFactor(8) / rV.manaUsage * rV.healFromMana; }},
+	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * 0.55 * GetFightLenFactor(2) / rV.manaUsage * rV.healFromMana; }},
 	{slot:-3,spell:279926,type:3,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleTrait(279926,ilvl) * 3 * 1.05 * healPerStat.int.amount; }},
 	{slot:-3,spell:267889,type:3,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleTrait(267889,ilvl) * GetFightLenFactor(60 / 5) * GetVersFactor() * GetCritFactor() * 0.4; }},
 	{slot:-3,spell:264108,type:3,tier:2,name:"Blood Siphon (only mastery)",icon:"ability_deathknight_deathsiphon2",special:function(ilvl){ return ScaleTrait(264108,ilvl) * healPerStat.mastery.amount; }},
@@ -1514,7 +1525,7 @@ function ParseHeader(fight_code,showPage,afterFunc)
 
 
 function GetIconUrl(icon){
-	return "//render-us.worldofwarcraft.com/icons/56/"+icon.replace(/\-/,"");
+	return "//render-us.worldofwarcraft.com/icons/56/"+icon.replace(/\-/g,"");
 }
 
 function GetIlvBonusID(baseIlvl,needIlvl){
@@ -1884,8 +1895,6 @@ function BuildReport(){
 	//console.log(healingData);
 	console.log(rV);
 	//console.log(healPerStat);
-	
-	if(cV.spellInfo[6262]) cV.spellInfo[6262].icon = "warlock_healthstone.jpg";
 	
 	var HTML = "";
 	

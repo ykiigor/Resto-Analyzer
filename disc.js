@@ -144,6 +144,7 @@ var OTHER_256 = [
 			ignoredSpellsForCDTracking = {
 				[-32]: true,
 				[-2]: true,
+				[63619]: true,
 			};
 						
 			healingFromMana = {
@@ -884,8 +885,8 @@ var TRAITS_256 = [
 					if(event.amount > 0){
 						var value = pV.azeritePenanceDamageValue * 1.05;
 						if(event.hitType == 2) value *= 2;
-						value *= (1 / ((pV.versNow / STATS.vers) / 100 + 1));
-						pV.azeritePenanceDamageLastMod = Math.min(value / event.amount,1);
+						value *= (1 / (((pV.versNow || cV.versatility) / STATS.vers) / 100 + 1));
+						pV.azeritePenanceDamageLastMod = Math.min(value / event.amount,0.2);
 					} else
 						pV.azeritePenanceDamageLastMod = 0;
 				}
@@ -1071,7 +1072,7 @@ var TRAITS_256 = [
 			name: "Savior",
 			id: 42,
 			spellID: 267883,
-			icon: "achievement_guildperk_everyones.jpg",
+			icon: "achievement_guildperk_everyonesahero.jpg",
 			tier: 2,
 		},
 	},
@@ -1808,6 +1809,26 @@ var POTIONS_256 = [
 				var amount = rV.potions[188030] / rV.manaUsage * rV.healFromMana;
 			
 				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[188030],2)+"</em> ("+(rV.potions[188030]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
+			},
+		},
+	},
+	{
+		init: function() {
+			rV.potions[250871] = 0;
+		},
+		parse: [
+			"energize", function(event,spellID){
+				if(spellID == 250871) rV.potions[250871] += event.resourceChange;
+			},		
+		],
+		obj: {
+			id: 250871,
+			name: "Coastal Mana Potion",
+			icon: "inv_alchemy_80_potion01blue.jpg",
+			text: function(){
+				var amount = rV.potions[250871] / rV.manaUsage * rV.healFromMana;
+			
+				return "Mana gained: <em class=\"result\">"+NumberToFormattedNumber(rV.potions[250871],2)+"</em> ("+(rV.potions[250871]/rV.manaUsage*100).toFixed(2)+"%)<br>Helaing: <em class=\"result-hps\">"+NumberToFormattedNumber(amount,0,2)+"</em> ("+(amount/rV.total*100).toFixed(2)+"%)";
 			},
 		},
 	},

@@ -1296,7 +1296,7 @@ var TRAITS_264 = [
 			name: "Savior",
 			id: 42,
 			spellID: 267883,
-			icon: "achievement_guildperk_everyones.jpg",
+			icon: "achievement_guildperk_everyonesahero.jpg",
 			tier: 2,
 		},
 	},
