@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "10.08.2018";
+var LAST_UPDATE = "29.08.2018";
 
 var itemsStats = {};
 
@@ -486,7 +486,7 @@ var ITEM_SPELLS_NUMBERS = {
 	273597: [{stat:289,lvl:340,isLinear:true}],	//Ebb and Flow
 	278713: [{stat:5100,lvl:340,isLinear:true}],	//Surging Tides
 	277658: [{stat:813,lvl:340,isLinear:true}],	//Overflowing Shores
-	275488: [{stat:1326,lvl:340,isLinear:true}],	//Swelling Stream
+	275488: [{stat:928,lvl:340,isLinear:true}],	//Swelling Stream
 	277666: [{stat:67,lvl:340,isLinear:false}],	//Ancestral Resonance
 	280021: [{stat:1570,lvl:340,isLinear:true}],	//Pack Spirit
 	274412: [{stat:5416,lvl:340,isLinear:true}],	//Serene Spirit
@@ -540,7 +540,7 @@ var ITEM_SPELLS_NUMBERS = {
 	271054: [{itemID:158368,stat:191,lvl:340,isLinear:false}],	//Fangs of Intertwined Essence
 	278359: [{itemID:161461,stat:448,lvl:370,isLinear:false}],	//Doom's Hatred
 	278383: [{itemID:161377,stat:245,lvl:355,isLinear:false}],	//Azurethos' Singed Plumage
-	278862: [{itemID:161380,stat:1401,lvl:355,isLinear:true}],	//Drust-Runed Icicle
+	278862: [{itemID:161380,stat:632,lvl:355,isLinear:true}],	//Drust-Runed Icicle
 	278227: [{itemID:161411,stat:1159,lvl:355,isLinear:false}],	//T'zane's Barkspines
 	278156: [{itemID:160656,stat:976,lvl:355,isLinear:true}],	//Twitching Tentacle of Xalzaix
 	278081: [{itemID:160649,stat:3135,lvl:355,isLinear:true}],	//Inoculating Extract
@@ -666,7 +666,7 @@ GEAR_BASE = [
 	{slot:14,item:159615,ilvl:340,type:2,name:"Ignition Mage's Fuse",int:205,icon:"inv_misc_rope_01",special:function(ilvl){ return ScaleItemSpell(159615,ilvl) * 4 * healPerStat.haste.amount * 20 / 120 * 1; },wilvl:300},
 	{slot:14,item:159630,ilvl:340,type:2,name:"Balefire Branch",mastery:143,icon:"inv_staff_26",special:function(ilvl){ return ScaleItemSpell(159630,ilvl) * 100 * 0.5 * 1.05 * healPerStat.int.amount * 20 / 90; },wilvl:300},
 	{slot:14,item:158368,ilvl:340,type:2,name:"Fangs of Intertwined Essence",int:205,icon:"inv_misc_toothb_06",special:function(ilvl){ return ScaleItemSpell(158368,ilvl) * 6 * GetFightLenFactor(120) / rV.manaUsage * rV.healFromMana; },wilvl:300},
-	{slot:14,item:161461,ilvl:370,type:1,name:"Doom's Hatred",int:271,icon:"ability_hunter_harass",special:function(ilvl){ return ScaleItemSpell(161461,ilvl) * 4 * healPerStat.vers.amount * 10 / 60 * 2.5; },wilvl:350},
+	{slot:14,item:161461,ilvl:370,type:1,name:"Doom's Hatred",int:271,icon:"ability_hunter_harass",special:function(ilvl){ return ScaleItemSpell(161461,ilvl) * healPerStat.vers.amount * 10 / 60 * 2.5; },wilvl:350},
 	{slot:14,item:161377,ilvl:355,type:1,name:"Azurethos' Singed Plumage",int:236,icon:"inv_icon_feather08a",special:function(ilvl){ return ScaleItemSpell(161377,ilvl) * 5 * 0.5 * healPerStat.haste.amount * 15 / 88; },wilvl:350},
 	{slot:14,item:161380,ilvl:355,type:1,name:"Drust-Runed Icicle",mastery:154,icon:"spell_ice_rune",special:function(ilvl){ return ScaleItemSpell(161380,ilvl) * 1.05 * healPerStat.int.amount * 12 / 60 * 2; },wilvl:350},
 	{slot:14,item:161411,ilvl:355,type:1,name:"T'zane's Barkspines",int:236,icon:"inv_misc_spineleaf-_01",special:function(ilvl){ return ScaleItemSpell(161411,ilvl) * healPerStat.crit.amount * 10 / 90; },wilvl:350},
@@ -1385,7 +1385,7 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 
 function StartParceLog(fight_code,actor_id,start_time,end_time)
 {
-	$.getJSON( "https://www.warcraftlogs.com:443/v1/report/events/"+fight_code+"?start="+start_time+"&end="+(start_time+1)+"&api_key="+WCL_API_KEY ).done( function( data ) {
+	$.getJSON( "https://www.warcraftlogs.com:443/v1/report/events/"+fight_code+"?start="+start_time+"&end="+(start_time+150)+"&api_key="+WCL_API_KEY ).done( function( data ) {
 		if(data.status == 400){
 			//error_msg("Unknown Warcraftlogs data error");
 			throw new Error("Unknown Warcraftlogs data error");
@@ -1425,7 +1425,7 @@ function StartParceLog(fight_code,actor_id,start_time,end_time)
 		for (var i = 0, len = data.events.length; i < len; i++) {
 			var event = data.events[i];
 			
-			if(event.type == "combatantinfo"){
+			if(event.type == "combatantinfo" && !cV.units[event.sourceID]){
 				cV.units[event.sourceID] = event;
 			
 				for (var j = 0, j_len = parsePlugins.allCombantantInfo.length; j < j_len; j++) {
@@ -2004,27 +2004,26 @@ function BuildReport(){
 			
 			var spellsKeys = Object.keys(healPerStat[ statData[0] ].spells);
 			spellsKeys.sort(function(a,b){ return healPerStat[ statData[0] ].spells[ a ] > healPerStat[ statData[0] ].spells[ b ] ? -1 : 1 });
-			for (var k = 0, k_len = spellsKeys.length; k < k_len; k++) {
+			for (var k = 0, k_len = spellsKeys.length; k < k_len; k++) if(healPerStat[ statData[0] ].spells[ spellsKeys[k] ] > 0) {
 				var spellID = spellsKeys[k];
 				var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
 				var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
 				subSpellsList += "<img src=\""+GetIconUrl(icon)+"\" alt=\""+name+"\"> "+name+" - "+healPerStat[ statData[0] ].spells[spellID].toFixed(1)+"<br>";
-
 			}
 			
 			if(statData[0] == "haste") {
 				subSpellsList += "<br>From cast speed: <br>";
 				var spellsKeys = Object.keys(rV.hasteCastProfitBySpell);
-				spellsKeys.sort(function(a,b){ return rV.hasteCastProfitBySpell[ a ] > rV.hasteCastProfitBySpell[ b ] ? -1 : 1 });
-				for (var k = 0, k_len = spellsKeys.length; k < k_len; k++) {
+ 				spellsKeys.sort(function(a,b){ return rV.hasteCastProfitBySpell[ a ] > rV.hasteCastProfitBySpell[ b ] ? -1 : 1 });
+ 				for (var k = 0, k_len = spellsKeys.length; k < k_len; k++) if(rV.hasteCastProfitBySpell[ spellsKeys[k] ] > 0) {
 					var spellID = spellsKeys[k];
 					var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
 					var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
 					
 					subSpellsList += "<img src=\""+GetIconUrl(icon)+"\" alt=\""+name+"\"> "+name+" - "+(rV.hasteCastProfitBySpell[spellID]).toFixed(1)+"<br>";
-	
 				}			
 			}
+			
 			subSpellsList += "</span></em>"
 		};
 		
