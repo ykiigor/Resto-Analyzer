@@ -1288,7 +1288,7 @@ var TRAITS_264 = [
 			"heal", function(event,spellID,amount){
  				if(event.resourceActor == 2 && event.hitPoints && event.maxHitPoints){
  					var targetHPbeforeHeal = Math.max(event.hitPoints - amount,0) / event.maxHitPoints;
-					if(targetHPbeforeHeal <= .35) pV.azerite35hpPrediction++;
+					if(targetHPbeforeHeal <= .5) pV.azerite35hpPrediction++;
 				}
 			},
 		],
