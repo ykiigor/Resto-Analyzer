@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "02.11.2018";
+var LAST_UPDATE = "08.11.2018";
 
 var itemsStats = {};
 
@@ -508,7 +508,7 @@ var ITEM_SPELLS_NUMBERS = {
 	277658: [{stat:813,lvl:340,isLinear:true}],	//Overflowing Shores
 	275488: [{stat:928,lvl:340,isLinear:true}],	//Swelling Stream
 	277666: [{stat:67,lvl:340,isLinear:false}],	//Ancestral Resonance
-	280021: [{stat:1570,lvl:340,isLinear:true}],	//Pack Spirit
+	280021: [{stat:1570,lvl:340,isLinear:true}],	//Pack Spirit		
 	274412: [{stat:5416,lvl:340,isLinear:true}],	//Serene Spirit
 	
 	//azerite powers; tier 1
@@ -527,7 +527,10 @@ var ITEM_SPELLS_NUMBERS = {
 	280178: [{stat:471,lvl:340,isLinear:true},{stat:767,lvl:340,isLinear:false}],	//Relational Normalization Gizmo
 	280579: [{stat:317,lvl:355,isLinear:false},{stat:1703,lvl:355,isLinear:true}],	//Retaliatory Fury	
 	280710: [{stat:19,lvl:355,isLinear:false}],	//Champion of Azeroth
-	273834: [{stat:5322,lvl:340,isLinear:true}],	//Filthy Transfusion	
+	273834: [{stat:5322,lvl:340,isLinear:true}],	//Filthy Transfusion
+	288749: [{stat:66,lvl:400,isLinear:true}],	//Seductive Power	561
+	288802: [{stat:8769,lvl:400,isLinear:true},{stat:747,lvl:400,isLinear:false}],	//Bonded Souls	560
+	288953: [{stat:384,lvl:400,isLinear:true}],	//Treacherous Covenant	562
 	
 	//azerite powers; tier 2
 	267886: [{stat:60,lvl:340,isLinear:false}],	//Ephemeral Recovery
@@ -568,6 +571,11 @@ var ITEM_SPELLS_NUMBERS = {
 	278081: [{itemID:160649,stat:4513,lvl:355,isLinear:true}],	//Inoculating Extract
 	277185: [{itemID:161902,stat:1517,lvl:370,isLinear:true}],	//Dread Gladiator's Badge
 	281547: [{itemID:163937,stat:18,lvl:350,isLinear:false}],	//Leyshock's Grand Compilation
+
+	288304: [{itemID:165581,stat:350,lvl:400,isLinear:false}],	//Crest of Pa'ku
+	287999: [{itemID:165578,stat:49840,lvl:400,isLinear:true}],	//Mirror of Entwined Fate
+	287568: [{itemID:165569,stat:39872,lvl:400,isLinear:true}],	//Ward of Envelopment
+	289522: [{itemID:165571,stat:26,lvl:400,isLinear:false},{itemID:165571,stat:82,lvl:400,isLinear:false}],	//Incandescent Sliver
 };
 
 function ScaleTrait(spellID,toIlvl,type) {
@@ -656,10 +664,11 @@ function GetSocketFactor(){
 var gear_charts_colors = {
 	1: ["Mage","World drop"],
 	2: ["Rogue","Dungeons"],
-	3: ["Hunter","Tomb of Sargeras",1],
+	3: ["Hunter","Battle of Dazar'alor",1],
 	4: ["Shaman","Antorus",1],
 	5: ["Druid","Legendary",1],
 	6: ["DemonHunter","Uldir"],
+	7: ["Warlock","Battle of Dazar'alor"],
 	10: ["DeathKnight","Equipped items"],
 	9: ["Priest","",1],
 };
@@ -681,6 +690,9 @@ GEAR_BASE = [
 	{slot:-3,spell:280579,type:1,tier:1,name:"Retaliatory Fury",icon:"achievement_boss_twinorcbrutes",special:function(ilvl){ return ScaleTrait(280579,ilvl,1) * healPerStat.mastery.amount * 10 / 60 * 3 + ScaleTrait(280579,ilvl,2) * GetFightLenFactor(20) * GetVersFactor() * GetCritFactor() * 0.7; }},
 	{slot:-3,spell:280710,type:1,tier:1,name:"Champion of Azeroth",icon:"spell_holy_championsgrace",special:function(ilvl){ return ScaleTrait(280710,ilvl) * 4 * (healPerStat.mastery.amount+healPerStat.crit.amount+healPerStat.haste.amount+healPerStat.vers.amount)*0.92; },max:360},
 	{slot:-3,spell:273834,type:2,tier:1,name:"Filthy Transfusion",icon:"spell_volatilefiregreen",special:function(ilvl){ return ScaleTrait(273834,ilvl) * GetFightLenFactor(20) * GetModFactor() * GetVersFactor() * GetCritFactor() * 0.65; }},
+	{slot:-3,spell:288749,type:7,tier:1,name:"Seductive Power",icon:"inv_tradeskill_81_breath_of_bwonsamdi_raid",special:function(ilvl){ return ScaleTrait(288749,ilvl) * (0.92 + 0.75 + 0.58 + 0.416 + 0.25) * (healPerStat.int.amount); }},
+	{slot:-3,spell:288802,type:7,tier:1,name:"Bonded Souls",icon:"sha_spell_warlock_demonsoul",special:function(ilvl){ return ScaleTrait(288802,ilvl,1) * GetModFactor() * GetVersFactor() * GetCritFactor() * 2 * 0.65 * GetFightLenFactor(60) + ScaleTrait(288802,ilvl,2) * healPerStat.haste.amount * 20 / 60; }},
+	{slot:-3,spell:288953,type:7,tier:1,name:"Treacherous Covenant",icon:"ability_argus_deathfog",special:function(ilvl){ return ScaleTrait(288953,ilvl) * healPerStat.int.amount * 0.99; }},
 
 	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * 0.5 * GetFightLenFactor(2) / rV.manaUsage * rV.healFromMana * 0.5; }},
 	{slot:-3,spell:279926,type:3,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleTrait(279926,ilvl) * 3 * 1.05 * healPerStat.int.amount; }},
@@ -714,6 +726,10 @@ GEAR_BASE = [
 	{slot:14,item:161902,ilvl:370,type:1,name:"Dread Gladiator's Badge",vers:164,icon:"spell_holy_championsbond",special:function(ilvl){ return ScaleItemSpell(161902,ilvl) * 1.05 * healPerStat.int.amount * 15 / 120; },wilvl:280},
 	{slot:14,item:159127,ilvl:355,type:1,name:"Darkmoon Deck: Tides",int:236,icon:"inv_inscription_80_deck_tides",special:function(ilvl){ return 300 * GetFightLenFactor(1) + 7.64 * GetFightLenFactor(1) / rV.manaUsage * rV.healFromMana; },wilvl:355,min:355,max:355},
 	{slot:14,item:163937,ilvl:350,type:1,name:"Leyshock's Grand Compilation",int:225,icon:"inv_trinket_80_titan02b",special:function(ilvl){ return ScaleItemSpell(163937,ilvl) * 3 * 0.95 * (healPerStat.mastery.amount+healPerStat.crit.amount+healPerStat.haste.amount+healPerStat.vers.amount); },wilvl:350},
+	{slot:14,item:165581,ilvl:385,type:7,name:"Crest of Pa'ku",int:313,icon:"inv_icon_wing01a",special:function(ilvl){ return ScaleItemSpell(165581,ilvl) * healPerStat.haste.amount * 0.375; },wilvl:350},
+	{slot:14,item:165578,ilvl:385,type:7,name:"Mirror of Entwined Fate",int:313,icon:"archaeology_5_0_carvedbronzemirror",special:function(ilvl){ return ScaleItemSpell(165578,ilvl) * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(120); },wilvl:350},
+	{slot:14,item:165569,ilvl:385,type:7,name:"Ward of Envelopment",int:313,icon:"misc_legionfall_paladin",special:function(ilvl){ return ScaleItemSpell(165569,ilvl) * 5 * GetFightLenFactor(120); },wilvl:350,tip:"Unknown effect"},
+	{slot:14,item:165571,ilvl:385,type:7,name:"Incandescent Sliver",int:313,icon:"ability_priest_cascade",special:function(ilvl){ return ScaleItemSpell(165571,ilvl,1) * healPerStat.crit.amount * 10 * 0.8 + ScaleItemSpell(165571,ilvl,2) * healPerStat.mastery.amount * 0.8; },wilvl:350,tip:"80% uptime at max stacks"},
 ];
 
 
@@ -1960,7 +1976,7 @@ function GetItemDataFromWowhead(itemID)
 					if(passiveStats.heal > 0){
 						HTML += "From <em class=\"tooltip\">passive stats<span class=\"tip-text\" style=\"width: 120px;margin-left:-60px;\">"+passiveStats.tip+"</span></em>: "+NumberToFormattedNumber(passiveStats.heal,2)+" ("+(passiveStats.heal/rV.total*100).toFixed(2)+"%)<br>";
 					}
-					if(passiveStats.heal > 0) HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(passiveStats.heal / currFightData.len * 1000,1)+"</em>";
+					if(passiveStats.heal > 0) HTML += "HPS: <em class=\"result-hps\">"+NumberToFormattedNumber(passiveStats.heal / currFightData.len * 1000,2)+"</em>";
 					
 					$("#gear-"+itemID+"-text").html(HTML);
 				}
@@ -2338,7 +2354,7 @@ function BuildReport(){
 	HTML += "</div>";
 	
 	HTML += "<div class=\"full clearfix\" style=\"padding-bottom:5px;display:none\" id=\"gear_chart_adv\">";
-	HTML += "<input type=\"range\" min=\"310\" max=\"410\" value=\""+GEAR_CHARTS_ILVL+"\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
+	HTML += "<input type=\"range\" min=\"310\" max=\"425\" value=\""+GEAR_CHARTS_ILVL+"\" step=\"5\" class=\"slider\" id=\"gear_chart_slider\">";
 	HTML += "<div class=\"full\" id=\"gear_chart_colorsnames\" style=\"display:none\">";
 	var gear_chart_colors_keys = Object.keys(gear_charts_colors);
 	for (var i = 0, len = gear_chart_colors_keys.length; i < len; i++) if(gear_charts_colors[ gear_chart_colors_keys[i] ][2] != 1) {
