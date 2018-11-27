@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "08.11.2018";
+var LAST_UPDATE = "27.11.2018";
 
 var itemsStats = {};
 
@@ -207,6 +207,8 @@ function PrepAllData(){
 
 	pluginsList = [];
 	EXTRA_QUERY = [];
+
+	pV.castNum = {};
 }
 
 function PrepPluginsData(){
@@ -571,6 +573,8 @@ var ITEM_SPELLS_NUMBERS = {
 	278081: [{itemID:160649,stat:4513,lvl:355,isLinear:true}],	//Inoculating Extract
 	277185: [{itemID:161902,stat:1517,lvl:370,isLinear:true}],	//Dread Gladiator's Badge
 	281547: [{itemID:163937,stat:18,lvl:350,isLinear:false}],	//Leyshock's Grand Compilation
+	277182: [{itemID:161676,stat:277,lvl:280,isLinear:true}],	//Dread Gladiator's Insignia
+	277179: [{itemID:161674,stat:428,lvl:280,isLinear:false}],	//Dread Gladiator's Medallion
 
 	288304: [{itemID:165581,stat:350,lvl:400,isLinear:false}],	//Crest of Pa'ku
 	287999: [{itemID:165578,stat:49840,lvl:400,isLinear:true}],	//Mirror of Entwined Fate
@@ -690,14 +694,14 @@ GEAR_BASE = [
 	{slot:-3,spell:280579,type:1,tier:1,name:"Retaliatory Fury",icon:"achievement_boss_twinorcbrutes",special:function(ilvl){ return ScaleTrait(280579,ilvl,1) * healPerStat.mastery.amount * 10 / 60 * 3 + ScaleTrait(280579,ilvl,2) * GetFightLenFactor(20) * GetVersFactor() * GetCritFactor() * 0.7; }},
 	{slot:-3,spell:280710,type:1,tier:1,name:"Champion of Azeroth",icon:"spell_holy_championsgrace",special:function(ilvl){ return ScaleTrait(280710,ilvl) * 4 * (healPerStat.mastery.amount+healPerStat.crit.amount+healPerStat.haste.amount+healPerStat.vers.amount)*0.92; },max:360},
 	{slot:-3,spell:273834,type:2,tier:1,name:"Filthy Transfusion",icon:"spell_volatilefiregreen",special:function(ilvl){ return ScaleTrait(273834,ilvl) * GetFightLenFactor(20) * GetModFactor() * GetVersFactor() * GetCritFactor() * 0.65; }},
-	{slot:-3,spell:288749,type:7,tier:1,name:"Seductive Power",icon:"inv_tradeskill_81_breath_of_bwonsamdi_raid",special:function(ilvl){ return ScaleTrait(288749,ilvl) * (0.92 + 0.75 + 0.58 + 0.416 + 0.25) * (healPerStat.int.amount); }},
-	{slot:-3,spell:288802,type:7,tier:1,name:"Bonded Souls",icon:"sha_spell_warlock_demonsoul",special:function(ilvl){ return ScaleTrait(288802,ilvl,1) * GetModFactor() * GetVersFactor() * GetCritFactor() * 2 * 0.65 * GetFightLenFactor(60) + ScaleTrait(288802,ilvl,2) * healPerStat.haste.amount * 20 / 60; }},
+	{slot:-3,spell:288749,type:7,tier:1,name:"Seductive Power",icon:"inv_tradeskill_81_breath_of_bwonsamdi_raid",special:function(ilvl){ return ScaleTrait(288749,ilvl) * (Math.max(0,1 - 30 / GetFightLenFactor(1)) + Math.max(0,1 - 90 / GetFightLenFactor(1)) + Math.max(0,1 - 150 / GetFightLenFactor(1)) + Math.max(0,1 - 210 / GetFightLenFactor(1)) + Math.max(0,1 - 270 / GetFightLenFactor(1))) * (healPerStat.int.amount); }},
+	{slot:-3,spell:288802,type:7,tier:1,name:"Bonded Souls",icon:"sha_spell_warlock_demonsoul",special:function(ilvl){ return ScaleTrait(288802,ilvl,1) * GetModFactor() * GetVersFactor() * GetCritFactor() * 2 * 0.65 * GetFightLenFactor(60) + ScaleTrait(288802,ilvl,2) * healPerStat.haste.amount * 15 / 60; }},
 	{slot:-3,spell:288953,type:7,tier:1,name:"Treacherous Covenant",icon:"ability_argus_deathfog",special:function(ilvl){ return ScaleTrait(288953,ilvl) * healPerStat.int.amount * 0.99; }},
 
 	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * 0.5 * GetFightLenFactor(2) / rV.manaUsage * rV.healFromMana * 0.5; }},
 	{slot:-3,spell:279926,type:3,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleTrait(279926,ilvl) * 3 * 1.05 * healPerStat.int.amount; }},
 	{slot:-3,spell:267889,type:3,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleTrait(267889,ilvl) * GetFightLenFactor(60 / 5) * GetVersFactor() * GetCritFactor() * 0.2; }},
-	{slot:-3,spell:264108,type:3,tier:2,name:"Blood Siphon",icon:"ability_deathknight_deathsiphon2",special:function(ilvl){ return ScaleTrait(264108,ilvl,1) * healPerStat.mastery.amount + ScaleTrait(264108,ilvl,2) / STATS.leech / 100 * pV.leechHeal; },textAmount:function(ilvl){ var t="Mastery: "+NumberToFormattedNumber(ScaleTrait(264108,ilvl,1) * healPerStat.mastery.amount,2)+"<br>Leech: "+NumberToFormattedNumber(ScaleTrait(264108,ilvl,2) / STATS.leech / 100 * pV.leechHeal,2); return t;}},
+	{slot:-3,spell:264108,type:3,tier:2,name:"Blood Siphon",icon:"ability_deathknight_deathsiphon2",special:function(ilvl,t){ return ScaleTrait(264108,ilvl,1) * healPerStat.mastery.amount * (t == 2 ? 0 : 1) + ScaleTrait(264108,ilvl,2) / STATS.leech / 100 * pV.leechHeal * (t == 1 ? 0 : 1); },textAmount:function(ilvl){ var t="Mastery: "+NumberToFormattedNumber(this.special(ilvl,1),2)+"<br>Leech: "+NumberToFormattedNumber(this.special(ilvl,2),2); return t;}},
 	{slot:-3,spell:267883,type:3,tier:2,name:"Savior",icon:"achievement_guildperk_everyonesahero",special:function(ilvl){ return ScaleTrait(267883,ilvl) * (pV.azerite35hpPrediction || 0) * GetVersFactor() * GetCritFactor() * 0.05; }},
 	{slot:-3,spell:266180,type:3,tier:2,name:"Overwhelming Power",icon:"ability_vehicle_electrocharge",special:function(ilvl){ return ScaleTrait(266180,ilvl) * 25 * 0.5 * healPerStat.haste.amount * 25 / 60 * 0.9; }},
 	{slot:-3,spell:267880,type:3,tier:2,name:"Woundbinder",icon:"inv_misc_emberweavebandage",special:function(ilvl){ return ScaleTrait(267880,ilvl) * 0.7 * healPerStat.haste.amount * 6 / 60 * 2; }},
@@ -728,8 +732,11 @@ GEAR_BASE = [
 	{slot:14,item:163937,ilvl:350,type:1,name:"Leyshock's Grand Compilation",int:225,icon:"inv_trinket_80_titan02b",special:function(ilvl){ return ScaleItemSpell(163937,ilvl) * 3 * 0.95 * (healPerStat.mastery.amount+healPerStat.crit.amount+healPerStat.haste.amount+healPerStat.vers.amount); },wilvl:350},
 	{slot:14,item:165581,ilvl:385,type:7,name:"Crest of Pa'ku",int:313,icon:"inv_icon_wing01a",special:function(ilvl){ return ScaleItemSpell(165581,ilvl) * healPerStat.haste.amount * 0.375; },wilvl:350},
 	{slot:14,item:165578,ilvl:385,type:7,name:"Mirror of Entwined Fate",int:313,icon:"archaeology_5_0_carvedbronzemirror",special:function(ilvl){ return ScaleItemSpell(165578,ilvl) * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(120); },wilvl:350},
-	{slot:14,item:165569,ilvl:385,type:7,name:"Ward of Envelopment",int:313,icon:"misc_legionfall_paladin",special:function(ilvl){ return ScaleItemSpell(165569,ilvl) * 5 * GetFightLenFactor(120); },wilvl:350,tip:"Unknown effect"},
+	{slot:14,item:165569,ilvl:385,type:7,name:"Ward of Envelopment",int:313,icon:"misc_legionfall_paladin",special:function(ilvl){ return ScaleItemSpell(165569,ilvl) * GetFightLenFactor(120) * 1.3; },wilvl:350},
 	{slot:14,item:165571,ilvl:385,type:7,name:"Incandescent Sliver",int:313,icon:"ability_priest_cascade",special:function(ilvl){ return ScaleItemSpell(165571,ilvl,1) * healPerStat.crit.amount * 10 * 0.8 + ScaleItemSpell(165571,ilvl,2) * healPerStat.mastery.amount * 0.8; },wilvl:350,tip:"80% uptime at max stacks"},
+	{slot:14,item:161676,ilvl:280,type:1,name:"Dread Gladiator's Insignia",vers:85,icon:"inv_misc_token_argentdawn3",special:function(ilvl){ return ScaleItemSpell(161676,ilvl) * 1.05 * healPerStat.int.amount * 20 / 40; },wilvl:280},
+	{slot:14,item:161674,ilvl:280,type:1,name:"Dread Gladiator's Medallion",int:117,icon:"spell_arcane_rune",special:function(ilvl){ return ScaleItemSpell(161674,ilvl) * healPerStat.vers.amount * 20 / 120; },wilvl:280},
+
 ];
 
 
@@ -1567,7 +1574,7 @@ function ParseHeader(fight_code,showPage,afterFunc)
 			error_msg("Unknown Warcraftlogs data error");
 			throw new Error("Unknown Warcraftlogs data error");
 		}
-		
+
 		fightsData = [];
 		actorsData = [];
 		
@@ -1595,6 +1602,8 @@ function ParseHeader(fight_code,showPage,afterFunc)
 		}
 		
 		currFightData.report_name = data.title;
+		currFightData.report_date = data.start;
+		if(currFightData.report_date > 1544540400000) currFightData.is81 = true;
 		
 		if(showPage) BuildFightsList();
 		if(afterFunc) afterFunc();
@@ -1653,13 +1662,14 @@ function CreateAzItemsData(fightLen){
 				}
 			});
 
+			var from_traits = [];
 			for (var tier = 1; tier <= 5; tier++) if(gearData["tier"+tier]) {
 				var tierResults = [];
 				for (var j = 0, len = gearData["tier"+tier].length; j < len; j++) {
 					var spellID = gearData["tier"+tier][j];
 					for (var k = 0, len = gearList.length; k < len; k++) {
 						if(gearList[k].slot == -3 && gearList[k].spell == spellID){
-							tierResults.push( [ gearList[k].special(scaleIlvl),gearList[k] ] );
+							tierResults.push( [ gearList[k].special(scaleIlvl) + (gearList[k].extra ? gearList[k].extra(scaleIlvl) : 0),gearList[k] ] );
 							break;
 						}
 					}
@@ -1668,6 +1678,7 @@ function CreateAzItemsData(fightLen){
 				if(tierResults.length > 0) {
 					totalAmount += tierResults[0][0];
 					tooltip += "<br>"+ (tierResults[0][1].icon ? "<img src=\""+GetIconUrl(tierResults[0][1].icon.replace(/\-/,"")+".jpg")+"\" alt=\""+tierResults[0][1].name+"\"> " : "") + tierResults[0][1].name + " " + NumberToFormattedNumber(tierResults[0][0],2);
+					from_traits.push([ tierResults[0][0],tierResults[0][1].icon,tierResults[0][1].name ]);
 				}
 			}
 
@@ -1679,6 +1690,7 @@ function CreateAzItemsData(fightLen){
 				scaleIlvl,
 				tooltip,
 				statsProfit,
+				from_traits,
 			] );
 		}
 	}
@@ -1687,7 +1699,18 @@ function CreateAzItemsData(fightLen){
 	
 	var HTML = "";
 	for (var i = 0, len = gear_chart_list.length; i < len; i++) {
-		HTML += "<div class=\"row full\"><div class=\"col w5 "+(gear_chart_list[i][4] == GEAR_CHARTS_ILVL ? "" : "t-grey")+"\">"+gear_chart_list[i][4]+"</div><div class=\"col w20\">"+gear_chart_list[i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(gear_chart_list[i][0]+0.5)+"hps"+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(gear_chart_list[i][3]+gear_chart_list[i][6],2)+"<br>From traits - "+NumberToFormattedNumber(gear_chart_list[i][3],2)+gear_chart_list[i][5]+"<br>From stats - "+NumberToFormattedNumber(gear_chart_list[i][6],2)+"</span></em></div><div class=\"col half clearfix\"><div class=\"performance-bar "+(gear_chart_list[i][2])+"-bg\" style=\"width: "+(Math.min(gear_chart_list[i][0]/gear_chart_list[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+		HTML += "<div class=\"row full\"><div class=\"col w5 "+(gear_chart_list[i][4] == GEAR_CHARTS_ILVL ? "" : "t-grey")+"\">"+gear_chart_list[i][4]+"</div><div class=\"col w20\">"+gear_chart_list[i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(gear_chart_list[i][0]+0.5)+"hps"+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(gear_chart_list[i][3]+gear_chart_list[i][6],2)+"<br>From traits - "+NumberToFormattedNumber(gear_chart_list[i][3],2)+gear_chart_list[i][5]+"<br>From stats - "+NumberToFormattedNumber(gear_chart_list[i][6],2)+"</span></em></div><div class=\"col half clearfix\">";
+
+		var total_width = Math.min(gear_chart_list[i][0]/gear_chart_list[0][0],0.99);
+		HTML += "<div class=\"performance-bar "+(gear_chart_list[i][2])+"-bg\" style=\"width: "+(gear_chart_list[i][6] / (gear_chart_list[i][6] + gear_chart_list[i][3]) * total_width * 100).toFixed(2)+"%;float:left;opacity:1\"></div>";
+		for (var k = 0, len_k = gear_chart_list[i][7].length; k < len_k; k++) {
+			var curr_width = gear_chart_list[i][7][k][0] / (gear_chart_list[i][6] + gear_chart_list[i][3]) * total_width;
+			HTML += "<div class=\"performance-bar "+(gear_chart_list[i][2])+"-bg\" style=\"width: "+(curr_width * 100).toFixed(2)+"%;float:left;opacity:"+(k % 2 == 0 ? "0.65" : "1")+"\">";
+			if(curr_width > 0.033) HTML += "<img src=\""+GetIconUrl(gear_chart_list[i][7][k][1].replace(/\-/,"")+".jpg")+"\" alt=\""+gear_chart_list[i][7][k][2]+"\" style=\"width:16px;height:16px;vertical-align: top;padding-left:3px;\">";
+			HTML += "</div>";
+		}
+
+		HTML += "</div><div class=\"list-top-line\"></div></div>";
 	}
 	
 	$("#gear_chart").html(HTML);
@@ -1706,15 +1729,22 @@ function CreateAzChartData(fightLen){
 		
 			var scaleIlvl = Math.min(Math.max(GEAR_CHARTS_ILVL,gearData.min || GEAR_CHARTS_ILVL),gearData.max || GEAR_CHARTS_ILVL);
 
-			var textAmount = gearData.textAmount ? gearData.textAmount(scaleIlvl) : "";		
+			var textAmount = gearData.textAmount ? gearData.textAmount(scaleIlvl) : "";
+
+			var addExtra = false;
+			if(gearData.addExtra && gearData.addExtra()) addExtra = true;
+			var extraAmount = gearData.extra ? gearData.extra(scaleIlvl) : 0;
+			var amount = gearData.special(scaleIlvl) + (addExtra ? extraAmount : 0);
 
 			if(!tier_data[gearData.tier - 1]) tier_data[gearData.tier - 1] = [];
 			tier_data[gearData.tier - 1].push( [ 
-				gearData.special(scaleIlvl) / (GEAR_CHARTS_SLOT == -2 ? 1 : (fightLen / 1000)),
+				amount / (GEAR_CHARTS_SLOT == -2 ? 1 : (fightLen / 1000)),
 				name+" "+scaleIlvl,
 				gear_charts_colors[gearData.type][0],
-				gearData.special(scaleIlvl),
-				textAmount ,
+				amount,
+				textAmount,
+				extraAmount / (GEAR_CHARTS_SLOT == -2 ? 1 : (fightLen / 1000)),
+				addExtra,
 			] );
 		}
 	}
@@ -1728,7 +1758,13 @@ function CreateAzChartData(fightLen){
 	for (var j = 0, len_j = tier_data.length; j < len_j; j++) {
 		HTML += "<div class=\"row full\"><div class=\"col w20\">Tier "+(j+1)+"</div><div class=\"list-top-line\"></div></div>";
 		for (var i = 0, len = tier_data[j].length; i < len; i++) {
-			HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_data[j][i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(tier_data[j][i][0]+0.5)+(GEAR_CHARTS_SLOT != -2 ? "hps" : "")+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(tier_data[j][i][3],2)+(tier_data[j][i][4] != "" ? "<br>"+tier_data[j][i][4] : "" )+"</span></em></div><div class=\"col half clearfix\"><div class=\"performance-bar "+(tier_data[j][i][2])+"-bg\" style=\"width: "+(Math.min(tier_data[j][i][0]/max_hps,1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+			HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_data[j][i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(tier_data[j][i][0]+0.5)+(GEAR_CHARTS_SLOT != -2 ? "hps" : "")+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(tier_data[j][i][3],2)+(tier_data[j][i][4] != "" ? "<br>"+tier_data[j][i][4] : "" )+"</span></em></div><div class=\"col half clearfix\">";
+
+			var bar_width = Math.min((tier_data[j][i][0] - (tier_data[j][i][6] ? tier_data[j][i][5] : 0))/max_hps,1);
+			HTML += "<div class=\"performance-bar "+(tier_data[j][i][2])+"-bg\" style=\"width: "+(bar_width * 100).toFixed(2)+"%;float: left;\"></div>";
+			if(tier_data[j][i][5] > 0) HTML += "<div class=\"performance-bar "+(tier_data[j][i][2])+"-bg\" style=\"width: "+(Math.min(tier_data[j][i][5]/max_hps,1 - bar_width) * 100).toFixed(2)+"%;float: left;opacity: "+(tier_data[j][i][6] ? "0.6" : "0.35")+";\"></div>";
+
+			HTML += "</div><div class=\"list-top-line\"></div></div>";
 		}
 	}
 	

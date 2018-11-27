@@ -1,4 +1,4 @@
-//Disc priest, 2:47 08.11.2018
+//Disc priest, 7:27 27.11.2018
 
 //OTHER & CLASS SPECIFIC
 var OTHER_256 = [
@@ -119,7 +119,10 @@ var OTHER_256 = [
 				94472: true,	//Atonement
 			};
 			
-			spellNotScaleHaste = {};
+			spellNotScaleHaste = {
+				272260: true,	//trait Concentrated Mending
+				270661: true,	//trait Self Reliance
+			};
 			spellAffectedByHaste = {};	//not tick events, but still haste scaling
 			
 			spellScaleVers = {
@@ -133,9 +136,13 @@ var OTHER_256 = [
 				186263: true,	//Shadow Mend
 				110744: true,	//Divine Star
 				204065: true,	//Shadow Covenant
+				208771: true,	//Smite absorb
 				
 				81751: true,	//Atonement
 				94472: true,	//Atonement
+
+				270117: true,	//trait impassive visage
+				269279: true,	//trait absorb
 			};
 			
 			cooldownsTrackingIDs = {
@@ -178,17 +185,18 @@ var OTHER_256 = [
 			function GetAtonementOverhealFactor(spellID){ if(!rV.atonementData[spellID] || (rV.atonementData[spellID][1] == 0)) return 1; return rV.atonementData[spellID][1] / (rV.atonementData[spellID][0]+rV.atonementData[spellID][1]); }
 			GEAR = [
 				{slot:-3,spell:273307,type:9,tier:1,name:"Weal and Woe",icon:"spell_holy_penance",special:function(ilvl){ return ScaleTrait(273307,ilvl,1) * (pV.azeritePenancePredictionSmite || 0) * GetVersFactor() * GetCritFactor() * GetMasteryFactor() * 1.5 * GetDpsFactor() * 0.6 * GetAtonementOverhealFactor(585) + ScaleTrait(273307,ilvl,2) * (pV.azeritePenancePredictionPWS || 0) * GetVersFactor() * GetCritFactor(); }},
-				{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePainSuppressionPredictionAtt; }},
-				{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleTrait(278643,ilvl) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + pV.azeritePWRPredictionAtt; },textAmount:function(){ var t="Atonement duration effect can't be stacked.<br>Atonement: "+NumberToFormattedNumber(pV.azeritePWRPredictionAtt,2)+(GetTraitBySpell(278643) ? " (already have it)" : ""); return t;}},
+				{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor();},extra:function(){return pV.azeritePainSuppressionPredictionAtt; },addExtra:function(){return !GetTraitBySpell(272775);}},
+				{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleTrait(278643,ilvl) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); },extra:function(ilvl){return GetTraitBySpell(278643) ? pV.azeritePWRAmountAtt : pV.azeritePWRPredictionAtt;},addExtra:function(){return !GetTraitBySpell(278643);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Atonement: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(278643) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
 				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 				{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleTrait(278629,ilvl) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 0.6 * GetDpsFactor() * GetAtonementOverhealFactor(47666) + pV.azeritePenanceDamagePredictionSWPHeal; }},
 				{slot:-3,spell:277680,type:9,tier:1,name:"Gift of Forgiveness",icon:"spell_holy_holysmite",special:function(ilvl){ return ScaleTrait(277680,ilvl) * (pV.azeriteSmitePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 1.5 * GetDpsFactor() * 0.6 * GetAtonementOverhealFactor(585); }},
-				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows [8.1]",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() * 2 + rV.healPerAtonement * (pV.castNum[186263] || 0); }},
-				{slot:-3,spell:287355,type:9,tier:1,name:"Sudden Revelation",icon:"spell_holy_holynova",special:function(ilvl){ return ScaleTrait(287355,ilvl) * (pV.azeriteSuddenRevelationPrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * 0.55 + Math.floor(pV.azeriteSuddenRevelationPrediction * 3 / 20) * 10.5 * 5 * rV.healPerAtonement; }},
+				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows [8.1]",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() * 2;},extra:function(ilvl){return GetTraitBySpell(275541) ? pV.azeriteShadowMendAtt : pV.azeriteShadowMendAttPred; },addExtra:function(){return !GetTraitBySpell(275541);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Atonement duration: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(275541) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
+				{slot:-3,spell:287355,type:9,tier:1,name:"Sudden Revelation",icon:"spell_holy_holynova",special:function(ilvl){ return Math.max(ScaleTrait(287355,ilvl) * (pV.azeriteSuddenRevelationPrediction2 || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * 0.55 - pV.azeriteSuddenRevelationPredictionSmiteNegate);},extra:function(ilvl){return Math.floor(pV.azeriteSuddenRevelationPrediction * 3 / 20) * 10.5 * 5 * rV.healPerAtonement; },addExtra:function(){return !GetTraitBySpell(287355);},textAmount:function(ilvl){ var t="Cooldown reduction effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Cooldown reduction: "+NumberToFormattedNumber(this.extra(ilvl),2); return t;}},
 
 				{slot:-3,spell:278659,type:9,tier:1,name:"Death Throes",icon:"spell_shadow_haunting",special:function(ilvl){ return ScaleTrait(278659,ilvl) / (8 * GetHasteFactor()) * (pV.azeriteSWDPrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * 0.6 * GetAtonementOverhealFactor(589); }},
 			
 				{slot:-3,spell:267892,type:9,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction2 || 0); }},
+				{slot:-3,spell:267892,type:9,tier:2,name:"Synergistic Growth [8.1]",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction || 0); }},
 				
 				{slot:-3,spell:274366,type:9,tier:3,name:"Sanctum",icon:"spell_magic_lesserinvisibilty",special:function(ilvl){ return ScaleTrait(274366,ilvl) * Math.max(pV.castNum[586] || 0,GetFightLenFactor(30) * 0.6) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 				{slot:-3,spell:280018,type:9,tier:3,name:"Twist Magic",icon:"spell_nature_nullifydisease",special:function(ilvl){ return ScaleTrait(280018,ilvl) * (pV.azeriteTwistMagicPrediction || 0) * 5 * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
@@ -283,6 +291,76 @@ var OTHER_256 = [
 				return HTML;
 			}
 
+			uV.BuildReportBeforeCooldowns = function(fightLen){
+				var HTML = "";
+				HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix procs\"><header class=\"box-header\">ATONEMENT DAMAGE</header><div class=\"list-top-line\" style=\"margin-bottom:10px;\"> </div>";
+
+				//per dmg
+				HTML += "<div class=\"row full\" style=\"font-size: 1.25em;\">Per damage event</div><div class=\"row full\" style=\"height: 300px; overflow-y: scroll;\">";
+				HTML += "<div class=\"row full\"><div class=\"col w5\"> </div><div class=\"col w30\"> </div><div class=\"col w15\">Damage</div><div class=\"col w15\">Targets</div><div class=\"col w15\">Heal</div><div class=\"col w15\">Overheal</div></div>";
+				for (var i = 0, len = rV.atonementHealEvents.length; i < len; i++) {
+					var line = rV.atonementHealEvents[i];
+					var spellID = line.spell;
+					var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
+					var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
+					HTML += "<div class=\"row full\">";
+					HTML += "<div class=\"col w5\">"+MsToFormattedTime(line.time - currFightData.start_time)+"</div>";
+					HTML += "<div class=\"col w30\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(icon)+"\" alt=\""+name+"\"> "+name+(line.isTick ? " (tick)" : "")+"</a>"+(line.isSchismUp ? " + <img src=\""+GetIconUrl(cV.spellInfo[214621].icon)+"\" style=\"height: 23px;width:23px;\" alt=\"Schism\">" : "")+"</div>";
+					HTML += "<div class=\"col w15\">"+line.damage+"</div>";
+					HTML += "<div class=\"col w15\">"+line.targets+"</div>";
+					HTML += "<div class=\"col w15\">"+line.amount+"</div>";
+					HTML += "<div class=\"col w15 t-grey\">"+line.overheal+"</div>";
+					HTML += "</div>";				
+				}
+				HTML += "</div>";
+
+				//per cast
+				HTML += "<div class=\"list-top-line row full\" style=\"margin-bottom:10px;padding-top:10px;\"> </div><div class=\"row full\" style=\"font-size: 1.25em;\">Per cast</div><div class=\"row full\" style=\"height: 300px; overflow-y: scroll;\">";
+				HTML += "<div class=\"row full\"><div class=\"col w5\"> </div><div class=\"col w25\"> </div><div class=\"col w15\">Damage</div><div class=\"col w15\">Target</div><div class=\"col w10\">Heal count</div><div class=\"col w15\">Heal</div><div class=\"col w15\">Overheal</div></div>";
+				for (var i = 0, len = rV.atonementHealCasts.length; i < len; i++) {
+					var line = rV.atonementHealCasts[i];
+					var spellID = line.spell;
+					var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
+					var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
+					HTML += "<div class=\"row full\">";
+					HTML += "<div class=\"col w5\">"+MsToFormattedTime(line.time - currFightData.start_time)+"</div>";
+					HTML += "<div class=\"col w25\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(icon)+"\" alt=\""+name+"\"> "+name+"</a></div>";
+					HTML += "<div class=\"col w15\">"+line.damage+"</div>";
+					HTML += "<div class=\"col w15\">"+(actorsData[line.targetID] ? actorsData[line.targetID].name : "")+"</div>";
+					HTML += "<div class=\"col w10\">"+line.count+"</div>";
+					HTML += "<div class=\"col w15\">"+line.amount+"</div>";
+					HTML += "<div class=\"col w15 t-grey\">"+line.overheal+"</div>";
+					HTML += "</div>";				
+				}
+				HTML += "</div>";
+
+				//per buff
+				HTML += "<div class=\"list-top-line row full\" style=\"margin-bottom:10px;padding-top:10px;\"> </div><div class=\"row full\" style=\"font-size: 1.25em;\">Per buff</div><div class=\"row full\" style=\"height: 300px; overflow-y: scroll;\">";
+				HTML += "<div class=\"row full\"><div class=\"col w10\"> </div><div class=\"col w30\"> </div><div class=\"col w15\">Target</div><div class=\"col w15\">Heal</div><div class=\"col w15\">Overheal</div></div>";
+				for (var i = 0, len = rV.atonementHealBuffs.length; i < len; i++) {
+					var line = rV.atonementHealBuffs[i];
+					var spellID = line.spell;
+					var icon = cV.spellInfo[spellID] ? cV.spellInfo[spellID].icon : "";
+					var name = cV.spellInfo[spellID] ? cV.spellInfo[spellID].name : "";
+					HTML += "<div class=\"row full\">";
+					HTML += "<div class=\"col w10\">"+MsToFormattedTime(line.time - currFightData.start_time)+" - "+MsToFormattedTime((line.fade || currFightData.end_time) - currFightData.start_time)+"</div>";
+					HTML += "<div class=\"col w30\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(icon)+"\" alt=\""+name+"\"> "+name+"</a></div>";
+					HTML += "<div class=\"col w15 "+(actorsData[line.targetID] ? actorsData[line.targetID].class : "")+"\">"+(actorsData[line.targetID] ? actorsData[line.targetID].name : "")+"</div>";
+					HTML += "<div class=\"col w15\"><em class=\"tooltip\">"+line.amount+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">"+CreateSpellsTextFromList(line.bySpell)+"</span></em></div>";
+					HTML += "<div class=\"col w15 t-grey\">"+line.overheal+"</div>";
+					HTML += "</div>";
+
+									
+				}
+				HTML += "</div>";
+				
+
+				HTML += "</div></div></div>";
+				return HTML;
+			};
+
+
+			pV.AtonementTarget = {};
 		},
 		parse: [
 			"applybuffany", function(event,spellID){
@@ -297,22 +375,27 @@ var OTHER_256 = [
 		init: function() {
 			pV.AtonementSnapshot = {};
 
-			uV.MasteryParseDisable = true;
-			uV.MasteryParseSpecial = function(event,spellID,amount,overheal){
-				var masteryFix;
-				if(pV.AtonementSnapshot[event.targetID])
-					masteryFix = pV.AtonementSnapshot[event.targetID];
-				else
-					masteryFix = pV.masteryNow;
-
-				pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((masteryFix / STATS.mastery) / 100) )) );
-				pV.currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((masteryFix / STATS.mastery) / 100) )) );
-
-				AddStatAmount('mastery',pV.currHealFromMastery,pV.currHealFromMasteryOh,masteryFix,amount,spellID,event.timestamp,event);
+			if(!currFightData.is81){
+				console.log('add pre 8.1 mastery snapshot fix');
+				uV.AtonementSnapshotFix = true;
+				uV.MasteryParseDisable = true;
+				uV.MasteryParseSpecial = function(event,spellID,amount,overheal){
+					var masteryFix;
+					if(pV.AtonementSnapshot[event.targetID])
+						masteryFix = pV.AtonementSnapshot[event.targetID];
+					else
+						masteryFix = pV.masteryNow;
+	
+					pV.currHealFromMastery = amount * ( 1 - (1 / (1 + ((masteryFix / STATS.mastery) / 100) )) );
+					pV.currHealFromMasteryOh = (amount + overheal) * ( 1 - (1 / (1 + ((masteryFix / STATS.mastery) / 100) )) );
+	
+					AddStatAmount('mastery',pV.currHealFromMastery,pV.currHealFromMasteryOh,masteryFix,amount,spellID,event.timestamp,event);
+				}
 			}
 		},
 		parse: [
 			"applybuffany", function(event,spellID){
+				if(!uV.AtonementSnapshotFix) return;
 				if(spellID == 194384 && actors[event.sourceID]) {
 					var masteryFix = cV.mastery;				
 
@@ -334,10 +417,12 @@ var OTHER_256 = [
 				}
 			},
 			"removebuffany", function(event,spellID){
+				if(!uV.AtonementSnapshotFix) return;
 				if(spellID == 194384 && actors[event.sourceID]) delete pV.AtonementSnapshot[event.targetID];
 			},
-			"any", function(event,spellID){
-				if(event.type == "refreshbuff" && spellID == 194384 && actors[event.sourceID]) {
+			"any", function(event){
+				if(!uV.AtonementSnapshotFix) return;
+				if(event.type == "refreshbuff" && event.ability.guid == 194384 && actors[event.sourceID]) {
 					var masteryFix = cV.mastery;				
 
 					Object.keys(statsBuffs.mastery).forEach(function (buffSpellID) {
@@ -434,13 +519,11 @@ var OTHER_256 = [
 			pV.totalCastTime = 0;
 			pV.prevCastTime = 0;
 			pV.savedTimeSpells = {};
-			pV.castNum = {};
 			rV.hasteCastProfit = 0;
 			rV.hasteCastProfitBySpell = {};
 			pV.savedTimeNoCD = {};
 			pV.savedTimeNoCDTotal = 0;
 			pV.hasteCast = {};
-			pV.AtonementTarget = {};
 			pV.savedTimeAvg = 0;
 			pV.savedTimeAvgCount = 0;	
 		},
@@ -537,7 +620,7 @@ var OTHER_256 = [
 		parse: [
 			// haste atonement application
 			"cast", function(event,spellID){
-				if(spellID == 17){
+				if(spellID == 17 || spellID == 186263){
 					var hasteCalc = GetCurrentHaste();
 					var hasteNow = hasteCalc[0];
 					var hasteMod = hasteCalc[1];
@@ -546,7 +629,7 @@ var OTHER_256 = [
 					
 					pV.hastePWSsaved += spellCastTime[spellID]*1000 - castTime;
 					if(pV.hastePWSsaved > castTime){
-						pV.hastePWStargets[event.targetID] = event.timestamp + 15000;
+						pV.hastePWStargets[event.targetID] = event.timestamp + 15000 + ((spellID == 186263 && GetTraitBySpell(275541) && currFightData.is81) ? 3000 : 0);
 						pV.hastePWSsaved -= castTime;
 						pV.hastePWStargetsHaste[event.targetID] = hasteNow;
 					}
@@ -572,7 +655,7 @@ var OTHER_256 = [
 			// haste in-atonement
 			"cast", function(event,spellID){
 				if(spellID == 17) pV.hasteCalc2[event.targetID] = 15000;
-				else if(spellID == 186263) pV.hasteCalc2[event.targetID] = 15000;
+				else if(spellID == 186263) pV.hasteCalc2[event.targetID] = 15000 + ((GetTraitBySpell(275541) && currFightData.is81) ? 3000 : 0);
 				else if(spellCastTime[spellID]) {
 					Object.keys(pV.hasteCalc2).forEach(function (targetID) {
 						pV.hasteCalc2[targetID] -= spellCastTime[spellID] * 1000;
@@ -583,7 +666,7 @@ var OTHER_256 = [
 				if(spellID == 194509) pV.hasteCalc2[event.targetID] = GetTraitBySpell(278643) ? 10500 : 9000;
 			},
 			"atonement", function(event,spellID){
-				if(pV.hasteCalc2[event.targetID] && pV.hasteCalc2[event.targetID] <= 0 && spellID != 589 && spellID != 34433){
+				if(typeof pV.hasteCalc2[event.targetID] !== 'undefined' && pV.hasteCalc2[event.targetID] <= 0 && spellID != 589 && spellID != 34433){
 					pV.hasteCalcResTar[event.targetID] = (pV.hasteCalcResTar[event.targetID] || 0) + event.amount;
 					pV.hasteCalcRes += event.amount;
 
@@ -599,34 +682,31 @@ var OTHER_256 = [
 			},
 		],
 	},
-	{	//Crit PWS calcs
+	{	//Crit calcs on absorbs
+		//currently ignores absorb overheal
 		init: function() {
-			pV.critPWSheal = {};
-			pV.critPWSstatCrit = {};
-			pV.critPWSstatInt = {};
-			pV.critPWSstatVers = {};
 			pV.critPWSraptureMod = 1;
 		},
 		parse: [
 			"applybuffany", function(event,spellID){
-				if(spellID == 17 && event.sourceID == currFightData.actor){
-					pV.critPWSheal[event.targetID] = 0;
-					pV.critPWSstatCrit[event.targetID] = pV.critNow;
-					pV.critPWSstatInt[event.targetID] = cV.intellect;
-					pV.critPWSstatVers[event.targetID] = pV.versNow;
-				}
-			},
-			"removebuffany", function(event,spellID){
-				if(spellID == 17 && event.sourceID == currFightData.actor && pV.critPWSheal[event.targetID]){
-					var simulatePWS = 1.54 * pV.critPWSstatInt[event.targetID] * ((pV.critPWSstatVers[event.targetID] / STATS.vers) / 100 + 1) * pV.critPWSraptureMod;
-					if(pV.critPWSheal[event.targetID] / simulatePWS > 1.5){
-						var critAmount = pV.critPWSheal[event.targetID] * 0.5;
+				if(spellID == 17 && event.sourceID == currFightData.actor){	//PW:S
+					var simulatePWS = 1.54 * cV.intellect * (((pV.versNow || cV.versatility) / STATS.vers) / 100 + 1) * pV.critPWSraptureMod;
+					if(event.absorb / simulatePWS > 1.5){
+						var critAmount = event.absorb * 0.5;
 
-						var critNow = pV.critPWSstatCrit[event.targetID] || pV.critNow || cV.critSpell;
+						var critNow = pV.critNow || cV.critSpell;
 				
-						AddStatAmount('crit',critAmount,critAmount,critNow,pV.critPWSheal[event.targetID],17,event.timestamp,event);
+						AddStatAmount('crit',critAmount,critAmount,critNow,event.absorb,spellID,event.timestamp,event);
 					}
-					pV.critPWSheal[event.targetID] = 0;
+				} else if (spellID == 271466 && event.sourceID == currFightData.actor){	//Luminous Barrier; not actually crit
+					var simulateSpell = 2.8 * cV.intellect * (((pV.versNow || cV.versatility) / STATS.vers) / 100 + 1);
+					if(event.absorb / simulateSpell > 1.5){
+						var critAmount = event.absorb * 0.5;
+
+						var critNow = pV.critNow || cV.critSpell;
+				
+						AddStatAmount('crit',critAmount,critAmount,critNow,event.absorb,spellID,event.timestamp,event);
+					}
 				}
 			},
 			"applybuff", function(event,spellID){
@@ -634,11 +714,6 @@ var OTHER_256 = [
 			},
 			"removebuff", function(event,spellID){
 				if(spellID == 47536) pV.critPWSraptureMod = 1;
-			},
-			"heal", function(event,spellID,amount,overheal){
-				if(spellID == 17 && typeof pV.critPWSheal[event.targetID] !== 'undefined') {
-					pV.critPWSheal[event.targetID] += amount;
-				}
 			},
 		],
 	},
@@ -664,7 +739,7 @@ var OTHER_256 = [
 				}
 			},
 			"heal", function(event,spellID,amount,overheal){
-				if(spellID == 81751 || spellID == 94472) {
+				if(uV.spellIsAtonement[spellID]) {
 					pV.atonementTLHeal += amount;
 				}
 			},
@@ -683,16 +758,19 @@ var CLASS_256 = [
 		init: function() {
 			rV.atonementData = {};
 			pV.atonementQueue = [];
+			pV.atonementQueueUID = 0;
 			
 			uV.AtonementDamageEvent = function (spellID,event,eSpellID) {
 				if(eSpellID == spellID || eSpellID == true) {
-					pV.atonementQueue.push([spellID,event.timestamp + 300,{},event.targetID,event.tick]);
+					pV.atonementQueue.push([spellID,event.timestamp + 300,{},event.targetID,event.tick,event,++pV.atonementQueueUID]);
+
+					if(uV.AtonementDamageEventSub1) uV.AtonementDamageEventSub1(spellID,event,event.tick,pV.atonementQueueUID);
 				}
 			}
 		},
 		parse: [
 			"heal", function(event,spellID,amount,overheal){
-				if(spellID == 81751 || spellID == 94472) {
+				if(uV.spellIsAtonement[spellID]) {
 					var isFound = false;
 					for (var k = 0, k_len = pV.atonementQueue.length; k < k_len; k++) {
 						if(!pV.atonementQueue[k][2][ event.targetID ]){
@@ -704,7 +782,7 @@ var CLASS_256 = [
 							rV.atonementData[ pV.atonementQueue[k][0] ][1] += overheal;
 							isFound = true;
 							for (var l = 0, l_len = parsePlugins.atonement.length; l < l_len; l++) {
-								parsePlugins.atonement[l](event,pV.atonementQueue[k][0],pV.atonementQueue[k][3],pV.atonementQueue[k][4]);
+								parsePlugins.atonement[l](event,pV.atonementQueue[k][0],pV.atonementQueue[k][3],pV.atonementQueue[k][4],pV.atonementQueue[k][5],pV.atonementQueue[k][6]);
 							}
 							break;
 						}
@@ -719,7 +797,7 @@ var CLASS_256 = [
 					}
 				}
 			},
-			"any", function(event,spellID){
+			"any", function(event){
 				for (var k = pV.atonementQueue.length - 1; k >= 0; k--) {
 					if(event.timestamp > pV.atonementQueue[k][1]){
 						pV.atonementQueue.splice(k, 1);
@@ -764,12 +842,12 @@ var CLASS_256 = [
 		},
 		parse: [
 			"damage", function(event,spellID){ 
-				if(event.sourceID && pV.atonementShadowfiend[event.sourceID] && (spellID == -32 || spellID == -2)){
+				if(event.sourceID && pV.atonementShadowfiend[event.sourceID]){
 					uV.AtonementDamageEvent(34433,event,true);
 				}
 			},
-			"any", function(event,spellID){ 
-				if(event.type == "summon" && actors[event.sourceID] && (event.ability.guid == 34433 || event.ability.guid == 254224)){
+			"any", function(event){ 
+				if(event.type == "summon" && actors[event.sourceID] && (event.ability.guid == 34433 || event.ability.guid == 254224 || event.ability.guid == 254232 || event.ability.guid == 132603)){
 					pV.atonementShadowfiend[ event.targetID ] = true;
 				}
 			},
@@ -781,12 +859,12 @@ var CLASS_256 = [
 		},
 		parse: [
 			"damage", function(event,spellID){ 
-				if(event.sourceID && pV.atonementMindbender[event.sourceID] && spellID == -32){
+				if(event.sourceID && pV.atonementMindbender[event.sourceID]){
 					uV.AtonementDamageEvent(123040,event,true);
 				}
 			},
-			"any", function(event,spellID){ 
-				if(event.type == "summon" && actors[event.sourceID] && event.ability.guid == 123040){
+			"any", function(event){ 
+				if(event.type == "summon" && actors[event.sourceID] && (event.ability.guid == 123040 || event.ability.guid == 200174)){
 					pV.atonementMindbender[ event.targetID ] = true;
 				}
 			},
@@ -799,7 +877,7 @@ var CLASS_256 = [
 		parse: [
 			"damage", function(event,spellID){ 
 				if(pV.atonementHaloLast < event.timestamp && spellID == 120696){
-					pV.atonementHaloLast = event.timestamp + 5000;
+					pV.atonementHaloLast = event.timestamp + 8000;
 					uV.AtonementDamageEvent(120696,event,true);
 				}
 			},
@@ -812,7 +890,7 @@ var CLASS_256 = [
 		parse: [
 			"damage", function(event,spellID){ 
 				if(pV.atonementDivineStarLast < event.timestamp && spellID == 122128){
-					pV.atonementDivineStarLast = event.timestamp + 5000;
+					pV.atonementDivineStarLast = event.timestamp + 8000;
 					uV.AtonementDamageEvent(122128,event,true);
 				}
 			},
@@ -825,11 +903,168 @@ var CLASS_256 = [
 		parse: [
 			"damage", function(event,spellID){ 
 				if(pV.atonementHolyNovaLast < event.timestamp && spellID == 132157){
-					pV.atonementHaloLast = event.timestamp + 800;
+					pV.atonementHaloLast = event.timestamp + 750;
 					uV.AtonementDamageEvent(132157,event,true);
 				}
 			},
 		],	
+	},
+
+
+
+	{	//Atonement heal events list
+		init: function() {
+			rV.atonementHealEvents = [];
+			rV.atonementHealCasts = [];
+			rV.atonementHealBuffs = [];
+
+			pV.atonementEventsUnsorted = {};
+			pV.atonementEventsCastToHealSpells = {
+				585: 585,
+				34433: 34433,
+				123040: 123040,
+				120517: 120696,
+				214621: 214621,
+				129250: 129250,
+				589: 589,
+				47540: 47666,
+				281265: 132157,
+			};
+			pV.atonementEventsCastToHealSpellsIgonreTarget = {
+				34433: true,
+				123040: true,
+				120696: true,
+				132157: true,
+				122128: true,
+			};
+			pV.atonementEventsCastTargets = {};
+			pV.atonementEventsCastUnsorted = {};
+			pV.atonementEventsCastCounter = 0;
+			pV.atonementEventsSchismUp = {};
+
+			pV.atonementEventsCastToAttBuff = {
+				17: true,
+				186263: true,
+				194509: true,
+			};
+			pV.atonementEventsBuffsToTable = {};
+
+			uV.AtonementDamageEventSub1 = function(spellID,damageEvent,isTick,damageEventUID){
+				pV.atonementEventsUnsorted[ damageEventUID ] = {
+					spell: spellID,
+					isTick: isTick,
+					isSchismUp: pV.atonementEventsSchismUp[damageEvent.targetID],
+					damage: damageEvent.amount,
+					targets: 0,
+					amount: 0,
+					overheal: 0,
+					time: damageEvent.timestamp,
+					uid: damageEventUID,
+				};
+				if(pV.atonementEventsCastTargets[spellID] && pV.atonementEventsCastTargets[spellID][damageEvent.targetID]) 
+					pV.atonementEventsCastTargets[spellID][damageEvent.targetID].push(damageEventUID);
+				if(pV.atonementEventsCastToHealSpellsIgonreTarget[spellID] && pV.atonementEventsCastTargets[spellID] && pV.atonementEventsCastTargets[spellID][-1])
+					pV.atonementEventsCastTargets[spellID][-1].push(damageEventUID);
+			};
+			uV.AtonementDamageEventSub2 = function(table,targetID){
+				pV.atonementEventsCastUnsorted[ table[0] ] = {
+					spell: table[1].ability.guid,
+					damage: 0,
+					amount: 0,
+					overheal: 0,
+					count: 0,
+					time: table[1].timestamp,
+					uid: table[0],
+					targetID: targetID,				
+				};
+				for (var k = 2, len = table.length; k < len; k++) {
+					pV.atonementEventsCastUnsorted[ table[0] ].damage += pV.atonementEventsUnsorted[ table[k] ].damage;
+					pV.atonementEventsCastUnsorted[ table[0] ].amount += pV.atonementEventsUnsorted[ table[k] ].amount;
+					pV.atonementEventsCastUnsorted[ table[0] ].overheal += pV.atonementEventsUnsorted[ table[k] ].overheal;
+					pV.atonementEventsCastUnsorted[ table[0] ].count += pV.atonementEventsUnsorted[ table[k] ].targets;
+				};
+			};
+		},
+		parse: [
+			"atonement", function(event,spellID,targetID,isTick,damageEvent,damageEventUID){ 
+				if(pV.atonementEventsUnsorted[ damageEventUID ]){
+					pV.atonementEventsUnsorted[ damageEventUID ].targets ++;
+					pV.atonementEventsUnsorted[ damageEventUID ].amount += event.amount;
+					pV.atonementEventsUnsorted[ damageEventUID ].overheal += event.overheal || 0;
+				};
+				if(typeof pV.atonementEventsBuffsToTable[event.targetID] !== 'undefined'){
+					var line = rV.atonementHealBuffs[ pV.atonementEventsBuffsToTable[event.targetID] ];
+					line.amount += event.amount;
+					line.overheal += event.overheal || 0;
+					line.bySpell[spellID] = (line.bySpell[spellID] || 0) + event.amount;
+				}
+			},
+			"cast", function(event,spellID){ 
+				if(pV.atonementEventsCastToHealSpells[ spellID ]){
+					spellID = pV.atonementEventsCastToHealSpells[ spellID ];
+					if(event.targetID || pV.atonementEventsCastToHealSpellsIgonreTarget[spellID]){
+						if(!pV.atonementEventsCastTargets[spellID]) pV.atonementEventsCastTargets[spellID] = {};
+						var targetID = pV.atonementEventsCastToHealSpellsIgonreTarget[spellID] ? -1 : event.targetID;
+	
+						if(pV.atonementEventsCastTargets[spellID][targetID]) uV.AtonementDamageEventSub2(pV.atonementEventsCastTargets[spellID][targetID],targetID);
+						pV.atonementEventsCastTargets[spellID][targetID] = [++pV.atonementEventsCastCounter,event];
+					}
+				};
+				if(pV.atonementEventsCastToAttBuff[spellID]){
+					pV.atonementEventsLastApplicSpell = spellID;
+				}
+			},
+			"applybuffany", function(event,spellID){ 
+				if(spellID == 214621 && actors[event.sourceID]) pV.atonementEventsSchismUp[event.targetID] = true;
+			},
+			"removebuffany", function(event,spellID){ 
+				if(spellID == 214621 && actors[event.sourceID]) delete pV.atonementEventsSchismUp[event.targetID];
+				else if(spellID == 194384 && actors[event.sourceID]) {
+					if(typeof pV.atonementEventsBuffsToTable[event.targetID] !== 'undefined') rV.atonementHealBuffs[ pV.atonementEventsBuffsToTable[event.targetID] ].fade = event.timestamp;
+					delete pV.atonementEventsBuffsToTable[event.targetID];
+				}
+			},
+			"any", function(event){
+				if((event.type == "refreshbuff" || event.type == "applybuff") && event.ability.guid == 194384 && actors[event.sourceID]) {
+					if(typeof pV.atonementEventsBuffsToTable[event.targetID] !== 'undefined') rV.atonementHealBuffs[ pV.atonementEventsBuffsToTable[event.targetID] ].fade = event.timestamp;
+
+					rV.atonementHealBuffs.push({
+						spell: pV.atonementEventsLastApplicSpell,
+						amount: 0,
+						overheal: 0,
+						time: event.timestamp,
+						targetID: event.targetID,
+						bySpell: {},
+					});
+					pV.atonementEventsBuffsToTable[event.targetID] = rV.atonementHealBuffs.length - 1;
+				};
+			},
+		],
+		afterParse: function() {
+			Object.keys(pV.atonementEventsCastTargets).forEach(function (spellID) {
+				Object.keys(pV.atonementEventsCastTargets[spellID]).forEach(function (targetID) {
+					uV.AtonementDamageEventSub2(pV.atonementEventsCastTargets[spellID][targetID],targetID);
+				});
+			});
+			
+			var sortTable = [];
+			Object.keys(pV.atonementEventsUnsorted).forEach(function (damageEventUID) {
+				sortTable.push([ damageEventUID,pV.atonementEventsUnsorted[ damageEventUID ] ]);
+			});
+			sortTable.sort(function(a,b){ return b - a });
+			for (var k = 0, len = sortTable.length; k < len; k++) {
+				rV.atonementHealEvents.push(sortTable[k][1]);
+			};
+
+			var sortTable2 = [];
+			Object.keys(pV.atonementEventsCastUnsorted).forEach(function (UID) {
+				sortTable2.push([ UID,pV.atonementEventsCastUnsorted[ UID ] ]);
+			});
+			sortTable2.sort(function(a,b){ return b - a });
+			for (var k = 0, len = sortTable2.length; k < len; k++) {
+				rV.atonementHealCasts.push(sortTable2[k][1]);
+			};
+		},	
 	},
 ];
 
@@ -896,18 +1131,50 @@ var ITEMS_256 = [
 		},
 	},
 	{	//Twitching Tentacle of Xalzaix [uldir mytrax trink]
+		init: function() { rV.xalzaixAmount = 0; },
+		afterParse: function() { if(rV.buffs.int[278156]) rV.xalzaixAmount += rV.buffs.int[278156]; },
+		obj: { type: "item", name: "Twitching Tentacle of Xalzaix", quality: 4, id: 160656, gear: "xalzaixAmount", },
+	},	
+	{	//Dread Gladiator's Insignia
+		init: function() { rV.item161676Amount = 0;},
+		afterParse: function() { if(rV.buffs.int[277181]) rV.item161676Amount += rV.buffs.int[277181]; },
+		obj: { type: "item", name: "Dread Gladiator's Insignia", quality: 4, id: 161676, gear: "item161676Amount", },
+	},
+	{	//Ignition Mage's Fuse
+		init: function() { rV.ignitionMageAmount = 0; },
+		afterParse: function() { if(rV.buffs.haste[271115]) rV.ignitionMageAmount += rV.buffs.haste[271115]; },
+		obj: { type: "item", name: "Ignition Mage's Fuse", quality: 4, id: 159615, gear: "ignitionMageAmount", },
+	},
+	{	//Inoculating Extract
+		init: function() { rV.inoculatingExtractAmount = 0; },
+		afterParse: function() { if(healingData[278088]) rV.inoculatingExtractAmount += healingData[278088][0];	},
+		obj: { type: "item", name: "Inoculating Extract", quality: 4, id: 160649, gear: "inoculatingExtractAmount", },
+	},
+	{	//Dread Gladiator's Medallion
+		init: function() { rV.item161674Amount = 0;},
+		afterParse: function() { if(rV.buffs.vers[277179]) rV.item161674Amount += rV.buffs.vers[277179]; },
+		obj: { type: "item", name: "Dread Gladiator's Medallion", quality: 4, id: 161674, gear: "item161674Amount", },
+	},	
+	{	//Fangs of Intertwined Essence
 		init: function() {
-			rV.xalzaixAmount = 0;
+			rV.fangsTrinkAmount = 0;
+			rV.fangsTrinkMana = 0;
 		},
+		parse: [
+			"energize", function(event,spellID){
+				if(spellID == 271058) rV.fangsTrinkMana += event.resourceChange;
+			},
+		],
 		afterParse: function() {
-			if(rV.buffs.int[278156]) rV.xalzaixAmount += rV.buffs.int[278156];
+			rV.fangsTrinkAmount = rV.fangsTrinkMana / rV.manaUsage * rV.healFromMana;
 		},
 		obj: {
 			type: "item",
-			name: "Twitching Tentacle of Xalzaix",
+			name: "Fangs of Intertwined Essence",
 			quality: 4,
-			id: 160656,
-			gear: "xalzaixAmount",
+			id: 158368,
+			gear: "fangsTrinkAmount",
+			gearAdditionalText: function() { return "Mana gain: "+NumberToFormattedNumber(rV.fangsTrinkMana,2); },
 		},
 	},	
 
@@ -921,6 +1188,8 @@ var ITEMS_256 = [
 	{parse:["gear", function(itemData,itemID){if(itemID == 161411) statsBuffs.crit[278227] = ScaleItemSpell(161411,itemData.itemLevel);}]}, //T'zane's Barkspines
 	{parse:["gear", function(itemData,itemID){if(itemID == 160656) statsBuffs.int[278156] = ScaleItemSpell(160656,itemData.itemLevel);}]}, //Twitching Tentacle of Xalzaix
 	{parse:["gear", function(itemData,itemID){if(itemID == 161902) statsBuffs.int[277185] = ScaleItemSpell(161902,itemData.itemLevel);}]}, //Dread Gladiator's Badge
+	{parse:["gear", function(itemData,itemID){if(itemID == 161676) statsBuffs.int[277181] = ScaleItemSpell(161676,itemData.itemLevel);}]}, //Dread Gladiator's Insignia
+	{parse:["gear", function(itemData,itemID){if(itemID == 161674) statsBuffs.vers[277179] = ScaleItemSpell(161674,itemData.itemLevel);}]}, //Dread Gladiator's Medallion
 ];
 
 
@@ -1184,14 +1453,23 @@ var TRAITS_256 = [
 			rV.traits[227] = 0;
 			pV.azeriteShadowMendPrediction = 0;
 			pV.azeriteShadowMendPredictionCount = 0;
+			pV.azeriteShadowMendAtt = 0;
+			pV.azeriteShadowMendAttTargetsStart = {};
+			pV.azeriteShadowMendAttTargetsEnd = {};
+			pV.azeriteShadowMendAttPred = 0;
+			pV.azeriteShadowMendAttPredLast = 0;
 			pV.azeriteShadowMendStack = 0;
 			pV.azeriteShadowMendValue = 0;
+			pV.azeriteShadowMendTraitActive = false;
 		},
 		parse: [
 			"cast", function(event,spellID){
 				if(spellID == 186263){
 					pV.azeriteShadowMendPrediction += pV.azeriteShadowMendPredictionCount;
 					pV.azeriteShadowMendPredictionCount = 0;
+
+					pV.azeriteShadowMendAttTargetsStart[event.targetID] = event.timestamp + 15000;
+					pV.azeriteShadowMendAttTargetsEnd[event.targetID] = event.timestamp + 18000;
 				}
 			},
 			"damage", function(event,spellID){
@@ -1218,6 +1496,22 @@ var TRAITS_256 = [
 					}
 					rV.traits[227] += Math.min(trait,amount);
 				}
+				if(uV.spellIsAtonement[spellID]){
+					if(pV.azeriteShadowMendTraitActive){
+						if(pV.azeriteShadowMendAttTargetsStart[event.targetID] && event.timestamp >= pV.azeriteShadowMendAttTargetsStart[event.targetID] && event.timestamp < pV.azeriteShadowMendAttTargetsEnd[event.targetID]){
+							pV.azeriteShadowMendAtt += amount;
+						}
+					} else {
+						if(event.timestamp - pV.azeriteShadowMendAttPredLast > 100){
+							pV.azeriteShadowMendAttPredLast = event.timestamp;
+							Object.keys(pV.azeriteShadowMendAttTargetsStart).forEach(function (targetID) {
+								if(event.timestamp >= pV.azeriteShadowMendAttTargetsStart[targetID] && event.timestamp < pV.azeriteShadowMendAttTargetsEnd[targetID]){
+									pV.azeriteShadowMendAttPred += amount + overheal;
+								}
+							});
+						}
+					}
+				}
 			},
 			"combantantInfo", function(event){
 				var trait = GetTraitBySpell(275541);
@@ -1225,6 +1519,7 @@ var TRAITS_256 = [
 					for (var k = 0, k_len = trait.rank.length; k < k_len; k++) {
 						pV.azeriteShadowMendValue += ScaleTrait(275541,trait.rank[k]);
 					}
+					pV.azeriteShadowMendTraitActive = true;
 				}
 			},			
 		],
@@ -1405,7 +1700,7 @@ var TRAITS_256 = [
 		},
 		parse: [
 			"damage", function(event,spellID){
-				if(spellID == 589 && event.tick){						
+				if((spellID == 589 || spellID == 204213) && event.tick){						
 					Object.keys(pV.AtonementTarget).forEach(function (targetID) {
 						pV.azeriteSWDPrediction++;
 					});
@@ -1432,13 +1727,28 @@ var TRAITS_256 = [
 		init: function() {
 			rV.traits[-100] = 0;
 			pV.azeriteSuddenRevelationPrediction = 0;
+			pV.azeriteSuddenRevelationPrediction2 = 0;
+			pV.azeriteSuddenRevelationPredictionSmiteNegate = 0;
 			pV.azeriteSuddenRevelationPWRCount = 0;
+			pV.azeriteSuddenRevelationPWRLastProc = 0;
 			pV.azeriteSuddenRevelationValue = 0;
 		},
 		parse: [
 			"cast", function(event,spellID){
 				if(spellID == 194509){						
 					pV.azeriteSuddenRevelationPWRCount++;
+					if(pV.azeriteSuddenRevelationPWRCount % 2 == 1){
+						Object.keys(pV.AtonementTarget).forEach(function (targetID) {
+							pV.azeriteSuddenRevelationPrediction2 ++; 
+						});
+						pV.azeriteSuddenRevelationPWRLastProc = event.timestamp + 10000;
+					}
+				}
+			},
+			"atonement", function(event,spellID,targetID,isTick,damageEvent){
+				if(spellID == 585 && event.timestamp < pV.azeriteSuddenRevelationPWRLastProc){
+					pV.azeriteSuddenRevelationPWRLastProc = event.timestamp + 200;
+					pV.azeriteSuddenRevelationPredictionSmiteNegate += event.amount * 0.66;
 				}
 			},
 			"combantantInfo", function(event){
@@ -1531,8 +1841,10 @@ var TRAITS_256 = [
 			"heal", function(event,spellID){
 				if(spellScaleMastery[spellID] && (event.timestamp < pV.azeriteSynergisticGrowthLast2) && pV.masteryNow && !uV.spellIsAtonement[spellID]){
 					pV.azeriteSynergisticGrowthPrediction2 += pV.currHealFromMastery / pV.masteryNow;
-				} else if(uV.spellIsAtonement[spellID] && pV.azeriteSynergisticGrowthATargets[event.targetID]){
-					pV.azeriteSynergisticGrowthPrediction2 += pV.currHealFromMastery / pV.azeriteSynergisticGrowthATargets[event.targetID];
+					pV.azeriteSynergisticGrowthPrediction += pV.currHealFromMastery / pV.masteryNow;
+				} else if(uV.spellIsAtonement[spellID]){
+					if(pV.azeriteSynergisticGrowthATargets[event.targetID]) pV.azeriteSynergisticGrowthPrediction2 += pV.currHealFromMastery / pV.azeriteSynergisticGrowthATargets[event.targetID];
+					if(pV.masteryNow) pV.azeriteSynergisticGrowthPrediction += pV.currHealFromMastery / pV.masteryNow;
 				}
 			},
 			"applybuffany", function(event,spellID){
@@ -1545,8 +1857,8 @@ var TRAITS_256 = [
 					delete pV.azeriteSynergisticGrowthATargets[event.targetID];
 				}
 			},
-			"any", function(event,spellID){
-				if(event.type == "refreshbuff" && spellID == 194384 && event.sourceID == currFightData.actor) {
+			"any", function(event){
+				if(event.type == "refreshbuff" && event.ability.guid == 194384 && event.sourceID == currFightData.actor) {
 					if((event.timestamp < pV.azeriteSynergisticGrowthLast2) && (event.timestamp > pV.azeriteSynergisticGrowthLast3))
 						pV.azeriteSynergisticGrowthATargets[event.targetID] = pV.masteryNow;
 					else
@@ -1738,8 +2050,8 @@ var TALENTS_256 = [
 					pV.talent214621LastTarget = 0;
 				}
 			},			
-			"atonement", function(event,spellID,targetID){
-				if(targetID == pV.talent214621LastTarget && spellID != 214621){
+			"atonement", function(event,spellID,targetID,isTick,damageEvent){
+				if(targetID == pV.talent214621LastTarget && spellID != 214621 && damageEvent.sourceID == currFightData.actor){
 					var amount = Math.max((event.amount + (event.overheal || 0)) * (1 - 1 / 1.4) - (event.overheal || 0),0);
 					rV.talents[214621] += amount;
 					pV.talent214621Data[spellID] = (pV.talent214621Data[spellID] || 0) + amount;
