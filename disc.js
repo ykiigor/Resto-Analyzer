@@ -1,4 +1,4 @@
-//Disc priest, 7:27 27.11.2018
+//Disc priest, 20:19 11.12.2018
 
 //OTHER & CLASS SPECIFIC
 var OTHER_256 = [
@@ -190,20 +190,17 @@ var OTHER_256 = [
 				{slot:-3,spell:273307,type:9,tier:1,name:"Weal and Woe",icon:"spell_holy_penance",special:function(ilvl){ return ScaleTrait(273307,ilvl,1) * (pV.azeritePenancePredictionSmite || 0) * GetVersFactor() * GetCritFactor() * GetMasteryFactor() * 1.5 * GetDpsFactor() * uV.masteryMod * GetAtonementOverhealFactor(585) + ScaleTrait(273307,ilvl,2) * (pV.azeritePenancePredictionPWS || 0) * GetVersFactor() * GetCritFactor(); }},
 				{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor();},extra:function(){return pV.azeritePainSuppressionPredictionAtt; },addExtra:function(){return !GetTraitBySpell(272775);}},
 				{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleTrait(278643,ilvl) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); },extra:function(ilvl){return GetTraitBySpell(278643) ? pV.azeritePWRAmountAtt : pV.azeritePWRPredictionAtt;},addExtra:function(){return !GetTraitBySpell(278643);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Atonement: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(278643) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
-				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-				{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleTrait(278629,ilvl) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * uV.masteryMod * GetDpsFactor() * GetAtonementOverhealFactor(47666) + pV.azeritePenanceDamagePredictionSWPHeal; }},
+				{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleTrait(278629,ilvl) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * uV.masteryMod * GetDpsFactor() * GetAtonementOverhealFactor(47666)},extra:function(ilvl){return pV.azeritePenanceDamagePredictionSWP / 16 * 15 * rV.healPerAtonement * 0.8; },addExtra:function(){return !GetTraitBySpell(278629);},textAmount:function(ilvl){ var t="Extension effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Extension: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(278629) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
 				{slot:-3,spell:277680,type:9,tier:1,name:"Gift of Forgiveness",icon:"spell_holy_holysmite",special:function(ilvl){ return ScaleTrait(277680,ilvl) * (pV.azeriteSmitePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 1.5 * GetDpsFactor() * uV.masteryMod * GetAtonementOverhealFactor(585); }},
-				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows [8.1]",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() * 2;},extra:function(ilvl){return GetTraitBySpell(275541) ? pV.azeriteShadowMendAtt : pV.azeriteShadowMendAttPred; },addExtra:function(){return !GetTraitBySpell(275541);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Atonement duration: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(275541) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
-				{slot:-3,spell:287355,type:9,tier:1,name:"Sudden Revelation",icon:"spell_holy_holynova",special:function(ilvl){ return Math.max(ScaleTrait(287355,ilvl) * (pV.azeriteSuddenRevelationPrediction2 || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * uV.masteryMod - pV.azeriteSuddenRevelationPredictionSmiteNegate);},extra:function(ilvl){return Math.floor(pV.azeriteSuddenRevelationPrediction * 3 / 20) * 10.5 * 5 * rV.healPerAtonement; },addExtra:function(){return !GetTraitBySpell(287355);},textAmount:function(ilvl){ var t="Cooldown reduction effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Cooldown reduction: "+NumberToFormattedNumber(this.extra(ilvl),2); return t;}},
+				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor();},extra:function(ilvl){return GetTraitBySpell(275541) ? pV.azeriteShadowMendAtt : pV.azeriteShadowMendAttPred; },addExtra:function(){return !GetTraitBySpell(275541);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Atonement duration: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(275541) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
+				{slot:-3,spell:287355,type:9,tier:1,name:"Sudden Revelation",icon:"spell_holy_holynova",special:function(ilvl){ return Math.max(ScaleTrait(287355,ilvl) * (pV.azeriteSuddenRevelationPrediction2 || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * uV.masteryMod - pV.azeriteSuddenRevelationPredictionSmiteNegate,0);},extra:function(ilvl){return Math.floor(pV.azeriteSuddenRevelationPrediction * 3 / 20) * 10.5 * 5 * rV.healPerAtonement; },addExtra:function(){return !GetTraitBySpell(287355);},textAmount:function(ilvl){ var t="Cooldown reduction effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Cooldown reduction: "+NumberToFormattedNumber(this.extra(ilvl),2); return t;}},
 
 				{slot:-3,spell:278659,type:9,tier:1,name:"Death Throes",icon:"spell_shadow_haunting",special:function(ilvl){ return ScaleTrait(278659,ilvl) / ((rV.atonementData[204213] ? 10 : 8) * GetHasteFactor()) * (pV.azeriteSWDPrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * uV.masteryMod * GetAtonementOverhealFactor(589) * GetAtonementOverhealFactor(204213); }},
 			
-				{slot:-3,spell:267892,type:9,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction2 || 0); }},
-				{slot:-3,spell:267892,type:9,tier:2,name:"Synergistic Growth [8.1]",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction || 0); }},
+				{slot:-3,spell:267892,type:9,tier:2,name:"Synergistic Growth",icon:"inv_misc_markoftheworldtree",special:function(ilvl){ return ScaleTrait(267892,ilvl) * (pV.azeriteSynergisticGrowthPrediction || 0); }},
 				
 				{slot:-3,spell:274366,type:9,tier:3,name:"Sanctum",icon:"spell_magic_lesserinvisibilty",special:function(ilvl){ return ScaleTrait(274366,ilvl) * Math.max(pV.castNum[586] || 0,GetFightLenFactor(30) * 0.6) * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
 				{slot:-3,spell:280018,type:9,tier:3,name:"Twist Magic",icon:"spell_nature_nullifydisease",special:function(ilvl){ return ScaleTrait(280018,ilvl) * (pV.azeriteTwistMagicPrediction || 0) * 5 * GetModFactor() * GetVersFactor() * GetCritFactor(); }},
-				{slot:-3,spell:280018,type:9,tier:3,name:"Twist Magic [8.1]",icon:"spell_nature_nullifydisease",special:function(ilvl){ return ScaleTrait(280018,ilvl) * (pV.azeriteTwistMagicPrediction || 0) * 5 * GetModFactor() * GetVersFactor() * GetCritFactor() / 4; }},
 				{slot:-3,spell:287717,type:9,tier:3,name:"Death Denied",icon:"priest_spell_leapoffaith_a",special:function(ilvl){ return ScaleTrait(287717,ilvl) * Math.max(pV.castNum[73325] || 0,GetFightLenFactor(75)) * GetVersFactor() * GetCritFactor(); }},
 
 				{slot:1,item:160719,ilvl:385,type:6,name:"Visage of the Ascended Prophet",int:625,icon:"inv_helm_cloth_nazmirraidmythic_d_01",tier1:[280559,273307],tier2:[263984,267886,267880],tier3:[268437,263962],max:390,min:340},
@@ -213,7 +210,7 @@ var OTHER_256 = [
 				{slot:1,item:161555,ilvl:385,type:1,name:"Azerothian Champion's Crown",int:625,icon:"inv_helm_cloth_zandalardungeon_c_01",tier1:[278659,278629,280710],tier2:[267882,279926,267883],tier3:[263962,268599],max:360,min:355},
 				{slot:1,item:160488,ilvl:385,type:1,name:"AZ3-R1-T3 Synthetic Specs",int:625,icon:"inv_helm_goggles_draenortradeskill_d_01",tier1:[280178],tier2:[267886,267884,266180],tier3:[280181],max:340,min:345},
 				{slot:1,item:161455,ilvl:385,type:1,name:"Battlemage's Collar",int:625,icon:"ivn_helm_cloth_warfrontshorde_c_01",tier1:[280581,275541],tier2:[267879,267889],tier3:[263962,274366],max:340,min:375},
-				{slot:1,item:159244,ilvl:385,type:2,name:"[S1] Stormlurker's Cowl",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[277680],tier2:[267889,267879,266180],tier3:[268437],max:390},
+				{slot:1,item:159244,ilvl:385,type:2,name:"[S1] Stormlurker's Cowl",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[287355],tier2:[267889,267879,266180],tier3:[268437],max:390},
 				{slot:1,item:159252,ilvl:385,type:2,name:"[S1] Grasping Crown of the Deep",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[278659,272775],tier2:[264108,267892,267884],tier3:[263962],max:390},
 				{slot:1,item:159279,ilvl:385,type:2,name:"[S1] Soulfuel Headdress",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[273823,278629],tier2:[267886,267882],tier3:[280018],max:390},
 				{slot:1,item:158315,ilvl:385,type:2,name:"[S1] Secret Spinner's Miter",int:625,icon:"inv_helm_cloth_zandalardungeon_c_01",tier1:[273307],tier2:[267880,267882,266180],tier3:[268599],max:390},
@@ -221,8 +218,8 @@ var OTHER_256 = [
 				{slot:1,item:158315,ilvl:385,type:2,name:"[S2] Secret Spinner's Miter",int:625,icon:"inv_helm_cloth_zandalardungeon_c_01",tier1:[275541,278643],tier2:[273307],tier3:[267880,267882,266180],tier4:[268599],max:420},
 				{slot:1,item:159236,ilvl:385,type:2,name:"[S2] Headdress of the First Empire",int:625,icon:"inv_helm_cloth_zandalardungeon_c_01",tier1:[272775,278659,278629],tier2:[275541],tier3:[279926,267882,267889],tier4:[268437,263962],max:420},
 				{slot:1,item:155886,ilvl:385,type:2,name:"[S2] Smartly Plumed Cap",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[287355,278659,278629],tier2:[278643,273682],tier3:[267892,267889],tier4:[274366,268599],max:420},
-				{slot:1,item:159244,ilvl:385,type:2,name:"[S2] Stormlurker's Cowl",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[272775,278643],tier2:[277680],tier3:[267889,267879,266180],tier4:[268437],max:420},
-				{slot:1,item:159252,ilvl:385,type:2,name:"[S2] Grasping Crown of the Deep",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[278355,273307],tier2:[278659,272775],tier3:[264108,267892,267884],tier4:[263962],max:420},
+				{slot:1,item:159244,ilvl:385,type:2,name:"[S2] Stormlurker's Cowl",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[272775,278643],tier2:[287355],tier3:[267889,267879,266180],tier4:[268437],max:420},
+				{slot:1,item:159252,ilvl:385,type:2,name:"[S2] Grasping Crown of the Deep",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[287355,273307],tier2:[278659,272775],tier3:[264108,267892,267884],tier4:[263962],max:420},
 				{slot:1,item:159279,ilvl:385,type:2,name:"[S2] Soulfuel Headdress",int:625,icon:"inv_helm_cloth_kultirasdungeon_c_01",tier1:[273307,275541],tier2:[273823,278629],tier3:[267886,267882],tier4:[280018],max:420},
 				{slot:1,item:165500,ilvl:385,type:7,name:"Blazewing Hood",int:625,icon:"inv_helm_cloth_zuldazarraidmythic_d_01",tier1:[272775,275541],tier2:[288953,278629,278659],tier3:[267880,267889],tier4:[280018],max:420,min:370},
 				{slot:1,item:165822,ilvl:385,type:7,name:"Cowl of Tideborne Omens",int:625,icon:"inv_helm_cloth_zuldazarraidmythic_d_01",tier1:[275541,273307],tier2:[288802,272775],tier3:[266180,267892,267883],tier4:[274366,263962],max:420,min:370},
@@ -231,34 +228,40 @@ var OTHER_256 = [
 				{slot:3,item:160613,ilvl:385,type:6,name:"Mantle of Contained Corruption",int:469,icon:"inv_shoulder_cloth_nazmirraidmythic_d_01",tier1:[280555,278629],tier2:[267880,267892,279899],tier3:[274366,263962],max:390,min:340},
 				{slot:3,item:160726,ilvl:385,type:6,name:"Amice of Corrupting Horror",int:469,icon:"inv_shoulder_cloth_nazmirraidmythic_d_01",tier1:[275541,280559],tier2:[267889,267884,279926],tier3:[274366],max:390,min:340},
 				{slot:3,item:160726,ilvl:385,type:1,name:"Amice of the Rending Abyss",int:469,icon:"inv_shoulder_cloth_nazmirraid_d_01",tier1:[272775],tier2:[267880,267889],max:360,min:355},
-				{slot:3,item:161454,ilvl:385,type:1,name:"Warcaster's Doom Mantle",int:469,icon:"ivn_shoulder_cloth_warfrontshorde_c_01",tier1:[277680],tier2:[267882,267892,263984],tier3:[268437],max:375,min:340},
+				{slot:3,item:161454,ilvl:385,type:1,name:"Warcaster's Doom Mantle",int:469,icon:"ivn_shoulder_cloth_warfrontshorde_c_01",tier1:[287355],tier2:[267882,267892,263984],tier3:[268437],max:375,min:340},
 				{slot:3,item:158344,ilvl:385,type:2,name:"[S1] Mantle of Ceremonial Ascension",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[273307],tier2:[267880,267886,263984],tier3:[274366],max:390},
 				{slot:3,item:159232,ilvl:385,type:2,name:"[S1] Exquisitely Aerodynamic Shoulderpads",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[281514,278629],tier2:[267880,267879],max:390},
 				{slot:3,item:159238,ilvl:385,type:2,name:"[S1] Mantle of Void-Touched Waters",int:469,icon:"inv_shoulder_cloth_kultirasdungeon_c_01",tier1:[273829,278643],tier2:[267882,267884],tier3:[268599],max:390},
 				{slot:3,item:159273,ilvl:385,type:2,name:"[S1] Amice of the Returned",int:469,icon:"inv_shoulder_cloth_kultirasdungeon_c_01",tier1:[275541,278659],tier2:[267892,267880,279899],tier3:[268437],max:390},
 				{slot:3,item:159254,ilvl:385,type:2,name:"[S1] Brood Cleanser's Amice",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[272775,280429],tier2:[267884,267886,279926],tier3:[280018],max:390},
-				{slot:3,item:159267,ilvl:385,type:2,name:"[S1] Pauldrons of Vile Corruption",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[277680,280407],tier2:[267884,267889,279899],tier3:[263962],max:390},
+				{slot:3,item:159267,ilvl:385,type:2,name:"[S1] Pauldrons of Vile Corruption",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[287355,280407],tier2:[267884,267889,279899],tier3:[263962],max:390},
 				{slot:3,item:158344,ilvl:385,type:2,name:"[S2] Mantle of Ceremonial Ascension",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[272775,287355],tier2:[273307],tier3:[267880,267886,263984],tier4:[274366],max:420},
 				{slot:3,item:159254,ilvl:385,type:2,name:"[S2] Brood Cleanser's Amice",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[273307,287355],tier2:[272775,280429],tier3:[267884,267886,279926],tier4:[280018],max:420},
 				{slot:3,item:159232,ilvl:385,type:2,name:"[S2] Exquisitely Aerodynamic Shoulderpads",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[275541,278643],tier2:[281514,278629],tier3:[267880,267879],tier4:[287717],max:420},
-				{slot:3,item:159267,ilvl:385,type:2,name:"[S2] Pauldrons of Vile Corruption",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[275541,278659,278629],tier2:[277680,280407],tier3:[267884,267889,279899],tier4:[263962],max:420},
+				{slot:3,item:159267,ilvl:385,type:2,name:"[S2] Pauldrons of Vile Corruption",int:469,icon:"inv_shoulder_cloth_zandalardungeon_c_01",tier1:[275541,278659,278629],tier2:[287355,280407],tier3:[267884,267889,279899],tier4:[263962],max:420},
 				{slot:3,item:159238,ilvl:385,type:2,name:"[S2] Mantle of Void-Touched Waters",int:469,icon:"inv_shoulder_cloth_kultirasdungeon_c_01",tier1:[273307,278659,278629],tier2:[273829,278643],tier3:[267882,267884],tier4:[268599],max:420},
 				{slot:3,item:159273,ilvl:385,type:2,name:"[S2] Amice of the Returned",int:469,icon:"inv_shoulder_cloth_kultirasdungeon_c_01",tier1:[272775,278643],tier2:[275541,278659],tier3:[267892,267880,279899],tier4:[268437],max:420},
 				{slot:3,item:165497,ilvl:385,type:7,name:"Giga-Charged Shoulderpads",int:469,icon:"inv_shoulder_cloth_zuldazarraidmythic_d_01",tier1:[287355,275541],tier2:[288953,272775],tier3:[267889,267882],tier4:[287717],max:420,min:370},
 				{slot:3,item:165922,ilvl:385,type:7,name:"Bristling Fur-Lined Amice",int:469,icon:"inv_shoulder_cloth_zuldazarraidmythic_d_01",tier1:[272775,278643],tier2:[288802,287355],tier3:[267882,267892],tier4:[287717],max:420,min:370},
 				{slot:3,item:165507,ilvl:385,type:7,name:"Mantle of the Skyterror",int:469,icon:"inv_shoulder_cloth_zuldazarraidmythic_d_01",tier1:[273307,278629,278659],tier2:[288749,278643],tier3:[264108,267884,267879],tier4:[274366,268599],max:420,min:370},
 
-				{slot:5,item:160614,ilvl:385,type:6,name:"Robes of the Unraveler",int:625,icon:"inv_robe_cloth_nazmirraidmythic_d_01",tier1:[280555,277680],tier2:[267883,267892,266180],tier3:[280018,268599],max:390,min:340},
+				{slot:5,item:160614,ilvl:385,type:6,name:"Robes of the Unraveler",int:625,icon:"inv_robe_cloth_nazmirraidmythic_d_01",tier1:[280555,287355],tier2:[267883,267892,266180],tier3:[280018,268599],max:390,min:340},
 				{slot:5,item:161400,ilvl:385,type:1,name:"Raider's Shrouding Thobe",int:625,icon:"inv_robe_cloth_nazmirraid_d_01",tier1:[280429,278629],tier2:[267883,267884],max:360,min:355},
-				{slot:5,item:158301,ilvl:385,type:2,name:"Ruffled Poet Blouse",int:625,icon:"inv_chest_cloth_kultirasdungeon_c_01",tier1:[281841,275541],tier2:[267883,263984,267879],max:390},
-				{slot:5,item:159268,ilvl:385,type:2,name:"Inmate's Straight Robe",int:625,icon:"inv_chest_cloth_kultirasdungeon_c_01",tier1:[278643],tier2:[267882,267879],tier3:[268437,280018],max:390},
-				{slot:5,item:158349,ilvl:385,type:2,name:"Petticoat of the Self-Stylized Azerite Baron",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[281514,277680],tier2:[279899,267886,267883],max:390},
-				{slot:5,item:159233,ilvl:385,type:2,name:"Loa Betrayer's Vestments",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[272775],tier2:[267879,267892],tier3:[274366,263962],max:390},
-				{slot:5,item:159241,ilvl:385,type:2,name:"Blood-Drenched Robes",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[278659,278629,273834],tier2:[267886,267883],tier3:[268599],max:390},
-				{slot:5,item:159257,ilvl:385,type:2,name:"Robes of the Reborn Serpent",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[273307],tier2:[267889,267883,264108],tier3:[268599],max:390},
+				{slot:5,item:158301,ilvl:385,type:2,name:"[S1] Ruffled Poet Blouse",int:625,icon:"inv_chest_cloth_kultirasdungeon_c_01",tier1:[281841,275541],tier2:[267883,263984,267879],max:390},
+				{slot:5,item:159268,ilvl:385,type:2,name:"[S1] Inmate's Straight Robe",int:625,icon:"inv_chest_cloth_kultirasdungeon_c_01",tier1:[278643],tier2:[267882,267879],tier3:[268437,280018],max:390},
+				{slot:5,item:158349,ilvl:385,type:2,name:"[S1] Petticoat of the Self-Stylized Azerite Baron",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[281514,287355],tier2:[279899,267886,267883],max:390},
+				{slot:5,item:159233,ilvl:385,type:2,name:"[S1] Loa Betrayer's Vestments",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[272775],tier2:[267879,267892],tier3:[274366,263962],max:390},
+				{slot:5,item:159241,ilvl:385,type:2,name:"[S1] Blood-Drenched Robes",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[278659,278629,273834],tier2:[267886,267883],tier3:[268599],max:390},
+				{slot:5,item:159257,ilvl:385,type:2,name:"[S1] Robes of the Reborn Serpent",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[273307],tier2:[267889,267883,264108],tier3:[268599],max:390},
 				{slot:5,item:165834,ilvl:385,type:7,name:"Divine Fury Raiment",int:625,icon:"inv_robe_cloth_zuldazarraidmythic_d_01",tier1:[278643,272775],tier2:[288953,275541],tier3:[279926,267879,267886],tier4:[274366],max:420,min:370},
 				{slot:5,item:165505,ilvl:385,type:7,name:"Robes of Biting Cold",int:625,icon:"inv_robe_cloth_zuldazarraidmythic_d_01",tier1:[278659,278629,278643],tier2:[288749,287355],tier3:[279899,267886,267884],tier4:[280018],max:420,min:370},
 				{slot:5,item:165498,ilvl:385,type:7,name:"Vestments of the Afterlife",int:625,icon:"inv_robe_cloth_zuldazarraidmythic_d_01",tier1:[287355,278629,278659],tier2:[288802,273307],tier3:[263984,267886,267880],tier4:[280018,263962],max:420,min:370},
+				{slot:5,item:159257,ilvl:385,type:2,name:"[S2] Robes of the Reborn Serpent",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[272775,278629,278659],tier2:[273307],tier3:[267889,267883,264108],tier4:[268599],max:420},
+				{slot:5,item:158301,ilvl:385,type:2,name:"[S2] Ruffled Poet Blouse",int:625,icon:"inv_chest_cloth_kultirasdungeon_c_01",tier1:[273307,278643],tier2:[281841,275541],tier3:[267883,263984,267879],tier4:[268600],max:420},
+				{slot:5,item:159233,ilvl:385,type:2,name:"[S2] Loa Betrayer's Vestments",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[275541,287355],tier2:[272775],tier3:[267879,267892],tier4:[274366,263962],max:420},
+				{slot:5,item:158349,ilvl:385,type:2,name:"[S2] Petticoat of the Self-Stylized Azerite Baron",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[275541,278629,278659],tier2:[281514,287355],tier3:[279899,267886,267883],max:420},
+				{slot:5,item:159268,ilvl:385,type:2,name:"[S2] Inmate's Straight Robe",int:625,icon:"inv_chest_cloth_kultirasdungeon_c_01",tier1:[273307,287355],tier2:[278643],tier3:[267882,267879],tier4:[268437,280018],max:420},
+				{slot:5,item:159241,ilvl:385,type:2,name:"[S2] Blood-Drenched Robes",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[272775,278643],tier2:[278659,278629,273834],tier3:[267886,267883],tier4:[268599],max:420},
 			];
 
 			uV.BuildReportHeaderIcons = function(fightLen){
@@ -309,7 +312,7 @@ var OTHER_256 = [
 					HTML += "<div class=\"row full\">";
 					HTML += "<div class=\"col w5\">"+MsToFormattedTime(line.time - currFightData.start_time)+"</div>";
 					HTML += "<div class=\"col w30\"><a href=\"//www.wowhead.com/spell="+spellID+"\" target=\"_blank\"><img src=\""+GetIconUrl(icon)+"\" alt=\""+name+"\"> "+name+(line.isTick ? " (tick)" : "")+"</a>"+(line.isSchismUp ? " + <img src=\""+GetIconUrl(cV.spellInfo[214621].icon)+"\" style=\"height: 23px;width:23px;\" alt=\"Schism\">" : "")+"</div>";
-					HTML += "<div class=\"col w15\">"+line.damage+"</div>";
+					HTML += "<div class=\"col w15\">"+(line.isCrit ? "*" : "")+line.damage+(line.isCrit ? "*" : "")+"</div>";
 					HTML += "<div class=\"col w15\">"+line.targets+"</div>";
 					HTML += "<div class=\"col w15\">"+line.amount+"</div>";
 					HTML += "<div class=\"col w15 t-grey\">"+line.overheal+"</div>";
@@ -956,6 +959,7 @@ var CLASS_256 = [
 				pV.atonementEventsUnsorted[ damageEventUID ] = {
 					spell: spellID,
 					isTick: isTick,
+					isCrit: damageEvent.hitType == 2,
 					isSchismUp: pV.atonementEventsSchismUp[damageEvent.targetID],
 					damage: damageEvent.amount,
 					targets: 0,
@@ -1228,6 +1232,7 @@ var TRAITS_256 = [
 		statsBuffs.mastery[280713] = ScaleStatRanks(280710,cV.traitBySpell[280710].rank);
 	}}]}, //Champion of Azeroth
 	//{parse:["combantantInfo", function(){if(cV.traitBySpell[279926]) statsBuffs.crit[280433] = ScaleStatRanks(279926,cV.traitBySpell[279926].rank);}]}, //Earthlink
+	{parse:["combantantInfo", function(){if(cV.traitBySpell[288749]) statsBuffs.int[288777] = ScaleStatRanks(288749,cV.traitBySpell[288749].rank);}]}, //Seductive Power
 
 	
 	{parse:["allCombantantInfo", function(e){ CreateDataByTraitBySpellID(e,280410,280413,"mastery",2);  }]}, //Incite the Pack
@@ -1472,7 +1477,7 @@ var TRAITS_256 = [
 					pV.azeriteShadowMendPredictionCount = 0;
 
 					pV.azeriteShadowMendAttTargetsStart[event.targetID] = event.timestamp + 15000;
-					pV.azeriteShadowMendAttTargetsEnd[event.targetID] = event.timestamp + 18000;
+					pV.azeriteShadowMendAttTargetsEnd[event.targetID] = event.timestamp + 17000;
 				}
 			},
 			"damage", function(event,spellID){
@@ -1526,12 +1531,17 @@ var TRAITS_256 = [
 				}
 			},			
 		],
+		afterParse: function() {
+			rV.traits[227] += pV.azeriteShadowMendAtt;
+		},
 		obj: {
 			name: "Depth of the Shadows",
 			id: 227,
 			spellID: 275541,
 			icon: "spell_shadow_shadowmend.jpg",
+			additionalText: function(){ return "Bonus: "+NumberToFormattedNumber(rV.traits[227] - pV.azeriteShadowMendAtt,1)+(GetTraitBySpell(275541).rank.length > 1 ? " (per item: "+NumberToFormattedNumber((rV.traits[227] - pV.azeriteShadowMendAtt)/GetTraitBySpell(275541).rank.length,1)+")" : "")+"<br>Atonement: "+NumberToFormattedNumber(pV.azeriteShadowMendAtt,1); },
 			tier: 1,
+			disablePerItem: true,
 		},
 	},
 	{	//Penance Damage
@@ -2249,19 +2259,33 @@ var TALENTS_256 = [
 			rV.talents[246287] = 0;
 			rV.talents_prediction[246287] = 0;
 			pV.talents246287Targets = {};
+			pV.talents246287AtTargets = {};
+			pV.talents246287LastAt = 0;
 		},
 		parse: [
 			"cast", function(event,spellID){
 				if(spellID == 246287) {
-					Object.keys(pV.AtonementTarget).forEach(function (targetID) {
-						pV.talents246287Targets[targetID] = event.timestamp + 6000;
+					Object.keys(pV.talents246287AtTargets).forEach(function (targetID) {
+						pV.talents246287Targets[targetID] = pV.talents246287AtTargets[targetID];
 					});
-				}
+				} else if(spellID == 17) pV.talents246287LastAt = 15000;
+				else if(spellID == 194509) pV.talents246287LastAt = GetTraitBySpell(278643) ? 10500 : 9000;
+				else if(spellID == 186263) pV.talents246287LastAt = 15000 + ((GetTraitBySpell(275541) && currFightData.is81) ? 3000 : 0);
+				else if(spellID == 33206 && GetTraitBySpell(272775)) pV.talents246287LastAt = 15000;
 			},
 			"heal", function(event,spellID,amount,overheal){
-				if(uV.spellIsAtonement[spellID] && pV.talents246287Targets[event.targetID] && event.timestamp < pV.talents246287Targets[event.targetID]){
+				if(uV.spellIsAtonement[spellID] && pV.talents246287Targets[event.targetID] && event.timestamp >= pV.talents246287Targets[event.targetID] && event.timestamp < pV.talents246287Targets[event.targetID] + 6000){
 					rV.talents[246287] += amount;
 				}
+			},
+			"applybuffany", function(event,spellID){
+				if(spellID == 194384 && actors[event.sourceID]) pV.talents246287AtTargets[event.targetID] = event.timestamp + pV.talents246287LastAt;
+			},
+			"removebuffany", function(event,spellID){
+				if(spellID == 194384 && actors[event.sourceID]) delete pV.talents246287AtTargets[event.targetID];
+			},
+			"any", function(event){
+				if(event.type == "refreshbuff" && event.ability.guid == 194384 && actors[event.sourceID]) pV.talents246287AtTargets[event.targetID] = event.timestamp + pV.talents246287LastAt;
 			},
 		],
 		obj: {

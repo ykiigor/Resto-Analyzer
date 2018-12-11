@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "27.11.2018";
+var LAST_UPDATE = "11.12.2018";
 
 var itemsStats = {};
 
@@ -126,6 +126,7 @@ function PrepAllData(){
 		manaUsageBySpell: [],
 		manaGain: 0,
 		dr: [],
+		manaUsageGraph: [],
 	};
 	cV = {
 		traitInfo: [],
@@ -365,6 +366,7 @@ var SavedRacial = {};
 
 var WCL_API_KEY = "c715943c916421282ae9451912918422";
 var STATS_GRAPH_STEP = 15;
+var MANA_GRAPH_STEP = 4;
 
 var specsNames = {
 	65: "Holy Paladin",
@@ -479,15 +481,15 @@ function CreateDataByTraitBySpellID(event,spellID,auraSpellID,stat,type){
 
 var ITEM_SPELLS_NUMBERS = {
 	//azerite powers; tier 1: Priest
-	273307: [{stat:501,lvl:340,isLinear:true},{stat:1877,lvl:340,isLinear:true}],	//Weal and Woe
+	273307: [{stat:766,lvl:385,isLinear:true},{stat:2871,lvl:385,isLinear:true}],	//Weal and Woe
 	272775: [{stat:10012,lvl:340,isLinear:true}],	//Moment of Repose
-	278643: [{stat:720,lvl:340,isLinear:true}],	//Enduring
-	275541: [{stat:56,lvl:340,isLinear:true}],	//Depth of the Shadows
-	278629: [{stat:166,lvl:340,isLinear:true}],	//Contemptuous Homily
+	278643: [{stat:1101,lvl:385,isLinear:true}],	//Enduring
+	275541: [{stat:207,lvl:385,isLinear:true}],	//Depth of the Shadows
+	278629: [{stat:184,lvl:340,isLinear:true}],	//Contemptuous Homily
 	277680: [{stat:256,lvl:340,isLinear:true}],	//Gift of Forgiveness
 	267892: [{stat:207,lvl:340,isLinear:false}],	//Synergistic Growth
-	278659: [{stat:2353,lvl:340,isLinear:true}],	//Death Throes		id 404
-	287355: [{stat:3129,lvl:340,isLinear:true}],	//Sudden Revelation
+	278659: [{stat:1381,lvl:385,isLinear:true}],	//Death Throes		id 404
+	287355: [{stat:2142,lvl:340,isLinear:true}],	//Sudden Revelation
 
 	//azerite powers; tier 1: Priest Holy
 	272780: [{stat:864,lvl:340,isLinear:true}],	//Permeating Glow
@@ -499,7 +501,7 @@ var ITEM_SPELLS_NUMBERS = {
 	
 	//azerite powers; tier 3: Priest
 	274366: [{stat:10597,lvl:340,isLinear:true}],	//Sanctum
-	280018: [{stat:5005,lvl:340,isLinear:true}],	//Twist Magic
+	280018: [{stat:1367,lvl:340,isLinear:true}],	//Twist Magic
 	287717: [{stat:15644,lvl:340,isLinear:true}],	//Death Denied
 
 	//azerite powers; tier 1: Shaman
@@ -520,8 +522,8 @@ var ITEM_SPELLS_NUMBERS = {
 	281514: [{stat:257,lvl:340,isLinear:true}],	//Unstable Catalyst
 	280407: [{stat:582,lvl:340,isLinear:false}],	//Blood Rite
 	273823: [{stat:960,lvl:340,isLinear:false}],	//Blightborne Infusion
-	280555: [{stat:14,lvl:385,isLinear:true}],	//Archive of the Titans		???
-	280559: [{stat:9784,lvl:370,isLinear:true}],	//Laser Matrix (unknown, 6targets)
+	280555: [{stat:14,lvl:385,isLinear:true}],	//Archive of the Titans
+	280559: [{stat:11306,lvl:385,isLinear:true}],	//Laser Matrix
 	273829: [{stat:206,lvl:340,isLinear:true},{stat:411,lvl:340,isLinear:true}],	//Secrets of the Deep
 	280429: [{stat:720,lvl:340,isLinear:false}],	//Swirling Sands
 	280581: [{stat:210,lvl:350,isLinear:true}],	//Collective Will
@@ -531,11 +533,11 @@ var ITEM_SPELLS_NUMBERS = {
 	280710: [{stat:19,lvl:355,isLinear:false}],	//Champion of Azeroth
 	273834: [{stat:5322,lvl:340,isLinear:true}],	//Filthy Transfusion
 	288749: [{stat:66,lvl:400,isLinear:true}],	//Seductive Power	561
-	288802: [{stat:8769,lvl:400,isLinear:true},{stat:747,lvl:400,isLinear:false}],	//Bonded Souls	560
+	288802: [{stat:8769,lvl:400,isLinear:true},{stat:141,lvl:300,isLinear:false}],	//Bonded Souls	560
 	288953: [{stat:384,lvl:400,isLinear:true}],	//Treacherous Covenant	562
 	
 	//azerite powers; tier 2
-	267886: [{stat:60,lvl:340,isLinear:false}],	//Ephemeral Recovery
+	267886: [{stat:7737,lvl:385,isLinear:false}],	//Ephemeral Recovery
 	279926: [{stat:15,lvl:340,isLinear:true}],	//Earthlink
 	267889: [{stat:4521,lvl:340,isLinear:true}],	//Blessed Portents
 	264108: [{stat:64,lvl:340,isLinear:false},{stat:32,lvl:340,isLinear:false}],	//Blood Siphon 
@@ -576,10 +578,10 @@ var ITEM_SPELLS_NUMBERS = {
 	277182: [{itemID:161676,stat:277,lvl:280,isLinear:true}],	//Dread Gladiator's Insignia
 	277179: [{itemID:161674,stat:428,lvl:280,isLinear:false}],	//Dread Gladiator's Medallion
 
-	288304: [{itemID:165581,stat:350,lvl:400,isLinear:false}],	//Crest of Pa'ku
+	288304: [{itemID:165581,stat:367,lvl:400,isLinear:false}],	//Crest of Pa'ku
 	287999: [{itemID:165578,stat:49840,lvl:400,isLinear:true}],	//Mirror of Entwined Fate
 	287568: [{itemID:165569,stat:39872,lvl:400,isLinear:true}],	//Ward of Envelopment
-	289522: [{itemID:165571,stat:26,lvl:400,isLinear:false},{itemID:165571,stat:82,lvl:400,isLinear:false}],	//Incandescent Sliver
+	289522: [{itemID:165571,stat:27,lvl:400,isLinear:false},{itemID:165571,stat:84,lvl:400,isLinear:false}],	//Incandescent Sliver
 };
 
 function ScaleTrait(spellID,toIlvl,type) {
@@ -646,6 +648,42 @@ GENERAL = [
 			},
 		],		
 	},
+	{
+		init: function() {
+			//Ephemeral Recovery trait
+			pV.ephemeralRecoveryPrediction = 0;
+			pV.ephemeralRecoveryPredictionLast = 0;
+
+			//Mana
+			pV.playerManaLast = 1;
+			pV.playerManaMin = 1;
+			rV.healFromManaChanged = 1;
+		},
+		parse: [
+			"any", function(event){
+				var resourceActorNow;
+				if(event.resourceActor == 1) resourceActorNow = event.sourceID;
+					else if(event.resourceActor == 2) resourceActorNow = event.targetID;
+				if(resourceActorNow == currFightData.actor){
+					if(event.classResources && event.classResources[0]){
+						var d = event.classResources[0].amount / event.classResources[0].max;
+						if((d < 0.2) && (event.timestamp - pV.ephemeralRecoveryPredictionLast > 180000)){
+							pV.ephemeralRecoveryPredictionLast = event.timestamp;
+							pV.ephemeralRecoveryPrediction ++ ;
+						}
+						pV.playerManaLast = d;
+						pV.playerManaMin = Math.min(d,pV.playerManaMin);
+					}
+				}
+			},
+		],
+		afterParseMajor: function(){
+			if(pV.playerManaMin > 0.2){
+				rV.healFromMana /= 10;
+				rV.healFromManaChanged = 10;
+			}
+		},		
+	},
 ];
 
 
@@ -695,10 +733,10 @@ GEAR_BASE = [
 	{slot:-3,spell:280710,type:1,tier:1,name:"Champion of Azeroth",icon:"spell_holy_championsgrace",special:function(ilvl){ return ScaleTrait(280710,ilvl) * 4 * (healPerStat.mastery.amount+healPerStat.crit.amount+healPerStat.haste.amount+healPerStat.vers.amount)*0.92; },max:360},
 	{slot:-3,spell:273834,type:2,tier:1,name:"Filthy Transfusion",icon:"spell_volatilefiregreen",special:function(ilvl){ return ScaleTrait(273834,ilvl) * GetFightLenFactor(20) * GetModFactor() * GetVersFactor() * GetCritFactor() * 0.65; }},
 	{slot:-3,spell:288749,type:7,tier:1,name:"Seductive Power",icon:"inv_tradeskill_81_breath_of_bwonsamdi_raid",special:function(ilvl){ return ScaleTrait(288749,ilvl) * (Math.max(0,1 - 30 / GetFightLenFactor(1)) + Math.max(0,1 - 90 / GetFightLenFactor(1)) + Math.max(0,1 - 150 / GetFightLenFactor(1)) + Math.max(0,1 - 210 / GetFightLenFactor(1)) + Math.max(0,1 - 270 / GetFightLenFactor(1))) * (healPerStat.int.amount); }},
-	{slot:-3,spell:288802,type:7,tier:1,name:"Bonded Souls",icon:"sha_spell_warlock_demonsoul",special:function(ilvl){ return ScaleTrait(288802,ilvl,1) * GetModFactor() * GetVersFactor() * GetCritFactor() * 2 * 0.65 * GetFightLenFactor(60) + ScaleTrait(288802,ilvl,2) * healPerStat.haste.amount * 15 / 60; }},
+	{slot:-3,spell:288802,type:7,tier:1,name:"Bonded Souls",icon:"sha_spell_warlock_demonsoul",special:function(ilvl){ return ScaleTrait(288802,ilvl,1) * GetModFactor() * GetVersFactor() * GetCritFactor() * 4 * 0.65 * GetFightLenFactor(60) + ScaleTrait(288802,ilvl,2) * healPerStat.haste.amount * 15 / 60; }},
 	{slot:-3,spell:288953,type:7,tier:1,name:"Treacherous Covenant",icon:"ability_argus_deathfog",special:function(ilvl){ return ScaleTrait(288953,ilvl) * healPerStat.int.amount * 0.99; }},
 
-	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * 0.5 * GetFightLenFactor(2) / rV.manaUsage * rV.healFromMana * 0.5; }},
+	{slot:-3,spell:267886,type:3,tier:2,name:"Ephemeral Recovery",icon:"inv_gizmo_manasyphon",special:function(ilvl){ return ScaleTrait(267886,ilvl) * pV.ephemeralRecoveryPrediction / rV.manaUsage * rV.healFromMana; }},
 	{slot:-3,spell:279926,type:3,tier:2,name:"Earthlink",icon:"inv_smallazeritefragment",special:function(ilvl){ return ScaleTrait(279926,ilvl) * 3 * 1.05 * healPerStat.int.amount; }},
 	{slot:-3,spell:267889,type:3,tier:2,name:"Blessed Portents",icon:"spell_holy_fanaticism",special:function(ilvl){ return ScaleTrait(267889,ilvl) * GetFightLenFactor(60 / 5) * GetVersFactor() * GetCritFactor() * 0.2; }},
 	{slot:-3,spell:264108,type:3,tier:2,name:"Blood Siphon",icon:"ability_deathknight_deathsiphon2",special:function(ilvl,t){ return ScaleTrait(264108,ilvl,1) * healPerStat.mastery.amount * (t == 2 ? 0 : 1) + ScaleTrait(264108,ilvl,2) / STATS.leech / 100 * pV.leechHeal * (t == 1 ? 0 : 1); },textAmount:function(ilvl){ var t="Mastery: "+NumberToFormattedNumber(this.special(ilvl,1),2)+"<br>Leech: "+NumberToFormattedNumber(this.special(ilvl,2),2); return t;}},
@@ -964,7 +1002,12 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 						if(uV.SpellParseCooldownAdd) uV.SpellParseCooldownAdd(spellID,event,cooldownsTracking[j]);
 					}
 				}
-				
+
+				var timeGraph = Math.floor((event.timestamp - currFightData.start_time) / 1000 / MANA_GRAPH_STEP);
+				if(!rV.manaUsageGraph[timeGraph]) rV.manaUsageGraph[timeGraph] = [0,0,0];
+				rV.manaUsageGraph[timeGraph][1] += amount;
+				rV.manaUsageGraph[timeGraph][2] += overheal;
+			
 				for (var j = 0, j_len = parsePlugins.heal.length; j < j_len; j++) {
 					parsePlugins.heal[j](event,spellID,amount,overheal);
 				}			
@@ -1175,6 +1218,10 @@ function ParseLog(fight_code,actor_id,start_time,end_time)
 							cooldownsTracking[j].mana += spellManaCost[spellID];
 						}
 					}
+
+					var timeGraph = Math.floor((event.timestamp - currFightData.start_time) / 1000 / MANA_GRAPH_STEP);
+					if(!rV.manaUsageGraph[timeGraph]) rV.manaUsageGraph[timeGraph] = [0,0,0];
+					rV.manaUsageGraph[timeGraph][0] += spellManaCost[spellID];
 				}
 				
 				pV.castNum[spellID] = (pV.castNum[spellID] || 0) + 1;
@@ -2084,7 +2131,13 @@ function BuildReport(){
 		rV.total += healingData[spellID][0];
 		rV.totalOver += healingData[spellID][1];
 	});
-	
+
+	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
+		var pluginData = pluginsList[k];
+		for (var i = 0, len = pluginData.length; i < len; i++) {
+			if(pluginData[i].afterParseMajor) pluginData[i].afterParseMajor();
+		}
+	}	
 	for (var k = 0, k_len = pluginsList.length; k < k_len; k++) {
 		var pluginData = pluginsList[k];
 		for (var i = 0, len = pluginData.length; i < len; i++) {
@@ -2239,7 +2292,7 @@ function BuildReport(){
 	}
 	
 	var manaSpellsText = "<br>Mana used by spells:<br>"+CreateSpellsTextFromList(rV.manaUsageBySpell);
-	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.manaUsage * maxMana / 100).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1% mana ("+(maxMana / 100).format()+")</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana,0,2)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 0.04 * maxMana / 5).format()+"<br>Base manapull: "+(maxMana).format()+manaSpellsText+"</span></em></div></div>";
+	HTML += "<div class=\"row full\"><div class=\"col size\">Mana</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.healFromMana / rV.healFromManaChanged / rV.manaUsage * maxMana / 100).toFixed(2)+"<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Healing per 1% mana ("+(maxMana / 100).format()+")</span></em></div><div class=\"col size\"> </div><div class=\"col size\">"+NumberToFormattedNumber(rV.healFromMana / rV.healFromManaChanged,0,2)+"</div><div class=\"col size\"><em class=\"tooltip\">"+(rV.manaUsage).format()+"<span class=\"tip-text\" style=\"width: 350px;margin-left:-175px;\">Mana used on fight: "+(rV.manaUsage).format()+"<br>Mana gained via passives & buffs: "+(rV.manaGain).format()+"<br>Mana regened: "+(fightLen / 1000 * 0.04 * maxMana / 5).format()+"<br>Base manapull: "+(maxMana).format()+manaSpellsText+"</span></em></div></div>";
 
 	HTML += "<div class=\"row full\"><div class=\"col half\" id=\"stats_graph_more\"><a href=\"javascript:void(0)\" class=\"more_graph\">Show graph</a></div>";
 	if(addRefreshLink) HTML += "<div class=\"col half t-right\"><a href=\"javascript:void(0)\" id=\"refresh_stats_button\"><em class=\"tooltip\">Refresh<span class=\"tip-text\" style=\"width: 200px;margin-left:-100px;\">Recalculate stats with acknowledge about character race</span></em></a></div>";
@@ -2587,6 +2640,13 @@ function BuildReport(){
 	HTML += "</div></div></div>";
 		
 	if(uV.BuildReportBeforeCooldowns) HTML += uV.BuildReportBeforeCooldowns(fightLen,fightStart,fightEnd);
+
+
+	/// Mana graph
+	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box clearfix procs\"><header class=\"box-header\">MANA GRAPH</header><div class=\"list-top-line\" style=\"margin-bottom:10px;\"> </div>";
+	HTML += "<div class=\"row full\" id=\"mana_graph\"></div>";
+	HTML += "</div></div></div>";
+
 	
 	/// COOLDOWNS
 	HTML += "<div class=\"panel\"><div class=\"col-full\"><div class=\"box\"><header class=\"box-header\">COOLDOWN USAGES</header><div class=\"list-top-line\"> </div><ul class=\"list cooldowns\">";
@@ -2717,6 +2777,35 @@ function BuildReport(){
 		$("#stats_graph").show();
 		$("#refresh_stats_button").hide();
 		return false;
+	});
+
+	var graphLabels = [];
+	var graphSeries = [[],[],[]];
+	for (var j = 0, j_len = (fightLen / 1000 / MANA_GRAPH_STEP); j < j_len; j++) {
+		if(rV.manaUsageGraph[j]){
+			graphLabels.push(MsToFormattedTime(j * 1000 * MANA_GRAPH_STEP));
+			
+			graphSeries[0].push(rV.manaUsageGraph[j][0] / rV.manaUsage * 100);
+			graphSeries[1].push(rV.manaUsageGraph[j][1] / rV.total * 100);
+			graphSeries[2].push(rV.manaUsageGraph[j][2] / (rV.total + rV.totalOver) * 100);
+		}
+	}
+	var x_d = Math.floor(fightLen / 1000 / 20 / MANA_GRAPH_STEP) + 1;
+
+	new Chartist.Line('#mana_graph', { labels: graphLabels, series: graphSeries}, {
+		fullWidth: true,
+		height: 300,
+		showArea: true,
+		showPoint: false,
+		lineSmooth: Chartist.Interpolation.cardinal({tension: 0.65}),
+		axisX: {
+			labelInterpolationFnc: function(value, index) {
+				return (index % x_d) == 0 ? value : null;
+			}
+		},
+		plugins: [
+			Chartist.plugins.legend({legendNames: ["Mana usage, %","Healing, %","Overhealing, %"]})
+		]
 	});
 	
 	document.getElementById("gear_chart_slider").oninput = function() {
