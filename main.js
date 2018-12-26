@@ -5,7 +5,7 @@
 ///
 ///
 
-var LAST_UPDATE = "11.12.2018";
+var LAST_UPDATE = "26.12.2018";
 
 var itemsStats = {};
 
@@ -506,11 +506,11 @@ var ITEM_SPELLS_NUMBERS = {
 
 	//azerite powers; tier 1: Shaman
 	272989: [{stat:1001,lvl:340,isLinear:true}],	//Soothing Waters
-	278715: [{stat:4005,lvl:340,isLinear:true}],	//Spouting Spirits
+	278715: [{stat:5304,lvl:340,isLinear:true}],	//Spouting Spirits
 	273597: [{stat:289,lvl:340,isLinear:true}],	//Ebb and Flow
 	278713: [{stat:5100,lvl:340,isLinear:true}],	//Surging Tides
 	277658: [{stat:813,lvl:340,isLinear:true}],	//Overflowing Shores
-	275488: [{stat:928,lvl:340,isLinear:true}],	//Swelling Stream
+	275488: [{stat:664,lvl:385,isLinear:true}],	//Swelling Stream
 	277666: [{stat:67,lvl:340,isLinear:false}],	//Ancestral Resonance
 	280021: [{stat:1570,lvl:340,isLinear:true}],	//Pack Spirit		
 	274412: [{stat:5416,lvl:340,isLinear:true}],	//Serene Spirit
@@ -559,6 +559,7 @@ var ITEM_SPELLS_NUMBERS = {
 	268435: [{stat:10008,lvl:340,isLinear:true}],	//
 	268595: [{stat:11214,lvl:340,isLinear:true}],	//
 	280181: [{stat:16830,lvl:340,isLinear:true}],	//Personal Absorb-o-Tron
+	268600: [{stat:1201,lvl:385,isLinear:true}],	//Self Reliance
 	
 	//trinkets
 	271071: [{itemID:159620,stat:599,lvl:340,isLinear:false}],	//Conch of Dark Whispers
@@ -582,6 +583,7 @@ var ITEM_SPELLS_NUMBERS = {
 	287999: [{itemID:165578,stat:49840,lvl:400,isLinear:true}],	//Mirror of Entwined Fate
 	287568: [{itemID:165569,stat:39872,lvl:400,isLinear:true}],	//Ward of Envelopment
 	289522: [{itemID:165571,stat:27,lvl:400,isLinear:false},{itemID:165571,stat:84,lvl:400,isLinear:false}],	//Incandescent Sliver
+	278267: [{itemID:166793,stat:212,lvl:385,isLinear:true}],	//Ancient Knot of Wisdom
 };
 
 function ScaleTrait(spellID,toIlvl,type) {
@@ -753,6 +755,7 @@ GEAR_BASE = [
 	{slot:-3,spell:268437,type:3,tier:3,name:"Impassive Visage",icon:"inv_pet_inquisitoreye",special:function(ilvl){ return ScaleTrait(268437,ilvl) * (pV.azeriteImpassiveVisagePrediction || 0) * GetVersFactor() * GetCritFactor(); }},
 	{slot:-3,spell:280181,type:1,tier:3,name:"Personal Absorb-o-Tron",icon:"inv_robotpet",special:function(ilvl){ return ScaleTrait(280181,ilvl) * GetFightLenFactor(40) * GetVersFactor() * 0.9; },min:340,max:340},
 	{slot:-3,spell:268599,type:3,tier:3,name:"Vampiric Speed",icon:"inv_misc_monsterfang_02",special:function(ilvl){ return ScaleTrait(268599,ilvl) * (pV.azeriteVampiricSpeedPrediction || 0) * GetVersFactor() * GetCritFactor() * 0.4; }},
+	{slot:-3,spell:268600,type:3,tier:3,name:"Self Reliance",icon:"achievement_guildperk_quick-and-dead",special:function(ilvl){ return ScaleTrait(268600,ilvl) * GetFightLenFactor(3) * GetCritFactor() * GetVersFactor() * 0.33; }},
 
 	{slot:14,item:158320,ilvl:340,type:2,name:"Revitalizing Voodoo Totem",int:205,icon:"ability_shaman_repulsiontotem",special:function(ilvl){ return ScaleItemSpell(158320,ilvl) * 91 * GetFightLenFactor(90) * GetVersFactor() * GetCritFactor(); },wilvl:300},
 	{slot:14,item:159620,ilvl:340,type:2,name:"Conch of Dark Whispers",int:205,icon:"inv_misc_food_legion_seashellc1",special:function(ilvl){ return ScaleItemSpell(159620,ilvl) * healPerStat.crit.amount * 15 / 60 * 1; },wilvl:300},
@@ -769,11 +772,12 @@ GEAR_BASE = [
 	{slot:14,item:159127,ilvl:355,type:1,name:"Darkmoon Deck: Tides",int:236,icon:"inv_inscription_80_deck_tides",special:function(ilvl){ return 300 * GetFightLenFactor(1) + 7.64 * GetFightLenFactor(1) / rV.manaUsage * rV.healFromMana; },wilvl:355,min:355,max:355},
 	{slot:14,item:163937,ilvl:350,type:1,name:"Leyshock's Grand Compilation",int:225,icon:"inv_trinket_80_titan02b",special:function(ilvl){ return ScaleItemSpell(163937,ilvl) * 3 * 0.95 * (healPerStat.mastery.amount+healPerStat.crit.amount+healPerStat.haste.amount+healPerStat.vers.amount); },wilvl:350},
 	{slot:14,item:165581,ilvl:385,type:7,name:"Crest of Pa'ku",int:313,icon:"inv_icon_wing01a",special:function(ilvl){ return ScaleItemSpell(165581,ilvl) * healPerStat.haste.amount * 0.375; },wilvl:350},
-	{slot:14,item:165578,ilvl:385,type:7,name:"Mirror of Entwined Fate",int:313,icon:"archaeology_5_0_carvedbronzemirror",special:function(ilvl){ return ScaleItemSpell(165578,ilvl) * GetModFactor() * GetVersFactor() * GetCritFactor() * GetFightLenFactor(120); },wilvl:350},
+	{slot:14,item:165578,ilvl:385,type:7,name:"Mirror of Entwined Fate",int:313,icon:"archaeology_5_0_carvedbronzemirror",special:function(ilvl){ return ScaleItemSpell(165578,ilvl) * GetVersFactor() * GetCritFactor() * GetFightLenFactor(120); },wilvl:350},
 	{slot:14,item:165569,ilvl:385,type:7,name:"Ward of Envelopment",int:313,icon:"misc_legionfall_paladin",special:function(ilvl){ return ScaleItemSpell(165569,ilvl) * GetFightLenFactor(120) * 1.3; },wilvl:350},
 	{slot:14,item:165571,ilvl:385,type:7,name:"Incandescent Sliver",int:313,icon:"ability_priest_cascade",special:function(ilvl){ return ScaleItemSpell(165571,ilvl,1) * healPerStat.crit.amount * 10 * 0.8 + ScaleItemSpell(165571,ilvl,2) * healPerStat.mastery.amount * 0.8; },wilvl:350,tip:"80% uptime at max stacks"},
 	{slot:14,item:161676,ilvl:280,type:1,name:"Dread Gladiator's Insignia",vers:85,icon:"inv_misc_token_argentdawn3",special:function(ilvl){ return ScaleItemSpell(161676,ilvl) * 1.05 * healPerStat.int.amount * 20 / 40; },wilvl:280},
 	{slot:14,item:161674,ilvl:280,type:1,name:"Dread Gladiator's Medallion",int:117,icon:"spell_arcane_rune",special:function(ilvl){ return ScaleItemSpell(161674,ilvl) * healPerStat.vers.amount * 20 / 120; },wilvl:280},
+	{slot:14,item:166793,ilvl:385,type:1,name:"Ancient Knot of Wisdom",mastery:176,icon:"inv_spiritshard_02",special:function(ilvl){ return ScaleItemSpell(166793,ilvl) * 1.05 * 2.5 * healPerStat.int.amount * 20 / 60; },wilvl:355},
 
 ];
 
@@ -1686,8 +1690,19 @@ var GEAR_CHARTS_SLOT = -3;
 var GEAR_CHARTS_ILVL = 385;
 
 function CreateAzItemsData(fightLen){
+	var extraSpells = [];
+
 	var gearList = GEAR_BASE.concat(GEAR);
 	var gear_chart_list = [];
+	for (var i = 0, len = gearList.length; i < len; i++) {
+		var gearData = gearList[i];
+		if(gearData.slot == -3 && gearData.extraNonStack) {
+			extraSpells.push([gearData.spell,gearData.name,gearData.icon]);
+		}
+	}
+
+	var maxAmountLine1 = 0;
+
 	for (var i = 0, len = gearList.length; i < len; i++) {
 		var gearData = gearList[i];
 		if(gearData.slot == GEAR_CHARTS_SLOT) {
@@ -1696,6 +1711,7 @@ function CreateAzItemsData(fightLen){
 			var scaleIlvl = Math.min(Math.max(GEAR_CHARTS_ILVL,gearData.min || GEAR_CHARTS_ILVL),gearData.max || GEAR_CHARTS_ILVL);
 
 			var totalAmount = 0;
+			var maxAmount = 0;
 			var tooltip = "";
 			var statsProfit = 0;
 
@@ -1716,7 +1732,9 @@ function CreateAzItemsData(fightLen){
 					var spellID = gearData["tier"+tier][j];
 					for (var k = 0, len = gearList.length; k < len; k++) {
 						if(gearList[k].slot == -3 && gearList[k].spell == spellID){
-							tierResults.push( [ gearList[k].special(scaleIlvl) + (gearList[k].extra ? gearList[k].extra(scaleIlvl) : 0),gearList[k] ] );
+							var a = gearList[k].special(scaleIlvl);
+							var e = gearList[k].extra ? gearList[k].extra(scaleIlvl) : 0;
+							tierResults.push( [ a + e * (pV[ "chart_azerite_extra"+gearList[k].spell ] == 2 ? 0 : 1),gearList[k],a + e ] );
 							break;
 						}
 					}
@@ -1727,7 +1745,13 @@ function CreateAzItemsData(fightLen){
 					tooltip += "<br>"+ (tierResults[0][1].icon ? "<img src=\""+GetIconUrl(tierResults[0][1].icon.replace(/\-/,"")+".jpg")+"\" alt=\""+tierResults[0][1].name+"\"> " : "") + tierResults[0][1].name + " " + NumberToFormattedNumber(tierResults[0][0],2);
 					from_traits.push([ tierResults[0][0],tierResults[0][1].icon,tierResults[0][1].name ]);
 				}
+				tierResults.sort(function(a,b){ return a[2] > b[2] ? -1 : 1 });
+				if(tierResults.length > 0) {
+					maxAmount += tierResults[0][2];
+				}
 			}
+
+			maxAmountLine1 = Math.max(maxAmountLine1,(statsProfit+maxAmount) / (fightLen / 1000));
 
 			gear_chart_list.push( [ 
 				(statsProfit+totalAmount) / (fightLen / 1000),
@@ -1745,10 +1769,18 @@ function CreateAzItemsData(fightLen){
 	gear_chart_list.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
 	
 	var HTML = "";
-	for (var i = 0, len = gear_chart_list.length; i < len; i++) {
-		HTML += "<div class=\"row full\"><div class=\"col w5 "+(gear_chart_list[i][4] == GEAR_CHARTS_ILVL ? "" : "t-grey")+"\">"+gear_chart_list[i][4]+"</div><div class=\"col w20\">"+gear_chart_list[i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(gear_chart_list[i][0]+0.5)+"hps"+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(gear_chart_list[i][3]+gear_chart_list[i][6],2)+"<br>From traits - "+NumberToFormattedNumber(gear_chart_list[i][3],2)+gear_chart_list[i][5]+"<br>From stats - "+NumberToFormattedNumber(gear_chart_list[i][6],2)+"</span></em></div><div class=\"col half clearfix\">";
 
-		var total_width = Math.min(gear_chart_list[i][0]/gear_chart_list[0][0],0.99);
+	for (var i = 0, len = extraSpells.length; i < len; i++) {
+		if(i % 3 == 0) HTML += "<div class=\"row full\">";
+		HTML += "<div class=\"col w20 t-right\">"+extraSpells[i][1]+(extraSpells[i][2] ? " <img src=\""+GetIconUrl(extraSpells[i][2].replace(/\-/,"")+".jpg")+"\" alt=\""+extraSpells[i][1]+"\">" : "")+"</div><div class=\"col w10\"><input type=\"range\" min=\"1\" max=\"2\" value=\""+(pV[ "chart_azerite_extra"+extraSpells[i][0] ] == 2 ? "2" : "1")+"\" step=\"1\" class=\"slider\" id=\"gear_chart_slider_extra_"+extraSpells[i][0]+"\" data-sid=\""+extraSpells[i][0]+"\"></div>";
+		if(i % 3 == 2) HTML += "</div>";
+	}
+	if((extraSpells.length - 1) % 3 != 2) if(i % 3 == 2) HTML += "</div>";
+
+	for (var i = 0, len = gear_chart_list.length; i < len; i++) {
+		HTML += "<div class=\"row full\"><div class=\"col w5 "+(gear_chart_list[i][4] == GEAR_CHARTS_ILVL ? "" : "t-grey")+"\">"+gear_chart_list[i][4]+"</div><div class=\"col w25\">"+gear_chart_list[i][1]+"</div><div class=\"col w7 t-right\"><em class=\"tooltip\">"+Math.floor(gear_chart_list[i][0]+0.5)+"hps"+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(gear_chart_list[i][3]+gear_chart_list[i][6],2)+"<br>From traits - "+NumberToFormattedNumber(gear_chart_list[i][3],2)+gear_chart_list[i][5]+"<br>From stats - "+NumberToFormattedNumber(gear_chart_list[i][6],2)+"</span></em></div><div class=\"col w60 clearfix\">";
+
+		var total_width = Math.min(gear_chart_list[i][0]/maxAmountLine1 * 0.99,0.99);
 		HTML += "<div class=\"performance-bar "+(gear_chart_list[i][2])+"-bg\" style=\"width: "+(gear_chart_list[i][6] / (gear_chart_list[i][6] + gear_chart_list[i][3]) * total_width * 100).toFixed(2)+"%;float:left;opacity:1\"></div>";
 		for (var k = 0, len_k = gear_chart_list[i][7].length; k < len_k; k++) {
 			var curr_width = gear_chart_list[i][7][k][0] / (gear_chart_list[i][6] + gear_chart_list[i][3]) * total_width;
@@ -1764,6 +1796,14 @@ function CreateAzItemsData(fightLen){
 	
 	$("#gear_chart_adv").show();
 	$("#gear_chart_colorsnames").show();
+
+	for (var i = 0, len = extraSpells.length; i < len; i++) {
+		document.getElementById("gear_chart_slider_extra_"+extraSpells[i][0]).oninput = function() {
+			pV[ "chart_azerite_extra"+$(this).attr("data-sid") ] = this.value;
+			CreateGearChartData(fightLen);
+		}
+	}
+
 }
 
 function CreateAzChartData(fightLen){
@@ -1805,7 +1845,7 @@ function CreateAzChartData(fightLen){
 	for (var j = 0, len_j = tier_data.length; j < len_j; j++) {
 		HTML += "<div class=\"row full\"><div class=\"col w20\">Tier "+(j+1)+"</div><div class=\"list-top-line\"></div></div>";
 		for (var i = 0, len = tier_data[j].length; i < len; i++) {
-			HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_data[j][i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(tier_data[j][i][0]+0.5)+(GEAR_CHARTS_SLOT != -2 ? "hps" : "")+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(tier_data[j][i][3],2)+(tier_data[j][i][4] != "" ? "<br>"+tier_data[j][i][4] : "" )+"</span></em></div><div class=\"col half clearfix\">";
+			HTML += "<div class=\"row full\"><div class=\"col w5\"></div><div class=\"col w20\">"+tier_data[j][i][1]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(tier_data[j][i][0]+0.5)+(GEAR_CHARTS_SLOT != -2 ? "hps" : "")+"<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Total amount - "+NumberToFormattedNumber(tier_data[j][i][3],2)+(tier_data[j][i][4] != "" ? "<br>"+tier_data[j][i][4] : "" )+"</span></em></div><div class=\"col w64 clearfix\">";
 
 			var bar_width = Math.min((tier_data[j][i][0] - (tier_data[j][i][6] ? tier_data[j][i][5] : 0))/max_hps,1);
 			HTML += "<div class=\"performance-bar "+(tier_data[j][i][2])+"-bg\" style=\"width: "+(bar_width * 100).toFixed(2)+"%;float: left;\"></div>";
@@ -1930,7 +1970,7 @@ function CreateGearChartData(fightLen){
 	
 	gear_chart_list.sort(function(a,b){ return a[0] > b[0] ? -1 : 1 });
 	for (var i = 0, len = gear_chart_list.length; i < len; i++) {
-		HTML += "<div class=\"row full "+(gear_chart_list[i][4] ? "eq" : "")+"\"><div class=\"col w5\">"+gear_chart_list[i][1]+"</div><div class=\"col w20\">"+gear_chart_list[i][2]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(gear_chart_list[i][0]+0.5)+"hps<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Effect amount - "+NumberToFormattedNumber(gear_chart_list[i][5],2)+"<br>From stats - "+NumberToFormattedNumber(gear_chart_list[i][6],2)+"</span></em></div><div class=\"col half clearfix\"><div class=\"performance-bar "+(gear_chart_list[i][3])+"-bg\" style=\"width: "+(Math.min(gear_chart_list[i][0]/gear_chart_list[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
+		HTML += "<div class=\"row full "+(gear_chart_list[i][4] ? "eq" : "")+"\"><div class=\"col w5\">"+gear_chart_list[i][1]+"</div><div class=\"col w20\">"+gear_chart_list[i][2]+"</div><div class=\"col w10 t-right\"><em class=\"tooltip\">"+Math.floor(gear_chart_list[i][0]+0.5)+"hps<span class=\"tip-text\" style=\"width: 300px;margin-left:-150px;\">Effect amount - "+NumberToFormattedNumber(gear_chart_list[i][5],2)+"<br>From stats - "+NumberToFormattedNumber(gear_chart_list[i][6],2)+"</span></em></div><div class=\"col w64 clearfix\"><div class=\"performance-bar "+(gear_chart_list[i][3])+"-bg\" style=\"width: "+(Math.min(gear_chart_list[i][0]/gear_chart_list[0][0],1) * 100).toFixed(2)+"%;\"></div></div><div class=\"list-top-line\"></div></div>";
 	}
 	
 	$("#gear_chart").html(HTML);	
@@ -2719,7 +2759,7 @@ function BuildReport(){
 	
 	$("#main").html(HTML);
 	
-	$("#nav-btn-main").html((uV.SPEC_NAME || "Data")+" Analyzer")
+	$("#nav-btn-main").html((uV.SPEC_NAME || "Data")+" Analyzer");
 
 	$("a.more_1").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_2").show();return false;});
 	$("a.more_2").click(function(){$(this).parent().hide();$(this).parent().parent().find(".div_more_3").show();return false;});

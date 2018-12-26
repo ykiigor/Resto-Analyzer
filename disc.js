@@ -1,4 +1,4 @@
-//Disc priest, 20:19 11.12.2018
+//Disc priest, 5:16 26.12.2018
 
 //OTHER & CLASS SPECIFIC
 var OTHER_256 = [
@@ -187,13 +187,13 @@ var OTHER_256 = [
 
 			function GetAtonementOverhealFactor(spellID){ if(!rV.atonementData[spellID] || (rV.atonementData[spellID][1] == 0)) return 1; return rV.atonementData[spellID][1] / (rV.atonementData[spellID][0]+rV.atonementData[spellID][1]); }
 			GEAR = [
+				{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleTrait(278643,ilvl) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); },extra:function(ilvl){return GetTraitBySpell(278643) ? pV.azeritePWRAmountAtt : pV.azeritePWRPredictionAtt;},addExtra:function(){return !GetTraitBySpell(278643);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Atonement: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(278643) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;},extraNonStack:true},
 				{slot:-3,spell:273307,type:9,tier:1,name:"Weal and Woe",icon:"spell_holy_penance",special:function(ilvl){ return ScaleTrait(273307,ilvl,1) * (pV.azeritePenancePredictionSmite || 0) * GetVersFactor() * GetCritFactor() * GetMasteryFactor() * 1.5 * GetDpsFactor() * uV.masteryMod * GetAtonementOverhealFactor(585) + ScaleTrait(273307,ilvl,2) * (pV.azeritePenancePredictionPWS || 0) * GetVersFactor() * GetCritFactor(); }},
-				{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor();},extra:function(){return pV.azeritePainSuppressionPredictionAtt; },addExtra:function(){return !GetTraitBySpell(272775);}},
-				{slot:-3,spell:278643,type:9,tier:1,name:"Enduring",icon:"spell_priest_power-word",special:function(ilvl){ return ScaleTrait(278643,ilvl) * (pV.azeritePWRPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor(); },extra:function(ilvl){return GetTraitBySpell(278643) ? pV.azeritePWRAmountAtt : pV.azeritePWRPredictionAtt;},addExtra:function(){return !GetTraitBySpell(278643);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Atonement: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(278643) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
-				{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleTrait(278629,ilvl) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * uV.masteryMod * GetDpsFactor() * GetAtonementOverhealFactor(47666)},extra:function(ilvl){return pV.azeritePenanceDamagePredictionSWP / 16 * 15 * rV.healPerAtonement * 0.8; },addExtra:function(){return !GetTraitBySpell(278629);},textAmount:function(ilvl){ var t="Extension effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Extension: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(278629) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
+				{slot:-3,spell:272775,type:9,tier:1,name:"Moment of Repose",icon:"spell_holy_painsupression",special:function(ilvl){ return ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor() + ScaleTrait(272775,ilvl) * (pV.azeritePainSuppressionPredictionMastery || 0) * GetMasteryFactor() * GetModFactor() * GetVersFactor() * GetCritFactor();},extra:function(){return pV.azeritePainSuppressionPredictionAtt; },addExtra:function(){return !GetTraitBySpell(272775);},extraNonStack:true},
+				{slot:-3,spell:278629,type:9,tier:1,name:"Contemptuous Homily",icon:"spell_shadow_painandsuffering",special:function(ilvl){ return ScaleTrait(278629,ilvl) * (pV.azeritePenanceDamagePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * uV.masteryMod * GetDpsFactor() * GetAtonementOverhealFactor(47666)},extra:function(ilvl){return pV.azeritePenanceDamagePredictionSWP / 16 * 15 * rV.healPerAtonement * 0.8; },addExtra:function(){return !GetTraitBySpell(278629);},textAmount:function(ilvl){ var t="Extension effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Extension: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(278629) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;},extraNonStack:true},
 				{slot:-3,spell:277680,type:9,tier:1,name:"Gift of Forgiveness",icon:"spell_holy_holysmite",special:function(ilvl){ return ScaleTrait(277680,ilvl) * (pV.azeriteSmitePrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * 1.5 * GetDpsFactor() * uV.masteryMod * GetAtonementOverhealFactor(585); }},
-				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor();},extra:function(ilvl){return GetTraitBySpell(275541) ? pV.azeriteShadowMendAtt : pV.azeriteShadowMendAttPred; },addExtra:function(){return !GetTraitBySpell(275541);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Atonement duration: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(275541) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;}},
-				{slot:-3,spell:287355,type:9,tier:1,name:"Sudden Revelation",icon:"spell_holy_holynova",special:function(ilvl){ return Math.max(ScaleTrait(287355,ilvl) * (pV.azeriteSuddenRevelationPrediction2 || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * uV.masteryMod - pV.azeriteSuddenRevelationPredictionSmiteNegate,0);},extra:function(ilvl){return Math.floor(pV.azeriteSuddenRevelationPrediction * 3 / 20) * 10.5 * 5 * rV.healPerAtonement; },addExtra:function(){return !GetTraitBySpell(287355);},textAmount:function(ilvl){ var t="Cooldown reduction effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Cooldown reduction: "+NumberToFormattedNumber(this.extra(ilvl),2); return t;}},
+				{slot:-3,spell:275541,type:9,tier:1,name:"Depth of the Shadows",icon:"spell_shadow_shadowmend",special:function(ilvl){ return ScaleTrait(275541,ilvl) * (pV.azeriteShadowMendPrediction || 0) * GetModFactor() * GetVersFactor() * GetCritFactor();},extra:function(ilvl){return GetTraitBySpell(275541) ? pV.azeriteShadowMendAtt : pV.azeriteShadowMendAttPred; },addExtra:function(){return !GetTraitBySpell(275541);},textAmount:function(ilvl){ var t="Atonement duration effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Atonement duration: "+NumberToFormattedNumber(this.extra(ilvl),2)+(GetTraitBySpell(275541) ? " (already have it, doesn't count in prediction, highlighted as translucent)" : ""); return t;},extraNonStack:true},
+				{slot:-3,spell:287355,type:9,tier:1,name:"Sudden Revelation",icon:"spell_holy_holynova",special:function(ilvl){ return Math.max(ScaleTrait(287355,ilvl) * (pV.azeriteSuddenRevelationPrediction2 || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * uV.masteryMod - pV.azeriteSuddenRevelationPredictionSmiteNegate,0);},extra:function(ilvl){return Math.floor(pV.azeriteSuddenRevelationPrediction * 3 / 20) * 10.5 * 5 * rV.healPerAtonement; },addExtra:function(){return !GetTraitBySpell(287355);},textAmount:function(ilvl){ var t="Cooldown reduction effect can't be stacked!<br>Extra healing: "+NumberToFormattedNumber(this.special(ilvl),2)+"<br>Cooldown reduction: "+NumberToFormattedNumber(this.extra(ilvl),2); return t;},extraNonStack:true},
 
 				{slot:-3,spell:278659,type:9,tier:1,name:"Death Throes",icon:"spell_shadow_haunting",special:function(ilvl){ return ScaleTrait(278659,ilvl) / ((rV.atonementData[204213] ? 10 : 8) * GetHasteFactor()) * (pV.azeriteSWDPrediction || 0) * GetMasteryFactor() * GetVersFactor() * GetCritFactor() * GetDpsFactor() * uV.masteryMod * GetAtonementOverhealFactor(589) * GetAtonementOverhealFactor(204213); }},
 			
@@ -254,7 +254,7 @@ var OTHER_256 = [
 				{slot:5,item:159241,ilvl:385,type:2,name:"[S1] Blood-Drenched Robes",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[278659,278629,273834],tier2:[267886,267883],tier3:[268599],max:390},
 				{slot:5,item:159257,ilvl:385,type:2,name:"[S1] Robes of the Reborn Serpent",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[273307],tier2:[267889,267883,264108],tier3:[268599],max:390},
 				{slot:5,item:165834,ilvl:385,type:7,name:"Divine Fury Raiment",int:625,icon:"inv_robe_cloth_zuldazarraidmythic_d_01",tier1:[278643,272775],tier2:[288953,275541],tier3:[279926,267879,267886],tier4:[274366],max:420,min:370},
-				{slot:5,item:165505,ilvl:385,type:7,name:"Robes of Biting Cold",int:625,icon:"inv_robe_cloth_zuldazarraidmythic_d_01",tier1:[278659,278629,278643],tier2:[288749,287355],tier3:[279899,267886,267884],tier4:[280018],max:420,min:370},
+				{slot:5,item:165505,ilvl:385,type:7,name:"Robes of Biting Cold",int:625,icon:"inv_robe_cloth_zuldazarraidmythic_d_01",tier1:[278659,278629,278643],tier2:[288749,287355],tier3:[279899,267886,267884],tier4:[280018,268600],max:420,min:370},
 				{slot:5,item:165498,ilvl:385,type:7,name:"Vestments of the Afterlife",int:625,icon:"inv_robe_cloth_zuldazarraidmythic_d_01",tier1:[287355,278629,278659],tier2:[288802,273307],tier3:[263984,267886,267880],tier4:[280018,263962],max:420,min:370},
 				{slot:5,item:159257,ilvl:385,type:2,name:"[S2] Robes of the Reborn Serpent",int:625,icon:"inv_chest_cloth_zandalardungeon_c_01",tier1:[272775,278629,278659],tier2:[273307],tier3:[267889,267883,264108],tier4:[268599],max:420},
 				{slot:5,item:158301,ilvl:385,type:2,name:"[S2] Ruffled Poet Blouse",int:625,icon:"inv_chest_cloth_kultirasdungeon_c_01",tier1:[273307,278643],tier2:[281841,275541],tier3:[267883,263984,267879],tier4:[268600],max:420},
@@ -1838,45 +1838,21 @@ var TRAITS_256 = [
 			rV.traits[102] = 0;
 			pV.azeriteSynergisticGrowthPrediction = 0;
 			pV.azeriteSynergisticGrowthLast = 0;
-			pV.azeriteSynergisticGrowthPrediction2 = 0;
-			pV.azeriteSynergisticGrowthLast2 = 0;
-			pV.azeriteSynergisticGrowthLast3 = 0;
-			pV.azeriteSynergisticGrowthATargets = {};
+			pV.azeriteSynergisticGrowthLastActive = 0;
 		},
 		parse: [
 			"cast", function(event,spellID){
  				if(spellID == 194509 && event.timestamp > pV.azeriteSynergisticGrowthLast){
  					pV.azeriteSynergisticGrowthLast = event.timestamp + 30000;
- 					pV.azeriteSynergisticGrowthLast2 = event.timestamp + 10000;
-					pV.azeriteSynergisticGrowthLast3 = event.timestamp + 300;
+ 					pV.azeriteSynergisticGrowthLastActive = event.timestamp + 10000;
 				}
 			},
 			"heal", function(event,spellID){
-				if(spellScaleMastery[spellID] && (event.timestamp < pV.azeriteSynergisticGrowthLast2) && pV.masteryNow && !uV.spellIsAtonement[spellID]){
-					pV.azeriteSynergisticGrowthPrediction2 += pV.currHealFromMastery / pV.masteryNow;
+				if(spellScaleMastery[spellID] && (event.timestamp < pV.azeriteSynergisticGrowthLastActive) && pV.masteryNow && !uV.spellIsAtonement[spellID]){
 					pV.azeriteSynergisticGrowthPrediction += pV.currHealFromMastery / pV.masteryNow;
-				} else if(uV.spellIsAtonement[spellID]){
-					if(pV.azeriteSynergisticGrowthATargets[event.targetID]) pV.azeriteSynergisticGrowthPrediction2 += pV.currHealFromMastery / pV.azeriteSynergisticGrowthATargets[event.targetID];
-					if(pV.masteryNow) pV.azeriteSynergisticGrowthPrediction += pV.currHealFromMastery / pV.masteryNow;
+				} else if(uV.spellIsAtonement[spellID] && (event.timestamp < pV.azeriteSynergisticGrowthLastActive) && pV.masteryNow){
+					pV.azeriteSynergisticGrowthPrediction += pV.currHealFromMastery / pV.masteryNow;
 				}
-			},
-			"applybuffany", function(event,spellID){
-				if(spellID == 194384 && event.sourceID == currFightData.actor && (event.timestamp < pV.azeriteSynergisticGrowthLast2) && (event.timestamp > pV.azeriteSynergisticGrowthLast3)){
-					pV.azeriteSynergisticGrowthATargets[event.targetID] = pV.masteryNow;
-				}
-			},
-			"removebuffany", function(event,spellID){
-				if(spellID == 194384 && event.sourceID == currFightData.actor){
-					delete pV.azeriteSynergisticGrowthATargets[event.targetID];
-				}
-			},
-			"any", function(event){
-				if(event.type == "refreshbuff" && event.ability.guid == 194384 && event.sourceID == currFightData.actor) {
-					if((event.timestamp < pV.azeriteSynergisticGrowthLast2) && (event.timestamp > pV.azeriteSynergisticGrowthLast3))
-						pV.azeriteSynergisticGrowthATargets[event.targetID] = pV.masteryNow;
-					else
-						delete pV.azeriteSynergisticGrowthATargets[event.targetID];
-				};
 			},
 		],
 		afterParse: function() {
@@ -2041,6 +2017,11 @@ var TRAITS_256 = [
 		init: function() { rV.traits[485] = 0; },
 		afterParse: function() { if(healingData[280707]) rV.traits[485] += healingData[280707][0]; },
 		obj: { name: "Laser Matrix", id: 485, spellID: 280559, icon: "spell_nature_groundingtotem.jpg", tier: 1, },
+	},
+	{	//Self Reliance
+		init: function() { rV.traits[87] = 0; },
+		afterParse: function() { if(healingData[270661]) rV.traits[87] += healingData[270661][0]; },
+		obj: { name: "Self Reliance", id: 87, spellID: 268600, icon: "achievement_guildperk_quickanddead.jpg", tier: 3, },
 	},
 ];
 

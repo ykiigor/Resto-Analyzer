@@ -87,6 +87,10 @@ div {
 	width: 5% !important;
 }
 
+.w7 {
+	width: 7% !important;
+}
+
 .w10 {
 	width: 10% !important;
 }
@@ -117,6 +121,14 @@ div {
 
 .w40 {
 	width: 40% !important;
+}
+
+.w60 {
+	width: 60% !important;
+}
+
+.w64 {
+	width: 64% !important;
 }
 
 .w75 {
